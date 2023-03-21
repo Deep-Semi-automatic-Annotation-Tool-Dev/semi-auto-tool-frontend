@@ -6,7 +6,7 @@
 import AppBar from './appbar/AppBar';
 
 export default {
-  name: "ProjectComponent",
+  name: "DashboardComponent",
   components: {
     AppBar
   }

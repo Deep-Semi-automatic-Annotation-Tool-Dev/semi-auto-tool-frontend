@@ -1,0 +1,51 @@
+#appbar-root {
+  background: $main-color;
+
+  width: 100%;
+
+  order: 0;
+  align-self: stretch;
+  flex-grow: 0;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 20px 28px;
+  gap: 20px;
+}
+
+#appbar-title {
+  font-weight: 700;
+  font-size: $text-size-title;
+  line-height: 20px;
+
+  color: $text-white;
+
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+#appbar-nav-area {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0;
+  gap: 15px;
+
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+}
+
+.appbar-nav-btn {
+  font-weight: 400;
+  font-size: $text-size-default;
+  line-height: 19px;
+
+  color: $text-white;
+  cursor: pointer;
+
+  flex: none;
+  flex-grow: 0;
+}

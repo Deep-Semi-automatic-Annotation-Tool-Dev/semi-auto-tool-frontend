@@ -1,10 +1,15 @@
 <template>
-  <div>Test</div>
+  <AppBar></AppBar>
 </template>
 
 <script>
+import AppBar from './appbar/AppBar';
+
 export default {
-  name: "IndexComponent"
+  name: "IndexComponent",
+  components: {
+    AppBar
+  }
 }
 </script>
 
