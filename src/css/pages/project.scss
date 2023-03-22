@@ -169,7 +169,6 @@
   flex-direction: column;
   align-items: flex-start;
   padding: 0;
-  gap: 10px;
 
   width: 100%;
   height: calc(100% - 50px);
@@ -210,4 +209,44 @@
   text-align: center;
 
   color: $text-white;
+}
+
+#editor-main-lines {
+  height: 100%;
+  width: 100%;
+  padding: 10px 20px;
+  box-sizing: border-box;
+  overflow-y: scroll;
+}
+
+#editor-main-lines > span {
+  width: 100%;
+  display: inline;
+  word-wrap:break-word;
+  margin: 6px 6px 6px 0;
+  cursor: pointer;
+}
+
+.highlight0 {
+  background: #9b80e7;
+}
+
+.highlight1 {
+  background: #d25f5f;
+}
+
+.highlight2 {
+  background: #aacb6d;
+}
+
+.highlight3 {
+  background: #6376da;
+}
+
+.highlight4 {
+  background: #6fd5d5;
+}
+
+.highlight5 {
+  background: #a47650;
 }

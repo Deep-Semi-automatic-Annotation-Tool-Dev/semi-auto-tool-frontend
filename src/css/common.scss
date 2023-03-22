@@ -43,3 +43,18 @@ body {
 .list-vuetify::-webkit-scrollbar-track {
   background: $scrollbar-background-color;
 }
+
+.list-vuetify-light::-webkit-scrollbar {
+  width: 4px;
+}
+
+.list-vuetify-light::-webkit-scrollbar-thumb {
+  height: 30%;
+  background: $scrollbar-background-color;
+
+  border-radius: 10px;
+}
+
+.list-vuetify-light::-webkit-scrollbar-track {
+  background: $scrollbar-color;
+}

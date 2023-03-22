@@ -34,6 +34,13 @@
             <div id="layout-project-editor-main-title">
               <div id="editor-main-title">-선택된 태그구성-</div>
             </div>
+            <p id="editor-main-lines" class="list-vuetify-light">
+              <span
+                  v-for="l in lineData()"
+                  :key="l"
+                  :class="getTagClasses(l.tags)"
+              >{{ l.data }}</span>
+            </p>
           </div>
         </div>
         <div id="layout-project-tag-area">
@@ -47,14 +54,39 @@
 <script>
 import AppBar from './appbar/AppBar';
 
+const generateRandomString = (num) => {
+  const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  let result = '';
+  const charactersLength = characters.length;
+  for (let i = 0; i < num; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+
+  return result;
+}
+
 export default {
   name: "ProjectComponent",
   data() {
     return {
       items: () => {
         const data = [];
-        for (let i = 0;i < 20;i++) {
+        for (let i = 0;i < 100;i++) {
           data.push({title: `${i}` + ' item', value: i});
+        }
+        return data;
+      },
+      lineData: () => {
+        const data = [];
+        for (let i = 0;i < 100;i++) {
+          const strLength = Math.floor(Math.random() * (100 - 25)) + 25;
+          let tags = []
+          for (let j = 0;j < 6;j++) {
+            if (Math.round(Math.random() - 0.3)) {
+              tags.push({type: j, name: `타입 ${j}`})
+            }
+          }
+          data.push({data: generateRandomString(strLength) + '.', tags: tags});
         }
         return data;
       }
@@ -63,6 +95,15 @@ export default {
   components: {
     AppBar
   },
+  methods: {
+    getTagClasses(tags) {
+      let classes = []
+      for (const element of tags) {
+        classes.push(`highlight${element.type}`)
+      }
+      return classes
+    }
+  }
 }
 </script>
 
