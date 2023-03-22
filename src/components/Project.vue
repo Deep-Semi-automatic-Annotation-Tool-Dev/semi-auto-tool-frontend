@@ -39,6 +39,7 @@
                   v-for="l in lineData()"
                   :key="l"
                   :class="getTagClasses(l.tags)"
+                  class="text-line"
               >{{ l.data }}</span>
             </p>
           </div>
