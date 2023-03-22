@@ -19,6 +19,14 @@
           프로젝트생성
         </v-btn>
       </div>
+      <div id="layout-project-editor">
+        <div id="layout-project-text-area">
+          <div id="layout-project-editor-top">
+            <div id="editor-top-title">프로젝트 제목</div>
+          </div>
+        </div>
+        <div id="layout-project-tag-area"></div>
+      </div>
     </div>
   </div>
 </template>

@@ -6,11 +6,12 @@
   gap: 20px;
 
   width: 100%;
+  max-width: 1500px;
   height: calc(100% - 60px);
 
   flex: none;
   order: 1;
-  align-self: stretch;
+  align-self: center;
   flex-grow: 0;
 }
 
@@ -82,4 +83,82 @@
 
 #text-project-create-btn {
   width: 100%;
+}
+
+#layout-project-editor {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0;
+  gap: 10px;
+
+  width: calc(100% - 220px);
+  height: 100%;
+
+  flex: none;
+  order: 1;
+  align-self: stretch;
+  flex-grow: 1;
+}
+
+#layout-project-text-area {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 10px;
+  gap: 20px;
+
+  width: calc(100% - 260px);
+  height: 100%;
+
+  flex: none;
+  order: 0;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+#layout-project-tag-area {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 10px;
+  gap: 20px;
+
+  width: 250px;
+  height: 100%;
+
+  flex: none;
+  order: 1;
+  align-self: stretch;
+  flex-grow: 1;
+}
+
+#layout-project-editor-top {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0;
+  gap: 10px;
+
+  width: 100%;
+
+  flex: none;
+  order: 0;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+#editor-top-title {
+  font-style: normal;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 23px;
+  display: flex;
+  align-items: center;
+
+  color: $text-black;
+
+  flex: none;
+  order: 0;
+  flex-grow: 1;
 }
