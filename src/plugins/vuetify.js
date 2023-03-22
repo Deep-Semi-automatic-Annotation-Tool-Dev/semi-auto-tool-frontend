@@ -8,6 +8,7 @@ const myCustomLightTheme = {
     dark: false,
     colors: {
         light_magenta: '#6750A4',
+        light_brown: '#7D5260',
     }
 }
 

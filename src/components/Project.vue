@@ -23,9 +23,22 @@
         <div id="layout-project-text-area">
           <div id="layout-project-editor-top">
             <div id="editor-top-title">프로젝트 제목</div>
+            <v-btn color="light_magenta" height="30">
+              저장
+            </v-btn>
+            <v-btn color="light_brown" height="30">
+              텍스트 로드
+            </v-btn>
+          </div>
+          <div id="layout-project-editor-main">
+            <div id="layout-project-editor-main-title">
+              <div id="editor-main-title">-선택된 태그구성-</div>
+            </div>
           </div>
         </div>
-        <div id="layout-project-tag-area"></div>
+        <div id="layout-project-tag-area">
+
+        </div>
       </div>
     </div>
   </div>
@@ -40,7 +53,7 @@ export default {
     return {
       items: () => {
         const data = [];
-        for (let i = 0;i < 100;i++) {
+        for (let i = 0;i < 20;i++) {
           data.push({title: `${i}` + ' item', value: i});
         }
         return data;
