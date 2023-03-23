@@ -219,6 +219,11 @@
   overflow-y: scroll;
 }
 
+.tag-tooltip {
+  visibility: hidden;
+  position: fixed;
+}
+
 .text-line {
   width: 100%;
   display: inline;

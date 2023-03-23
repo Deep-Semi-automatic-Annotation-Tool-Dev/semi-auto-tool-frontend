@@ -40,7 +40,7 @@
                   :key="l"
                   :class="getTagClasses(l.tags)"
                   class="text-line"
-              >{{ l.data }}</span>
+              >{{ l.data }}<span class="tag-tooltip">{{ l.tags }}</span></span>
             </p>
           </div>
         </div>
