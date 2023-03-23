@@ -65,6 +65,24 @@
               </v-btn>
             </v-container>
           </div>
+          <div id="layout-project-tag-selection-area">
+            <div id="tag-selection-top">
+              <div id="tag-top-title">태그-선택된 그룹의 태그</div>
+              <v-btn color="light_brown" height="30" width="80" id="tag-top-add-btn">
+                태그추가
+              </v-btn>
+            </div>
+            <div id="tag-chips">
+              <v-chip-group>
+                <v-chip
+                    v-for="tag in tags[selectedTagGroup]"
+                    :key="tag">
+                  {{ tag.name }}
+                </v-chip>
+              </v-chip-group>
+            </div>
+          </div>
+          <div style="order: 2">fff</div>
         </div>
       </div>
     </div>
@@ -109,6 +127,20 @@ const generateTagGroups = () => {
   return group;
 }
 
+const generateTags = () => {
+  const groupTags = {}
+  for (let i = 0;i < 6;i++) {
+    const tags = []
+    for (let j = 0;j < Math.floor(Math.random() * (60 - 30) + 30);j++) {
+      tags.push({name: `${generateRandomString(Math.floor(Math.random() * (10 - 4) + 4))} ${j}`, value: j})
+    }
+    groupTags[i] = tags
+  }
+
+  console.log(groupTags)
+  return groupTags
+}
+
 export default {
   name: "ProjectComponent",
   data() {
@@ -122,7 +154,8 @@ export default {
       },
       lineData: generateTestLines(),
       tagGroups: generateTagGroups(),
-      selectedTagGroup: 0
+      selectedTagGroup: 0,
+      tags: generateTags()
     }
   },
   components: {
