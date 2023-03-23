@@ -9,6 +9,9 @@ const myCustomLightTheme = {
     colors: {
         light_magenta: '#6750A4',
         light_brown: '#7D5260',
+        color_accept: '#5373C3',
+        color_deny: '#E24343',
+        color_second: '#5E5E5E',
     }
 }
 

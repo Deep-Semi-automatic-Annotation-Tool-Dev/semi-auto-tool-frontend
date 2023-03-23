@@ -82,7 +82,31 @@
               </v-chip-group>
             </div>
           </div>
-          <div style="order: 2">fff</div>
+          <div id="layout-project-model-area">
+            <div id="model-top-title">Active Learning</div>
+            <v-container class="pa-0 ma-0">
+              <v-select
+                  label="태그 그룹"
+                  density="comfortable"
+                  :items="tagGroups"
+                  item-title="name"
+                  item-value="value"
+                  :hide-details="true"
+                  @update:model-value="changeGroup"
+              ></v-select>
+            </v-container>
+            <div id="model-learning-selection">
+              <v-btn color="color_accept" class="learning-btn">
+                모델학습
+              </v-btn>
+              <v-btn color="color_deny" class="learning-btn">
+                데이터리로드
+              </v-btn>
+            </div>
+            <v-btn color="color_second" id="annotation-btn">
+              Auto Annotation
+            </v-btn>
+          </div>
         </div>
       </div>
     </div>
