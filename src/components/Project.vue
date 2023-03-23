@@ -73,7 +73,7 @@
               </v-btn>
             </div>
             <div id="tag-chips">
-              <v-chip-group>
+              <v-chip-group class="pa-3 list-vuetify-light">
                 <v-chip
                     v-for="tag in tags[selectedTagGroup]"
                     :key="tag">
