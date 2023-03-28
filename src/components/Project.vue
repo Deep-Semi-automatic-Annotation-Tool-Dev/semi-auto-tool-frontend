@@ -47,66 +47,150 @@
           </div>
         </div>
         <div id="layout-project-tag-area">
-          <div id="tags-group-select-area">
-            <v-container class="pa-0 ma-0">
-              <v-select
-                  label="태그 그룹"
-                  density="comfortable"
-                  :items="tagGroups"
-                  item-title="name"
-                  item-value="value"
-                  :hide-details="true"
-                  @update:model-value="changeGroup"
-              ></v-select>
-            </v-container>
-            <v-container class="pa-0 ma-0">
-              <v-btn color="light_magenta" id="tags-group-add-btn">
-                그룹 추가
-              </v-btn>
-            </v-container>
-          </div>
-          <div id="layout-project-tag-selection-area">
-            <div id="tag-selection-top">
-              <div id="tag-top-title">태그-선택된 그룹의 태그</div>
-              <v-btn color="light_brown" height="30" width="80" id="tag-top-add-btn">
-                태그추가
-              </v-btn>
+
+          <div class="stepper-item">
+            <div class="stepper-item-top">
+              <div class="stepper-item-top-circle">
+                <div class="stepper-item-top-circle-num">1</div>
+              </div>
+              <div class="stepper-item-top-circle-title">
+                태깅
+              </div>
             </div>
-            <div id="tag-chips">
-              <v-chip-group class="pa-3 list-vuetify-light">
-                <v-chip
-                    v-for="tag in tags[selectedTagGroup]"
-                    :key="tag">
-                  {{ tag.name }}
-                </v-chip>
-              </v-chip-group>
+            <div class="stepper-item-content">
+              <v-divider vertical></v-divider>
+              <div class="stepper-item-content-area">
+                <div id="tags-group-select-area">
+                  <v-container class="pa-0 ma-0">
+                    <v-select
+                        label="태그 그룹"
+                        density="comfortable"
+                        :items="tagGroups"
+                        item-title="name"
+                        item-value="value"
+                        :hide-details="true"
+                        @update:model-value="changeGroup"
+                    ></v-select>
+                  </v-container>
+                  <v-container class="pa-0 ma-0">
+                    <v-btn color="light_magenta" id="tags-group-add-btn">
+                      그룹 추가
+                    </v-btn>
+                  </v-container>
+                </div>
+                <div id="layout-project-tag-selection-area">
+                  <div id="tag-selection-top">
+                    <div id="tag-top-title">태그-선택된 그룹의 태그</div>
+                    <v-btn color="light_brown" height="30" width="80" id="tag-top-add-btn">
+                      태그추가
+                    </v-btn>
+                  </div>
+                  <div id="tag-chips">
+                    <v-chip-group class="pa-3 list-vuetify-light">
+                      <v-chip
+                          v-for="tag in tags[selectedTagGroup]"
+                          :key="tag">
+                        {{ tag.name }}
+                      </v-chip>
+                    </v-chip-group>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <div id="layout-project-model-area">
-            <div id="model-top-title">Active Learning</div>
-            <v-container class="pa-0 ma-0">
-              <v-select
-                  label="태그 그룹"
-                  density="comfortable"
-                  :items="tagGroups"
-                  item-title="name"
-                  item-value="value"
-                  :hide-details="true"
-                  @update:model-value="changeGroup"
-              ></v-select>
-            </v-container>
-            <div id="model-learning-selection">
-              <v-btn color="color_accept" class="learning-btn">
-                모델학습
-              </v-btn>
-              <v-btn color="color_deny" class="learning-btn">
-                데이터리로드
-              </v-btn>
+
+          <div class="stepper-item">
+            <div class="stepper-item-top">
+              <div class="stepper-item-top-circle">
+                <div class="stepper-item-top-circle-num">2</div>
+              </div>
+              <div class="stepper-item-top-circle-title">
+                모델 선택
+              </div>
             </div>
-            <v-btn color="color_second" id="annotation-btn">
-              Auto Annotation
-            </v-btn>
+            <div class="stepper-item-content">
+              <v-divider vertical></v-divider>
+              <div class="stepper-item-content-area">
+
+              </div>
+            </div>
           </div>
+
+          <div class="stepper-item">
+            <div class="stepper-item-top">
+              <div class="stepper-item-top-circle">
+                <div class="stepper-item-top-circle-num">3</div>
+              </div>
+              <div class="stepper-item-top-circle-title">
+                Training
+              </div>
+            </div>
+            <div class="stepper-item-content">
+              <v-divider vertical></v-divider>
+              <div class="stepper-item-content-area">
+
+              </div>
+            </div>
+          </div>
+
+          <div class="stepper-item">
+            <div class="stepper-item-top">
+              <div class="stepper-item-top-circle">
+                <div class="stepper-item-top-circle-num">4</div>
+              </div>
+              <div class="stepper-item-top-circle-title">
+                Auto Annotation
+              </div>
+            </div>
+            <div class="stepper-item-content">
+              <v-divider vertical></v-divider>
+              <div class="stepper-item-content-area">
+
+              </div>
+            </div>
+          </div>
+
+          <div class="stepper-item">
+            <div class="stepper-item-top">
+              <div class="stepper-item-top-circle">
+                <div class="stepper-item-top-circle-num">5</div>
+              </div>
+              <div class="stepper-item-top-circle-title">
+                Data Reloaded
+              </div>
+            </div>
+            <div class="stepper-item-content stepper-item-content-last">
+              <div class="stepper-item-content-area ">
+
+              </div>
+            </div>
+          </div>
+
+<!--          <div id="layout-project-model-area">-->
+<!--            <div id="model-top-title">Active Learning</div>-->
+<!--            <v-container class="pa-0 ma-0">-->
+<!--              <v-select-->
+<!--                  label="태그 그룹"-->
+<!--                  density="comfortable"-->
+<!--                  :items="tagGroups"-->
+<!--                  item-title="name"-->
+<!--                  item-value="value"-->
+<!--                  :hide-details="true"-->
+<!--                  @update:model-value="changeGroup"-->
+<!--              ></v-select>-->
+<!--            </v-container>-->
+<!--            <div id="model-learning-selection">-->
+<!--              <v-btn color="color_accept" class="learning-btn">-->
+<!--                모델학습-->
+<!--              </v-btn>-->
+<!--              <v-btn color="color_deny" class="learning-btn">-->
+<!--                데이터리로드-->
+<!--              </v-btn>-->
+<!--            </div>-->
+<!--            <v-btn color="color_second" id="annotation-btn">-->
+<!--              Auto Annotation-->
+<!--            </v-btn>-->
+<!--          </div>-->
         </div>
       </div>
     </div>
