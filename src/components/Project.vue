@@ -173,7 +173,8 @@
               <v-divider class="stepper-item-divider" vertical></v-divider>
               <div class="stepper-item-content-area" :class="stepperIdx !== 2 ? 'unselected' : ''">
 
-
+                <div class="model-summary">학습이 완료되면 자동으로 다음 단계로 넘어갑니다.</div>
+                <v-progress-linear indeterminate></v-progress-linear>
                 <div class="stepper-item-buttons">
                   <v-btn color="color_accept" size="small" @click="stepperNext">
                     다음
@@ -201,6 +202,8 @@
               <div class="stepper-item-content-area" :class="stepperIdx !== 3 ? 'unselected' : ''">
 
 
+                <div class="model-summary">학습이 완료되면 자동으로 다음 단계로 넘어갑니다.</div>
+                <v-progress-linear indeterminate></v-progress-linear>
                 <div class="stepper-item-buttons">
                   <v-btn color="color_accept" size="small" @click="stepperNext">
                     다음
@@ -227,13 +230,18 @@
 <!--              <v-divider vertical></v-divider>-->
               <div class="stepper-item-content-area" :class="stepperIdx !== 4 ? 'unselected' : ''">
 
+                <div>
 
+                  <div class="model-summary">정답 데이터: n개</div>
+                  <div class="model-summary">오답 데이터: n개</div>
+                  <div class="model-summary">data reload를 진행할 시 정답 데이터를 제외하고 태깅 단계로 되돌아 갑니다.</div>
+                </div>
                 <div class="stepper-item-buttons">
 <!--                  <v-btn color="color_accept" size="small" @click="stepperNext">-->
 <!--                    다음-->
 <!--                  </v-btn>-->
-                  <v-btn color="color_deny" size="small" @click="stepperPrev">
-                    이전
+                  <v-btn color="color_deny" size="small" @click="dataReloading">
+                    data reload
                   </v-btn>
                 </div>
               </div>
@@ -383,6 +391,9 @@ export default {
     },
     stepperPrev() {
       if (this.stepperIdx - 1 >= 0) this.stepperIdx--;
+    },
+    dataReloading() {
+      this.stepperIdx = 0;
     }
   }
 }
