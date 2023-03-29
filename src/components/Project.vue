@@ -54,7 +54,7 @@
                 <div class="stepper-item-top-circle-num">1</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 0 ? 'stepper-item-top-circle-title-selected' : ''">
-                태깅
+                태깅 - {{ tagGroups[selectedTagGroup].name }}
               </div>
             </div>
 
@@ -99,7 +99,7 @@
 
                 <div class="stepper-item-buttons">
                   <v-btn color="color_accept" size="small" @click="stepperNext">
-                    다음
+                    모델선택
                   </v-btn>
 <!--                  <v-btn color="color_deny" size="small" @click="stepperPrev">-->
 <!--                    이전-->
@@ -115,7 +115,7 @@
                 <div class="stepper-item-top-circle-num">2</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 1 ? 'stepper-item-top-circle-title-selected' : ''">
-                모델
+                모델 - {{ modelLists[selectedModel].name }}
               </div>
             </div>
 
@@ -123,7 +123,7 @@
               <v-divider class="stepper-item-divider" vertical></v-divider>
               <div class="stepper-item-content-area" :class="stepperIdx !== 1 ? 'stepper-item-content-area-unselected' : ''">
                 <div id="layout-project-model-area">
-                  <div id="model-top-title">Active Learning을 진행할 모델을 선택해주세요.</div>
+                  <div class="model-summary">Active Learning을 진행할 모델을 선택해주세요.</div>
                   <v-container class="pa-0 ma-0">
                     <v-select
                         label="모델 목록"
@@ -149,10 +149,10 @@
                 </div>
                 <div class="stepper-item-buttons">
                   <v-btn color="color_accept" size="small" @click="stepperNext">
-                    다음
+                    학습
                   </v-btn>
                   <v-btn color="color_deny" size="small" @click="stepperPrev">
-                    이전
+                    태깅 다시하기
                   </v-btn>
                 </div>
               </div>
@@ -321,6 +321,7 @@ export default {
       tagGroups: generateTagGroups(),
       modelLists: generateModels(),
       selectedTagGroup: 0,
+      selectedModel: 0,
       tags: generateTags(),
       stepperIdx: 0,
       stepperMax: 4
@@ -375,6 +376,7 @@ export default {
     },
     changeModel(v) {
       console.log(v)
+      this.selectedModel = v
     },
     stepperNext() {
       if (this.stepperIdx + 1 <= this.stepperMax) this.stepperIdx++;
