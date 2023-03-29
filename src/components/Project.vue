@@ -50,7 +50,7 @@
 
           <div class="stepper-item" :class="stepperIdx === 0 ? 'selected' : ''">
             <div class="stepper-item-top">
-              <div class="stepper-item-top-circle">
+              <div class="stepper-item-top-circle" :class="stepperIdx === 0 ? 'selected' : ''">
                 <div class="stepper-item-top-circle-num">1</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 0 ? 'stepper-item-top-circle-title-selected' : ''">
@@ -111,7 +111,7 @@
 
           <div class="stepper-item" :class="stepperIdx === 1 ? 'selected' : ''">
             <div class="stepper-item-top">
-              <div class="stepper-item-top-circle">
+              <div class="stepper-item-top-circle" :class="stepperIdx === 1 ? 'selected' : ''">
                 <div class="stepper-item-top-circle-num">2</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 1 ? 'stepper-item-top-circle-title-selected' : ''">
@@ -161,7 +161,7 @@
 
           <div class="stepper-item" :class="stepperIdx === 2 ? 'selected' : ''">
             <div class="stepper-item-top">
-              <div class="stepper-item-top-circle">
+              <div class="stepper-item-top-circle" :class="stepperIdx === 2 ? 'selected' : ''">
                 <div class="stepper-item-top-circle-num">3</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 2 ? 'stepper-item-top-circle-title-selected' : ''">
@@ -188,7 +188,7 @@
 
           <div class="stepper-item" :class="stepperIdx === 3 ? 'selected' : ''">
             <div class="stepper-item-top">
-              <div class="stepper-item-top-circle">
+              <div class="stepper-item-top-circle" :class="stepperIdx === 3 ? 'selected' : ''">
                 <div class="stepper-item-top-circle-num">4</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 3 ? 'stepper-item-top-circle-title-selected' : ''">
@@ -215,7 +215,7 @@
 
           <div class="stepper-item" :class="stepperIdx === 4 ? 'selected' : ''">
             <div class="stepper-item-top">
-              <div class="stepper-item-top-circle">
+              <div class="stepper-item-top-circle" :class="stepperIdx === 4 ? 'selected' : ''">
                 <div class="stepper-item-top-circle-num">5</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 4 ? 'stepper-item-top-circle-title-selected' : ''">
