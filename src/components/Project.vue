@@ -101,9 +101,9 @@
                   <v-btn color="color_accept" size="small" @click="stepperNext">
                     다음
                   </v-btn>
-                  <v-btn color="color_deny" size="small" @click="stepperPrev">
-                    이전
-                  </v-btn>
+<!--                  <v-btn color="color_deny" size="small" @click="stepperPrev">-->
+<!--                    이전-->
+<!--                  </v-btn>-->
                 </div>
               </div>
             </div>
@@ -122,8 +122,31 @@
             <div class="stepper-item-content" :class="stepperIdx === 1 ? 'stepper-item-content-selected' : ''">
               <v-divider class="stepper-item-divider" vertical></v-divider>
               <div class="stepper-item-content-area" :class="stepperIdx !== 1 ? 'stepper-item-content-area-unselected' : ''">
-
-
+                <div id="layout-project-model-area">
+                  <div id="model-top-title">Active Learning을 진행할 모델을 선택해주세요.</div>
+                  <v-container class="pa-0 ma-0">
+                    <v-select
+                        label="모델 목록"
+                        density="comfortable"
+                        :items="modelLists"
+                        item-title="name"
+                        item-value="value"
+                        :hide-details="true"
+                        @update:model-value="changeModel"
+                    ></v-select>
+                  </v-container>
+<!--                  <div id="model-learning-selection">-->
+<!--                    <v-btn color="color_accept" class="learning-btn">-->
+<!--                      모델학습-->
+<!--                    </v-btn>-->
+<!--                    <v-btn color="color_deny" class="learning-btn">-->
+<!--                      데이터리로드-->
+<!--                    </v-btn>-->
+<!--                  </div>-->
+<!--                  <v-btn color="color_second" id="annotation-btn">-->
+<!--                    Auto Annotation-->
+<!--                  </v-btn>-->
+                </div>
                 <div class="stepper-item-buttons">
                   <v-btn color="color_accept" size="small" @click="stepperNext">
                     다음
@@ -206,9 +229,9 @@
 
 
                 <div class="stepper-item-buttons">
-                  <v-btn color="color_accept" size="small" @click="stepperNext">
-                    다음
-                  </v-btn>
+<!--                  <v-btn color="color_accept" size="small" @click="stepperNext">-->
+<!--                    다음-->
+<!--                  </v-btn>-->
                   <v-btn color="color_deny" size="small" @click="stepperPrev">
                     이전
                   </v-btn>
@@ -217,31 +240,6 @@
             </div>
           </div>
 
-<!--          <div id="layout-project-model-area">-->
-<!--            <div id="model-top-title">Active Learning</div>-->
-<!--            <v-container class="pa-0 ma-0">-->
-<!--              <v-select-->
-<!--                  label="태그 그룹"-->
-<!--                  density="comfortable"-->
-<!--                  :items="tagGroups"-->
-<!--                  item-title="name"-->
-<!--                  item-value="value"-->
-<!--                  :hide-details="true"-->
-<!--                  @update:model-value="changeGroup"-->
-<!--              ></v-select>-->
-<!--            </v-container>-->
-<!--            <div id="model-learning-selection">-->
-<!--              <v-btn color="color_accept" class="learning-btn">-->
-<!--                모델학습-->
-<!--              </v-btn>-->
-<!--              <v-btn color="color_deny" class="learning-btn">-->
-<!--                데이터리로드-->
-<!--              </v-btn>-->
-<!--            </div>-->
-<!--            <v-btn color="color_second" id="annotation-btn">-->
-<!--              Auto Annotation-->
-<!--            </v-btn>-->
-<!--          </div>-->
         </div>
       </div>
     </div>
@@ -286,6 +284,14 @@ const generateTagGroups = () => {
   return group;
 }
 
+const generateModels = () => {
+  const group = []
+  for (let i = 0;i < 3;i++) {
+    group.push({value: i, name: `model ${i}`})
+  }
+  return group;
+}
+
 const generateTags = () => {
   const groupTags = {}
   for (let i = 0;i < 6;i++) {
@@ -313,6 +319,7 @@ export default {
       },
       lineData: generateTestLines(),
       tagGroups: generateTagGroups(),
+      modelLists: generateModels(),
       selectedTagGroup: 0,
       tags: generateTags(),
       stepperIdx: 0,
@@ -365,6 +372,9 @@ export default {
     changeGroup(v) {
       console.log(v)
       this.selectedTagGroup = v
+    },
+    changeModel(v) {
+      console.log(v)
     },
     stepperNext() {
       if (this.stepperIdx + 1 <= this.stepperMax) this.stepperIdx++;
