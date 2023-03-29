@@ -48,9 +48,9 @@
         </div>
         <div id="layout-project-tag-area">
 
-          <div class="stepper-item" :class="stepperIdx === 0 ? 'stepper-item-selected' : ''">
+          <div class="stepper-item" :class="stepperIdx === 0 ? 'selected' : ''">
             <div class="stepper-item-top">
-              <div class="stepper-item-top-circle" :class="stepperIdx === 0 ? 'stepper-item-top-circle-selected' : ''">
+              <div class="stepper-item-top-circle">
                 <div class="stepper-item-top-circle-num">1</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 0 ? 'stepper-item-top-circle-title-selected' : ''">
@@ -58,9 +58,9 @@
               </div>
             </div>
 
-            <div class="stepper-item-content" :class="stepperIdx === 0 ? 'stepper-item-content-selected' : ''">
+            <div class="stepper-item-content">
               <v-divider class="stepper-item-divider" vertical></v-divider>
-              <div class="stepper-item-content-area" :class="stepperIdx !== 0 ? 'stepper-item-content-area-unselected' : ''">
+              <div class="stepper-item-content-area" :class="stepperIdx !== 0 ? 'unselected' : ''">
                 <div id="tags-group-select-area">
                   <v-container class="pa-0 ma-0">
                     <v-select
@@ -109,9 +109,9 @@
             </div>
           </div>
 
-          <div class="stepper-item" :class="stepperIdx === 1 ? 'stepper-item-selected' : ''">
+          <div class="stepper-item" :class="stepperIdx === 1 ? 'selected' : ''">
             <div class="stepper-item-top">
-              <div class="stepper-item-top-circle" :class="stepperIdx === 1 ? 'stepper-item-top-circle-selected' : ''">
+              <div class="stepper-item-top-circle">
                 <div class="stepper-item-top-circle-num">2</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 1 ? 'stepper-item-top-circle-title-selected' : ''">
@@ -119,9 +119,9 @@
               </div>
             </div>
 
-            <div class="stepper-item-content" :class="stepperIdx === 1 ? 'stepper-item-content-selected' : ''">
+            <div class="stepper-item-content">
               <v-divider class="stepper-item-divider" vertical></v-divider>
-              <div class="stepper-item-content-area" :class="stepperIdx !== 1 ? 'stepper-item-content-area-unselected' : ''">
+              <div class="stepper-item-content-area" :class="stepperIdx !== 1 ? 'unselected' : ''">
                 <div id="layout-project-model-area">
                   <div class="model-summary">Active Learning을 진행할 모델을 선택해주세요.</div>
                   <v-container class="pa-0 ma-0">
@@ -159,9 +159,9 @@
             </div>
           </div>
 
-          <div class="stepper-item" :class="stepperIdx === 2 ? 'stepper-item-selected' : ''">
+          <div class="stepper-item" :class="stepperIdx === 2 ? 'selected' : ''">
             <div class="stepper-item-top">
-              <div class="stepper-item-top-circle" :class="stepperIdx === 2 ? 'stepper-item-top-circle-selected' : ''">
+              <div class="stepper-item-top-circle">
                 <div class="stepper-item-top-circle-num">3</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 2 ? 'stepper-item-top-circle-title-selected' : ''">
@@ -169,9 +169,9 @@
               </div>
             </div>
 
-            <div class="stepper-item-content" :class="stepperIdx === 2 ? 'stepper-item-content-selected' : ''">
+            <div class="stepper-item-content">
               <v-divider class="stepper-item-divider" vertical></v-divider>
-              <div class="stepper-item-content-area" :class="stepperIdx !== 2 ? 'stepper-item-content-area-unselected' : ''">
+              <div class="stepper-item-content-area" :class="stepperIdx !== 2 ? 'unselected' : ''">
 
 
                 <div class="stepper-item-buttons">
@@ -186,9 +186,9 @@
             </div>
           </div>
 
-          <div class="stepper-item" :class="stepperIdx === 3 ? 'stepper-item-selected' : ''">
+          <div class="stepper-item" :class="stepperIdx === 3 ? 'selected' : ''">
             <div class="stepper-item-top">
-              <div class="stepper-item-top-circle" :class="stepperIdx === 3 ? 'stepper-item-top-circle-selected' : ''">
+              <div class="stepper-item-top-circle">
                 <div class="stepper-item-top-circle-num">4</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 3 ? 'stepper-item-top-circle-title-selected' : ''">
@@ -196,9 +196,9 @@
               </div>
             </div>
 
-            <div class="stepper-item-content" :class="stepperIdx === 3 ? 'stepper-item-content-selected' : ''">
+            <div class="stepper-item-content">
               <v-divider class="stepper-item-divider" vertical></v-divider>
-              <div class="stepper-item-content-area" :class="stepperIdx !== 3 ? 'stepper-item-content-area-unselected' : ''">
+              <div class="stepper-item-content-area" :class="stepperIdx !== 3 ? 'unselected' : ''">
 
 
                 <div class="stepper-item-buttons">
@@ -213,9 +213,9 @@
             </div>
           </div>
 
-          <div class="stepper-item" :class="stepperIdx === 4 ? 'stepper-item-selected' : ''">
+          <div class="stepper-item" :class="stepperIdx === 4 ? 'selected' : ''">
             <div class="stepper-item-top">
-              <div class="stepper-item-top-circle" :class="stepperIdx === 4 ? 'stepper-item-top-circle-selected' : ''">
+              <div class="stepper-item-top-circle">
                 <div class="stepper-item-top-circle-num">5</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 4 ? 'stepper-item-top-circle-title-selected' : ''">
@@ -223,9 +223,9 @@
               </div>
             </div>
 
-            <div class="stepper-item-content stepper-item-content-last" :class="stepperIdx === 4 ? 'stepper-item-content-selected' : ''">
+            <div class="stepper-item-content stepper-item-content-last">
 <!--              <v-divider vertical></v-divider>-->
-              <div class="stepper-item-content-area" :class="stepperIdx !== 4 ? 'stepper-item-content-area-unselected' : ''">
+              <div class="stepper-item-content-area" :class="stepperIdx !== 4 ? 'unselected' : ''">
 
 
                 <div class="stepper-item-buttons">
