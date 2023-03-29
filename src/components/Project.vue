@@ -48,18 +48,19 @@
         </div>
         <div id="layout-project-tag-area">
 
-          <div class="stepper-item">
+          <div class="stepper-item" :class="stepperIdx === 0 ? 'stepper-item-selected' : ''">
             <div class="stepper-item-top">
-              <div class="stepper-item-top-circle">
+              <div class="stepper-item-top-circle" :class="stepperIdx === 0 ? 'stepper-item-top-circle-selected' : ''">
                 <div class="stepper-item-top-circle-num">1</div>
               </div>
-              <div class="stepper-item-top-circle-title">
+              <div class="stepper-item-top-circle-title" :class="stepperIdx === 0 ? 'stepper-item-top-circle-title-selected' : ''">
                 태깅
               </div>
             </div>
-            <div class="stepper-item-content">
-              <v-divider vertical></v-divider>
-              <div class="stepper-item-content-area">
+
+            <div class="stepper-item-content" :class="stepperIdx === 0 ? 'stepper-item-content-selected' : ''">
+              <v-divider class="stepper-item-divider" vertical></v-divider>
+              <div class="stepper-item-content-area" :class="stepperIdx !== 0 ? 'stepper-item-content-area-unselected' : ''">
                 <div id="tags-group-select-area">
                   <v-container class="pa-0 ma-0">
                     <v-select
@@ -95,73 +96,123 @@
                     </v-chip-group>
                   </div>
                 </div>
+
+                <div class="stepper-item-buttons">
+                  <v-btn color="color_accept" size="small" @click="stepperNext">
+                    다음
+                  </v-btn>
+                  <v-btn color="color_deny" size="small" @click="stepperPrev">
+                    이전
+                  </v-btn>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="stepper-item">
+          <div class="stepper-item" :class="stepperIdx === 1 ? 'stepper-item-selected' : ''">
             <div class="stepper-item-top">
-              <div class="stepper-item-top-circle">
+              <div class="stepper-item-top-circle" :class="stepperIdx === 1 ? 'stepper-item-top-circle-selected' : ''">
                 <div class="stepper-item-top-circle-num">2</div>
               </div>
-              <div class="stepper-item-top-circle-title">
-                모델 선택
+              <div class="stepper-item-top-circle-title" :class="stepperIdx === 1 ? 'stepper-item-top-circle-title-selected' : ''">
+                모델
               </div>
             </div>
-            <div class="stepper-item-content">
-              <v-divider vertical></v-divider>
-              <div class="stepper-item-content-area">
 
+            <div class="stepper-item-content" :class="stepperIdx === 1 ? 'stepper-item-content-selected' : ''">
+              <v-divider class="stepper-item-divider" vertical></v-divider>
+              <div class="stepper-item-content-area" :class="stepperIdx !== 1 ? 'stepper-item-content-area-unselected' : ''">
+
+
+                <div class="stepper-item-buttons">
+                  <v-btn color="color_accept" size="small" @click="stepperNext">
+                    다음
+                  </v-btn>
+                  <v-btn color="color_deny" size="small" @click="stepperPrev">
+                    이전
+                  </v-btn>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="stepper-item">
+          <div class="stepper-item" :class="stepperIdx === 2 ? 'stepper-item-selected' : ''">
             <div class="stepper-item-top">
-              <div class="stepper-item-top-circle">
+              <div class="stepper-item-top-circle" :class="stepperIdx === 2 ? 'stepper-item-top-circle-selected' : ''">
                 <div class="stepper-item-top-circle-num">3</div>
               </div>
-              <div class="stepper-item-top-circle-title">
+              <div class="stepper-item-top-circle-title" :class="stepperIdx === 2 ? 'stepper-item-top-circle-title-selected' : ''">
                 Training
               </div>
             </div>
-            <div class="stepper-item-content">
-              <v-divider vertical></v-divider>
-              <div class="stepper-item-content-area">
 
+            <div class="stepper-item-content" :class="stepperIdx === 2 ? 'stepper-item-content-selected' : ''">
+              <v-divider class="stepper-item-divider" vertical></v-divider>
+              <div class="stepper-item-content-area" :class="stepperIdx !== 2 ? 'stepper-item-content-area-unselected' : ''">
+
+
+                <div class="stepper-item-buttons">
+                  <v-btn color="color_accept" size="small" @click="stepperNext">
+                    다음
+                  </v-btn>
+                  <v-btn color="color_deny" size="small" @click="stepperPrev">
+                    이전
+                  </v-btn>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="stepper-item">
+          <div class="stepper-item" :class="stepperIdx === 3 ? 'stepper-item-selected' : ''">
             <div class="stepper-item-top">
-              <div class="stepper-item-top-circle">
+              <div class="stepper-item-top-circle" :class="stepperIdx === 3 ? 'stepper-item-top-circle-selected' : ''">
                 <div class="stepper-item-top-circle-num">4</div>
               </div>
-              <div class="stepper-item-top-circle-title">
+              <div class="stepper-item-top-circle-title" :class="stepperIdx === 3 ? 'stepper-item-top-circle-title-selected' : ''">
                 Auto Annotation
               </div>
             </div>
-            <div class="stepper-item-content">
-              <v-divider vertical></v-divider>
-              <div class="stepper-item-content-area">
 
+            <div class="stepper-item-content" :class="stepperIdx === 3 ? 'stepper-item-content-selected' : ''">
+              <v-divider class="stepper-item-divider" vertical></v-divider>
+              <div class="stepper-item-content-area" :class="stepperIdx !== 3 ? 'stepper-item-content-area-unselected' : ''">
+
+
+                <div class="stepper-item-buttons">
+                  <v-btn color="color_accept" size="small" @click="stepperNext">
+                    다음
+                  </v-btn>
+                  <v-btn color="color_deny" size="small" @click="stepperPrev">
+                    이전
+                  </v-btn>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="stepper-item">
+          <div class="stepper-item" :class="stepperIdx === 4 ? 'stepper-item-selected' : ''">
             <div class="stepper-item-top">
-              <div class="stepper-item-top-circle">
+              <div class="stepper-item-top-circle" :class="stepperIdx === 4 ? 'stepper-item-top-circle-selected' : ''">
                 <div class="stepper-item-top-circle-num">5</div>
               </div>
-              <div class="stepper-item-top-circle-title">
-                Data Reloaded
+              <div class="stepper-item-top-circle-title" :class="stepperIdx === 4 ? 'stepper-item-top-circle-title-selected' : ''">
+                Data Reload
               </div>
             </div>
-            <div class="stepper-item-content stepper-item-content-last">
-              <div class="stepper-item-content-area ">
 
+            <div class="stepper-item-content stepper-item-content-last" :class="stepperIdx === 4 ? 'stepper-item-content-selected' : ''">
+<!--              <v-divider vertical></v-divider>-->
+              <div class="stepper-item-content-area" :class="stepperIdx !== 4 ? 'stepper-item-content-area-unselected' : ''">
+
+
+                <div class="stepper-item-buttons">
+                  <v-btn color="color_accept" size="small" @click="stepperNext">
+                    다음
+                  </v-btn>
+                  <v-btn color="color_deny" size="small" @click="stepperPrev">
+                    이전
+                  </v-btn>
+                </div>
               </div>
             </div>
           </div>
@@ -263,7 +314,9 @@ export default {
       lineData: generateTestLines(),
       tagGroups: generateTagGroups(),
       selectedTagGroup: 0,
-      tags: generateTags()
+      tags: generateTags(),
+      stepperIdx: 0,
+      stepperMax: 4
     }
   },
   components: {
@@ -312,6 +365,12 @@ export default {
     changeGroup(v) {
       console.log(v)
       this.selectedTagGroup = v
+    },
+    stepperNext() {
+      if (this.stepperIdx + 1 <= this.stepperMax) this.stepperIdx++;
+    },
+    stepperPrev() {
+      if (this.stepperIdx - 1 >= 0) this.stepperIdx--;
     }
   }
 }
