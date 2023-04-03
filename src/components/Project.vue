@@ -111,7 +111,7 @@
                           v-for="tag in tags[selectedTagGroup]"
                           :key="tag"
                           :draggable="true"
-                          @dragstart="startDrag($event, tag.value)">
+                          @dragstart="startDrag($event, [tag.value, tag.name])">
                         {{ tag.name }}
                       </v-chip>
                     </v-chip-group>
@@ -419,8 +419,22 @@ export default {
     startDrag(event, item) {
       event.dataTransfer.dropEffect = "move"
       event.dataTransfer.effectAllowed = "move"
-      console.log(item)
-      event.dataTransfer.setData("selectedItem", item)
+
+      let dragElement = document.createElement("div")
+      const dragElementText = document.createTextNode(item[1])
+      dragElement.appendChild(dragElementText)
+      dragElement.className = "dragItem"
+      document.body.appendChild(dragElement);
+      document.addEventListener("dragend", function() {
+        if (dragElement) {
+          dragElement.remove();
+          dragElement = null;
+        }
+      }, false);
+      console.log(dragElement)
+
+      event.dataTransfer.setDragImage(dragElement, 0, 0)
+      event.dataTransfer.setData("selectedItem", item[0])
     },
     onDrop(event, colNum) {
       const selectedItem = Number(event.dataTransfer.getData("selectedItem"))
