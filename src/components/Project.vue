@@ -40,6 +40,9 @@
                 :key="l"
                 class="text-line"
                 :data-tooltip="idx"
+                @dragenter.prevent
+                @dragover.prevent
+                @drop.prevent="onDrop($event, idx)"
               >
                 <span class="text-word">{{ l.data }}</span>
                 <v-chip
@@ -106,7 +109,9 @@
                     <v-chip-group class="pa-3 list-vuetify-light">
                       <v-chip
                           v-for="tag in tags[selectedTagGroup]"
-                          :key="tag">
+                          :key="tag"
+                          :draggable="true"
+                          @dragstart="startDrag($event, tag.value)">
                         {{ tag.name }}
                       </v-chip>
                     </v-chip-group>
@@ -410,7 +415,31 @@ export default {
     },
     dataReloading() {
       this.stepperIdx = 0;
-    }
+    },
+    startDrag(event, item) {
+      event.dataTransfer.dropEffect = "move"
+      event.dataTransfer.effectAllowed = "move"
+      console.log(item)
+      event.dataTransfer.setData("selectedItem", item)
+    },
+    onDrop(event, colNum) {
+      const selectedItem = Number(event.dataTransfer.getData("selectedItem"))
+
+      console.log(colNum, selectedItem)
+      // let targetIdx
+      // let targetItem
+      // this.lists.forEach((obj, index) => {
+      //   obj.numberList.forEach((ob) => {
+      //     if(ob.content === selectedItem) {
+      //       targetIdx = index
+      //       targetItem = ob
+      //     }
+      //   })
+      // })
+
+      // this.lists[colNum].numberList.push(targetItem)
+      // this.lists[targetIdx].numberList.splice(this.lists[targetIdx].numberList.indexOf(targetItem), 1)
+    },
   }
 }
 </script>
