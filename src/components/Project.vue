@@ -34,16 +34,32 @@
             <div id="layout-project-editor-main-title">
               <div id="editor-main-title">-선택된 태그구성-</div>
             </div>
-            <p id="editor-main-lines" class="list-vuetify-light">
-              <span
-                  v-for="(l, idx) in lineData"
-                  :key="l"
-                  :class="getTagClasses(l.tags)"
-                  class="text-line"
-                  :data-tooltip="idx"
-                  @mouseover="lineOver"
-              >{{ l.data }}</span>
-            </p>
+            <div id="editor-main-lines" class="list-vuetify-light">
+              <p
+                v-for="(l, idx) in lineData"
+                :key="l"
+                class="text-line"
+                :data-tooltip="idx"
+              >
+                <span class="text-word">{{ l.data }}</span>
+                <v-chip
+                    v-if="lineData[idx].tags[selectedTagGroup] !== undefined"
+                    size="small"
+                    >
+                  {{ lineData[idx].tags[selectedTagGroup].name }}
+                </v-chip>
+              </p>
+            </div>
+<!--            <p id="editor-main-lines" class="list-vuetify-light">-->
+<!--              <span-->
+<!--                  v-for="(l, idx) in lineData"-->
+<!--                  :key="l"-->
+<!--                  :class="getTagClasses(l.tags)"-->
+<!--                  class="text-line"-->
+<!--                  :data-tooltip="idx"-->
+<!--                  @mouseover="lineOver"-->
+<!--              >{{ l.data }}</span>-->
+<!--            </p>-->
           </div>
         </div>
         <div id="layout-project-tag-area">
