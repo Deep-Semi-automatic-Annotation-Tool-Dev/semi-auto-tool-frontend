@@ -106,7 +106,9 @@
                     </v-btn>
                   </div>
                   <div id="tag-chips">
-                    <v-chip-group class="pa-3 list-vuetify-light">
+                    <v-chip-group
+                        class="pa-3 list-vuetify-light"
+                    >
                       <v-chip
                           v-for="tag in tags[selectedTagGroup]"
                           :key="tag"
@@ -277,6 +279,7 @@
 
 <script>
 import AppBar from './appbar/AppBar';
+import axios from "axios";
 
 const generateRandomString = (num) => {
   const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -356,6 +359,15 @@ export default {
       stepperMax: 4
     }
   },
+  created() {
+    axios.get("https://autotag.hrabit64.xyz/api/v1/project")
+        .then(function(response) {
+          console.log(response);
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
+  },
   components: {
     AppBar
   },
@@ -431,7 +443,7 @@ export default {
           dragElement = null;
         }
       }, false);
-      console.log(dragElement)
+      // console.log(dragElement)
 
       event.dataTransfer.setDragImage(dragElement, 0, 0)
       event.dataTransfer.setData("selectedItem", item[0])
