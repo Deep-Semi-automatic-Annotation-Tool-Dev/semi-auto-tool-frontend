@@ -5,21 +5,47 @@
       <div id="layout-project-sidebar">
         <div id="layout-sidebar-project-list">
           <div id="text-project-list-title">프로젝트 목록</div>
+          <!--     프로젝트 리스트     -->
           <v-list lines="one" id="text-project-list-item" class="list-vuetify" density="compact">
             <v-list-item
                 class="list-vuetify-item"
-                v-for="item in items()"
-                :key="item.value"
-                :value="item.value">
-              <v-list-item-title v-text="item.title" class="list-vuetify-title"></v-list-item-title>
+                v-for="item in projectList"
+                :key="item.project_id"
+                :value="item.project_id">
+              <v-list-item-title v-text="item.project_name" class="list-vuetify-title"></v-list-item-title>
             </v-list-item>
           </v-list>
         </div>
-        <v-btn color="light_magenta" id="text-project-create-btn" prepend-icon="mdi-plus">
-          프로젝트생성
-        </v-btn>
+
+        <!--    프로젝트 생성 다이얼로그 부분    -->
+        <v-dialog
+            v-model="dialog"
+            width="auto"
+        >
+          <template v-slot:activator="{ props }">
+            <v-btn
+                color="light_magenta"
+                id="text-project-create-btn"
+                prepend-icon="mdi-plus"
+                v-bind="props"
+            >
+              프로젝트생성
+            </v-btn>
+          </template>
+          <!--     다이얼로그     -->
+          <v-card>
+            <v-card-text>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            </v-card-text>
+            <v-card-actions>
+              <v-btn color="primary" block @click="dialog = false">Close Dialog</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
       </div>
       <div id="layout-project-editor">
+        <!--   문장/태그 편집 영역   -->
         <div id="layout-project-text-area">
           <div id="layout-project-editor-top">
             <div id="editor-top-title">프로젝트 제목</div>
@@ -65,6 +91,7 @@
 <!--            </p>-->
           </div>
         </div>
+        <!--   태그 선택 및 학습 영역   -->
         <div id="layout-project-tag-area">
 
           <div class="stepper-item" :class="stepperIdx === 0 ? 'selected' : ''">
@@ -338,6 +365,17 @@ const generateTags = () => {
   return groupTags
 }
 
+const getProjectList = (context) => {
+  axios.get(`${context.$baseURL}api/v1/project?size=100`)
+      .then(response => {
+        context.projectList = response.data._embedded.projectResponseControllerDtoList;
+        // console.log(projectList);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+}
+
 export default {
   name: "ProjectComponent",
   data() {
@@ -356,20 +394,16 @@ export default {
       selectedModel: 0,
       tags: generateTags(),
       stepperIdx: 0,
-      stepperMax: 4
+      stepperMax: 4,
+      projectList: [],
+      dialog: false
     }
-  },
-  created() {
-    axios.get("https://autotag.hrabit64.xyz/api/v1/project")
-        .then(function(response) {
-          console.log(response);
-        })
-        .catch(function(error) {
-          console.log(error);
-        });
   },
   components: {
     AppBar
+  },
+  created() {
+    getProjectList(this);
   },
   methods: {
     getTagClasses(tags) {
