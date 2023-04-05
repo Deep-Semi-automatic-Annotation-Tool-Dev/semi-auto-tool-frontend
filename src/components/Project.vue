@@ -6,20 +6,22 @@
         <div id="layout-sidebar-project-list">
           <div id="text-project-list-title">프로젝트 목록</div>
           <!--     프로젝트 리스트     -->
-          <v-list lines="one" id="text-project-list-item" class="list-vuetify" density="compact">
-            <v-list-item
-                class="list-vuetify-item"
+          <div id="text-project-list-item" class="list-vuetify">
+            <div
                 v-for="item in projectList"
                 :key="item.project_id"
-                :value="item.project_id">
-              <v-list-item-title v-text="item.project_name" class="list-vuetify-title"></v-list-item-title>
-            </v-list-item>
-          </v-list>
+                class="list-vuetify-item"
+                @click.right="projectListClick($event, item.project_id, item.project_name)"
+                @contextmenu.prevent
+            >
+              {{ item.project_name }}
+            </div>
+          </div>
         </div>
 
         <!--    프로젝트 생성 다이얼로그 부분    -->
         <v-dialog
-            v-model="dialog"
+            v-model="showMakeProjectDialog"
             width="auto"
         >
           <template v-slot:activator="{ props }">
@@ -33,14 +35,14 @@
             </v-btn>
           </template>
           <!--     다이얼로그     -->
-          <v-card>
-            <v-card-text>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </v-card-text>
-            <v-card-actions>
-              <v-btn color="primary" block @click="dialog = false">Close Dialog</v-btn>
-            </v-card-actions>
-          </v-card>
+          <Dialog
+              v-on:dialog-click="projectCreateDialogClicked"
+              :dialog-type="this.DIALOG_TYPE_TEXTFIELD"
+              title="프로젝트 생성"
+              text-field-label="프로젝트 이름"
+              text-accept="생성"
+              text-deny="취소"
+          ></Dialog>
         </v-dialog>
 
       </div>
@@ -301,11 +303,53 @@
         </div>
       </div>
     </div>
+
+    <!--  context menu - 프로젝트 리스트 우클릭  -->
+    <context-menu
+        v-model:show="showProjectListMenu"
+        :options="optionsComponent"
+    >
+      <context-menu-item label="이름 변경" @click="projectContextMenuClick(this.CONTEXTMENU_PROJECT_RENAME)"/>
+
+      <context-menu-item
+          label="삭제"
+          @click="projectContextMenuClick(this.CONTEXTMENU_PROJECT_DELETE)">
+
+      </context-menu-item>
+
+    </context-menu>
+    <v-dialog
+        v-model="showDeleteProjectDialog"
+        width="auto"
+    >
+      <Dialog
+          v-on:dialog-click="projectDeleteDialogClicked"
+          :dialog-type="this.DIALOG_TYPE_SUBTITLE"
+          title="프로젝트 삭제"
+          :subtitle="`'${projectRightClickedName}' 프로젝트를 삭제하시겠습니까?`"></Dialog>
+    </v-dialog>
+
+    <!--  snackbar - 프로젝트 생성 경고  -->
+    <v-snackbar
+        v-model="snackbarMakeProjectTitleWarn"
+    >
+      {{ snackbarMakeProjectTitleWarnMsg }}
+      <template v-slot:actions>
+        <v-btn
+            color="pink"
+            variant="text"
+            @click="snackbarMakeProjectTitleWarn = false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
 <script>
 import AppBar from './appbar/AppBar';
+import Dialog from "@/components/dialog/Dialog";
 import axios from "axios";
 
 const generateRandomString = (num) => {
@@ -372,7 +416,32 @@ const getProjectList = (context) => {
         // console.log(projectList);
       })
       .catch(error => {
-        console.log(error);
+        console.log('get project error', error);
+      });
+}
+
+const createProject = (context, title) => {
+  console.log(title.length)
+  axios.post(`${context.$baseURL}api/v1/project`, {
+    project_name: title
+  })
+      // eslint-disable-next-line no-unused-vars
+      .then(response => {
+        getProjectList(context)
+      })
+      .catch(error => {
+        console.log('post project error', error);
+      });
+}
+
+const deleteProject = (context, id) => {
+  axios.delete(`${context.$baseURL}api/v1/project/${id}`)
+      // eslint-disable-next-line no-unused-vars
+      .then(response => {
+        getProjectList(context)
+      })
+      .catch(error => {
+        console.log('delete project error', error);
       });
 }
 
@@ -390,17 +459,33 @@ export default {
       lineData: generateTestLines(),
       tagGroups: generateTagGroups(),
       modelLists: generateModels(),
+
       selectedTagGroup: 0,
       selectedModel: 0,
       tags: generateTags(),
       stepperIdx: 0,
       stepperMax: 4,
       projectList: [],
-      dialog: false
+
+      showMakeProjectDialog: false,
+      snackbarMakeProjectTitleWarn: false,
+      snackbarMakeProjectTitleWarnMsg: "",
+
+      showProjectListMenu: false,
+      optionsComponent: {
+        zIndex: 3,
+        minWidth: 230,
+        x: 500,
+        y: 200
+      },
+      projectRightClickedId: 0,
+      projectRightClickedName: 'name',
+      showDeleteProjectDialog: false,
     }
   },
   components: {
-    AppBar
+    AppBar,
+    Dialog
   },
   created() {
     getProjectList(this);
@@ -499,6 +584,43 @@ export default {
 
       // this.lists[colNum].numberList.push(targetItem)
       // this.lists[targetIdx].numberList.splice(this.lists[targetIdx].numberList.indexOf(targetItem), 1)
+    },
+    projectCreateDialogClicked(data) {
+      if (data.type === this.DIALOG_CLICK_YES) {
+        const title = data.projectTitle;
+        const titleRegEx = /^[a-z|A-Z|ㄱ-ㅎ|ㅏ-ㅣ|가-힣|0-9]+/;
+        if (title.length > 20) {
+          this.snackbarMakeProjectTitleWarn = true
+          this.snackbarMakeProjectTitleWarnMsg = "프로젝트 이름은 20자 이하만 가능합니다."
+        } else if (titleRegEx.test(title)) {
+          createProject(this, title)
+        } else {
+          this.snackbarMakeProjectTitleWarn = true
+          this.snackbarMakeProjectTitleWarnMsg = "프로젝트 이름은 영어, 한글, 숫자만 입력 가능합니다."
+        }
+      }
+      this.showMakeProjectDialog = false
+    },
+    projectListClick(e, id, name) {
+      this.showProjectListMenu = true;
+      this.optionsComponent.x = e.x;
+      this.optionsComponent.y = e.y;
+      this.projectRightClickedId = id
+      this.projectRightClickedName = name
+      // console.log(id)
+    },
+    projectContextMenuClick(type) {
+      if (type === this.CONTEXTMENU_PROJECT_RENAME) {
+        console.log(`${this.projectRightClickedId} rename`)
+      } else if (type === this.CONTEXTMENU_PROJECT_DELETE) {
+        this.showDeleteProjectDialog = true
+      }
+    },
+    projectDeleteDialogClicked(data) {
+      if (data.type === this.DIALOG_CLICK_YES) {
+        deleteProject(this, this.projectRightClickedId)
+      }
+      this.showDeleteProjectDialog = false
     },
   }
 }
