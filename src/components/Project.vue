@@ -466,6 +466,10 @@ const checkProjectName = (context, title) => {
   }
 }
 
+const loadPeoject = async (context, id) => {
+  await getDataList(context, id, 0)
+}
+
 export default {
   name: "ProjectComponent",
   data() {
@@ -654,7 +658,7 @@ export default {
       // 프로젝트 선택
       if (this.selectedProjectId === -1) {
         this.selectedProjectId = id
-        getDataList(this, this.selectedProjectId, 0)
+        loadPeoject(this, this.selectedProjectId)
       } else {
         // 이전에 선택한 화면이 있다면 저장 여부 물어보기
         this.moveProjectId = id
@@ -665,7 +669,7 @@ export default {
       // 프로젝트 이동 시 저장 여부 다이얼로그 버튼 클릭
       if (data.type === this.DIALOG_CLICK_YES) {
         this.selectedProjectId = this.moveProjectId
-        getDataList(this, this.selectedProjectId, 0)
+        loadPeoject(this, this.selectedProjectId)
       } // move cancel
       this.showChangeProjectDialog = false
     }

@@ -1,7 +1,7 @@
 import axios from "axios";
 
-export const getDataList = (context, id, page) => {
-    axios.get(`${context.$baseURL}api/v1/project/${id}/data?size=100&page=${page}`)
+export const getTagGroupList = (context, id) => {
+    axios.get(`${context.$baseURL}api/v1/tagGroup?size=100`)
         .then(response => {
             context.lineData = response.data._embedded.dataResponseControllerDtoList;
             console.log(response.data._embedded);
