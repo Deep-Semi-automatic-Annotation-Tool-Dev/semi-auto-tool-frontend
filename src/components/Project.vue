@@ -318,6 +318,7 @@
       </context-menu-item>
 
     </context-menu>
+    <!--  dialog - 프로젝트 삭제 확인  -->
     <v-dialog
         v-model="showDeleteProjectDialog"
         width="auto"
@@ -326,7 +327,24 @@
           v-on:dialog-click="projectDeleteDialogClicked"
           :dialog-type="this.DIALOG_TYPE_SUBTITLE"
           title="프로젝트 삭제"
-          :subtitle="`'${projectRightClickedName}' 프로젝트를 삭제하시겠습니까?`"></Dialog>
+          :subtitle="`'${projectRightClickedName}' 프로젝트를 삭제하시겠습니까?`"
+          text-accept="삭제"
+          text-deny="취소"
+      ></Dialog>
+    </v-dialog>
+    <!--  dialog - 프로젝트 이름 변경 확인  -->
+    <v-dialog
+        v-model="showRenameProjectDialog"
+        width="auto"
+    >
+      <Dialog
+          v-on:dialog-click="projectRenameDialogClicked"
+          :dialog-type="this.DIALOG_TYPE_TEXTFIELD"
+          title="프로젝트 이름 변경"
+          :subtitle="`'${projectRightClickedName}' 프로젝트를 삭제하시겠습니까?`"
+          text-accept="변경"
+          text-deny="취소"
+      ></Dialog>
     </v-dialog>
 
     <!--  snackbar - 프로젝트 생성 경고  -->
@@ -421,7 +439,7 @@ const getProjectList = (context) => {
 }
 
 const createProject = (context, title) => {
-  console.log(title.length)
+  // console.log(title.length)
   axios.post(`${context.$baseURL}api/v1/project`, {
     project_name: title
   })
@@ -434,6 +452,20 @@ const createProject = (context, title) => {
       });
 }
 
+const renameProject = (context, title, id) => {
+  // console.log(title.length)
+  axios.put(`${context.$baseURL}api/v1/project/${id}`, {
+    project_name: title
+  })
+      // eslint-disable-next-line no-unused-vars
+      .then(response => {
+        getProjectList(context)
+      })
+      .catch(error => {
+        console.log('put project error', error);
+      });
+}
+
 const deleteProject = (context, id) => {
   axios.delete(`${context.$baseURL}api/v1/project/${id}`)
       // eslint-disable-next-line no-unused-vars
@@ -443,6 +475,21 @@ const deleteProject = (context, id) => {
       .catch(error => {
         console.log('delete project error', error);
       });
+}
+
+const checkProjectName = (context, title) => {
+  const titleRegEx = /^[a-z|A-Z|ㄱ-ㅎ|ㅏ-ㅣ|가-힣|0-9]+/;
+  if (title.length > 20) {
+    context.snackbarMakeProjectTitleWarn = true
+    context.snackbarMakeProjectTitleWarnMsg = "프로젝트 이름은 20자 이하만 가능합니다."
+    return false
+  } else if (titleRegEx.test(title)) {
+    return true
+  } else {
+    context.snackbarMakeProjectTitleWarn = true
+    context.snackbarMakeProjectTitleWarnMsg = "프로젝트 이름은 영어, 한글, 숫자만 입력 가능합니다."
+    return false
+  }
 }
 
 export default {
@@ -481,6 +528,7 @@ export default {
       projectRightClickedId: 0,
       projectRightClickedName: 'name',
       showDeleteProjectDialog: false,
+      showRenameProjectDialog: false,
     }
   },
   components: {
@@ -588,15 +636,8 @@ export default {
     projectCreateDialogClicked(data) {
       if (data.type === this.DIALOG_CLICK_YES) {
         const title = data.projectTitle;
-        const titleRegEx = /^[a-z|A-Z|ㄱ-ㅎ|ㅏ-ㅣ|가-힣|0-9]+/;
-        if (title.length > 20) {
-          this.snackbarMakeProjectTitleWarn = true
-          this.snackbarMakeProjectTitleWarnMsg = "프로젝트 이름은 20자 이하만 가능합니다."
-        } else if (titleRegEx.test(title)) {
+        if (checkProjectName(this, title)) {
           createProject(this, title)
-        } else {
-          this.snackbarMakeProjectTitleWarn = true
-          this.snackbarMakeProjectTitleWarnMsg = "프로젝트 이름은 영어, 한글, 숫자만 입력 가능합니다."
         }
       }
       this.showMakeProjectDialog = false
@@ -611,7 +652,7 @@ export default {
     },
     projectContextMenuClick(type) {
       if (type === this.CONTEXTMENU_PROJECT_RENAME) {
-        console.log(`${this.projectRightClickedId} rename`)
+        this.showRenameProjectDialog = true
       } else if (type === this.CONTEXTMENU_PROJECT_DELETE) {
         this.showDeleteProjectDialog = true
       }
@@ -621,6 +662,15 @@ export default {
         deleteProject(this, this.projectRightClickedId)
       }
       this.showDeleteProjectDialog = false
+    },
+    projectRenameDialogClicked(data) {
+      if (data.type === this.DIALOG_CLICK_YES) {
+        const title = data.projectTitle;
+        if (checkProjectName(this, title)) {
+          renameProject(this, title, this.projectRightClickedId)
+        }
+      }
+      this.showRenameProjectDialog = false
     },
   }
 }
