@@ -368,7 +368,12 @@
 <script>
 import AppBar from './appbar/AppBar';
 import Dialog from "@/components/dialog/Dialog";
-import axios from "axios";
+import {
+  createProject,
+  getProjectList,
+  deleteProject,
+  renameProject
+} from'@/js/api/project.js'
 
 const generateRandomString = (num) => {
   const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -425,56 +430,6 @@ const generateTags = () => {
 
   console.log(groupTags)
   return groupTags
-}
-
-const getProjectList = (context) => {
-  axios.get(`${context.$baseURL}api/v1/project?size=100`)
-      .then(response => {
-        context.projectList = response.data._embedded.projectResponseControllerDtoList;
-        // console.log(projectList);
-      })
-      .catch(error => {
-        console.log('get project error', error);
-      });
-}
-
-const createProject = (context, title) => {
-  // console.log(title.length)
-  axios.post(`${context.$baseURL}api/v1/project`, {
-    project_name: title
-  })
-      // eslint-disable-next-line no-unused-vars
-      .then(response => {
-        getProjectList(context)
-      })
-      .catch(error => {
-        console.log('post project error', error);
-      });
-}
-
-const renameProject = (context, title, id) => {
-  // console.log(title.length)
-  axios.put(`${context.$baseURL}api/v1/project/${id}`, {
-    project_name: title
-  })
-      // eslint-disable-next-line no-unused-vars
-      .then(response => {
-        getProjectList(context)
-      })
-      .catch(error => {
-        console.log('put project error', error);
-      });
-}
-
-const deleteProject = (context, id) => {
-  axios.delete(`${context.$baseURL}api/v1/project/${id}`)
-      // eslint-disable-next-line no-unused-vars
-      .then(response => {
-        getProjectList(context)
-      })
-      .catch(error => {
-        console.log('delete project error', error);
-      });
 }
 
 const checkProjectName = (context, title) => {
