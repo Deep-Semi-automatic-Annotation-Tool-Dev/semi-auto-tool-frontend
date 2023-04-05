@@ -74,12 +74,14 @@
                 @drop.prevent="onDrop($event, idx)"
               >
                 <span class="text-word">{{ l.text }}</span>
-<!--                <v-chip-->
-<!--                    v-if="lineData[idx].tags[selectedTagGroup] !== undefined"-->
-<!--                    size="small"-->
-<!--                    >-->
-<!--                  {{ lineData[idx].tags[selectedTagGroup].name }}-->
-<!--                </v-chip>-->
+                <v-chip
+                      v-if="checkDataTag(l.data_tags) !== undefined"
+                      size="small"
+                      :style="[chipBackground(`#${checkDataTag(l.data_tags).tagColor}`),
+                      setChipBackgroundColor(`#${checkDataTag(l.data_tags).tagColor}`)]"
+                    >
+                  {{ checkDataTag(l.data_tags).tagName }}
+                </v-chip>
               </p>
             </div>
 <!--            <p id="editor-main-lines" class="list-vuetify-light">-->
@@ -493,6 +495,14 @@ export default {
     getProjectList(this);
   },
   methods: {
+    checkDataTag(tags) {
+      for (let t of tags) {
+        if (t.tagGroupId === this.tagGroups[this.selectedTagGroup].tag_group_id) {
+          return t
+        }
+      }
+      return undefined
+    },
     setChipBackgroundColor(hex) {
       const rgb = hexToRgb(hex)
 
@@ -501,6 +511,12 @@ export default {
           (parseInt(rgb.b) * 114)) / 1000);
       return {'color': (brightness > 125) ? 'black' : 'white'};
     },
+    chipBackground (color) {
+      return {
+        'background': color
+      }
+    },
+
     getTagClasses(tags) {
       let classes = []
       for (const obj in tags) {
@@ -540,8 +556,9 @@ export default {
         }
       };
     },
+
     changeGroup(v) {
-      console.log(this.tagGroups[v])
+      // console.log(this.tagGroups[v])
       this.selectedTagGroup = v
       getTagList(this, this.selectedProjectId, this.tagGroups[this.selectedTagGroup].tag_group_id)
     },
@@ -549,6 +566,7 @@ export default {
       console.log(v)
       this.selectedModel = v
     },
+
     stepperNext() {
       if (this.stepperIdx + 1 <= this.stepperMax) this.stepperIdx++;
     },
@@ -558,6 +576,7 @@ export default {
     dataReloading() {
       this.stepperIdx = 0;
     },
+
     startDrag(event, item) {
       event.dataTransfer.dropEffect = "move"
       event.dataTransfer.effectAllowed = "move"
@@ -598,6 +617,7 @@ export default {
       // this.lists[colNum].numberList.push(targetItem)
       // this.lists[targetIdx].numberList.splice(this.lists[targetIdx].numberList.indexOf(targetItem), 1)
     },
+
     projectCreateDialogClicked(data) {
       if (data.type === this.DIALOG_CLICK_YES) {
         const title = data.projectTitle;
@@ -655,12 +675,6 @@ export default {
         loadProject(this, this.selectedProjectId)
       } // move cancel
       this.showChangeProjectDialog = false
-    },
-
-    chipBackground (color) {
-      return {
-        'background': color
-      }
     },
   },
 }
