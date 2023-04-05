@@ -570,9 +570,9 @@ export default {
       };
     },
     changeGroup(v) {
-      console.log(v)
+      console.log(this.tagGroups[v])
       this.selectedTagGroup = v
-      getTagList(this, this.selectedProjectId, this.selectedTagGroup)
+      getTagList(this, this.selectedProjectId, this.tagGroups[this.selectedTagGroup].tag_group_id)
     },
     changeModel(v) {
       console.log(v)
