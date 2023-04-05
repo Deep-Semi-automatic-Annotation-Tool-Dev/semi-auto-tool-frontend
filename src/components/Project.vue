@@ -103,7 +103,7 @@
                 <div class="stepper-item-top-circle-num">1</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 0 ? 'stepper-item-top-circle-title-selected' : ''">
-                태깅 - {{ tagGroups[selectedTagGroup].tag_group_name }}
+                태깅 - {{ tagGroups.length > 0 ? tagGroups[selectedTagGroup].tag_group_name : '' }}
               </div>
             </div>
 
@@ -144,7 +144,8 @@
                           :key="tag"
                           :draggable="true"
                           @dragstart="startDrag($event, [tag.tag_id, tag.tag_name])"
-                          :style="chipBackground(`#${tag.tag_color}`)"
+                          :style="[chipBackground(`#${tag.tag_color}`),
+                          setChipBackgroundColor(`#${tag.tag_color}`)]"
                       >
                         {{ tag.tag_name }}
                       </v-chip>
@@ -400,61 +401,12 @@ import {
   getTagList
 } from "@/js/api/tag";
 
-const generateRandomString = (num) => {
-  const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-  let result = '';
-  const charactersLength = characters.length;
-  for (let i = 0; i < num; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-
-  return result;
-}
-
-// const generateTestLines = () => {
-//   const data = [];
-//   for (let i = 0;i < 100;i++) {
-//     const strLength = Math.floor(Math.random() * (100 - 25)) + 25;
-//     let tags = {}
-//     for (let j = 0;j < 6;j++) {
-//       if (Math.round(Math.random() - 0.1)) {
-//         const type = Math.floor(Math.random() * 6)
-//         tags[j] = {groupId: j, name: `타입 ${type}`, type: type}
-//       }
-//     }
-//     data.push({data: generateRandomString(strLength) + '.', tags: tags});
-//   }
-//   return data;
-// }
-
-const generateTagGroups = () => {
-  const group = []
-  for (let i = 0;i < 6;i++) {
-    group.push({value: i, name: `group ${i}`})
-  }
-  return group;
-}
-
 const generateModels = () => {
   const group = []
   for (let i = 0;i < 3;i++) {
     group.push({value: i, name: `model ${i}`})
   }
   return group;
-}
-
-const generateTags = () => {
-  const groupTags = {}
-  for (let i = 0;i < 6;i++) {
-    const tags = []
-    for (let j = 0;j < Math.floor(Math.random() * (60 - 30) + 30);j++) {
-      tags.push({name: `${generateRandomString(Math.floor(Math.random() * (10 - 4) + 4))} ${j}`, value: j})
-    }
-    groupTags[i] = tags
-  }
-
-  console.log(groupTags)
-  return groupTags
 }
 
 const checkProjectName = (context, title) => {
@@ -481,6 +433,15 @@ const loadProject = async (context, id) => {
   await getDataList(context, id, 0)
 }
 
+const hexToRgb = (hex) => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : null;
+}
+
 export default {
   name: "ProjectComponent",
   data() {
@@ -493,12 +454,12 @@ export default {
         return data;
       },
       lineData: [],
-      tagGroups: generateTagGroups(),
+      tagGroups: [],
       modelLists: generateModels(),
 
       selectedTagGroup: 0,
       selectedModel: 0,
-      tags: generateTags(),
+      tags: [],
       stepperIdx: 0,
       stepperMax: 4,
       projectList: [],
@@ -685,10 +646,19 @@ export default {
       } // move cancel
       this.showChangeProjectDialog = false
     },
+
     chipBackground (color) {
       return {
         'background': color
       }
+    },
+    setChipBackgroundColor(hex) {
+      const rgb = hexToRgb(hex)
+
+      const brightness = Math.round(((parseInt(rgb.r) * 299) +
+          (parseInt(rgb.g) * 587) +
+          (parseInt(rgb.b) * 114)) / 1000);
+      return {'color': (brightness > 125) ? 'black' : 'white'};
     }
   },
 }
