@@ -103,7 +103,7 @@
                 <div class="stepper-item-top-circle-num">1</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 0 ? 'stepper-item-top-circle-title-selected' : ''">
-                태깅 - {{ tagGroups[selectedTagGroup].name }}
+                태깅 - {{ tagGroups[selectedTagGroup].tag_group_name }}
               </div>
             </div>
 
@@ -116,7 +116,7 @@
                         label="태그 그룹"
                         density="comfortable"
                         :items="tagGroups"
-                        item-title="name"
+                        item-title="tag_group_name"
                         item-value="value"
                         :hide-details="true"
                         @update:model-value="changeGroup"
@@ -140,11 +140,11 @@
                         class="pa-3 list-vuetify-light"
                     >
                       <v-chip
-                          v-for="tag in tags[selectedTagGroup]"
+                          v-for="tag in tags"
                           :key="tag"
                           :draggable="true"
-                          @dragstart="startDrag($event, [tag.value, tag.name])">
-                        {{ tag.name }}
+                          @dragstart="startDrag($event, [tag.tag_id, tag.tag_name])">
+                        {{ tag.tag_name }}
                       </v-chip>
                     </v-chip-group>
                   </div>
@@ -393,6 +393,10 @@ import {
 import {
   getDataList
 } from '@/js/api/data.js'
+import {
+  getTagGroupList,
+  getTagList
+} from "@/js/api/tag";
 
 const generateRandomString = (num) => {
   const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -466,7 +470,12 @@ const checkProjectName = (context, title) => {
   }
 }
 
-const loadPeoject = async (context, id) => {
+const loadProject = async (context, id) => {
+  await getTagGroupList(context, id)
+  if (context.tagGroups.length > 0) {
+    console.log(context.tagGroups)
+    await getTagList(context, id, context.tagGroups[context.selectedTagGroup].tag_group_id)
+  }
   await getDataList(context, id, 0)
 }
 
@@ -563,6 +572,7 @@ export default {
     changeGroup(v) {
       console.log(v)
       this.selectedTagGroup = v
+      getTagList(this, this.selectedProjectId, this.selectedTagGroup)
     },
     changeModel(v) {
       console.log(v)
@@ -658,7 +668,7 @@ export default {
       // 프로젝트 선택
       if (this.selectedProjectId === -1) {
         this.selectedProjectId = id
-        loadPeoject(this, this.selectedProjectId)
+        loadProject(this, this.selectedProjectId)
       } else {
         // 이전에 선택한 화면이 있다면 저장 여부 물어보기
         this.moveProjectId = id
@@ -669,7 +679,7 @@ export default {
       // 프로젝트 이동 시 저장 여부 다이얼로그 버튼 클릭
       if (data.type === this.DIALOG_CLICK_YES) {
         this.selectedProjectId = this.moveProjectId
-        loadPeoject(this, this.selectedProjectId)
+        loadProject(this, this.selectedProjectId)
       } // move cancel
       this.showChangeProjectDialog = false
     }
