@@ -143,7 +143,9 @@
                           v-for="tag in tags"
                           :key="tag"
                           :draggable="true"
-                          @dragstart="startDrag($event, [tag.tag_id, tag.tag_name])">
+                          @dragstart="startDrag($event, [tag.tag_id, tag.tag_name])"
+                          :style="chipBackground(`#${tag.tag_color}`)"
+                      >
                         {{ tag.tag_name }}
                       </v-chip>
                     </v-chip-group>
@@ -682,8 +684,13 @@ export default {
         loadProject(this, this.selectedProjectId)
       } // move cancel
       this.showChangeProjectDialog = false
+    },
+    chipBackground (color) {
+      return {
+        'background': color
+      }
     }
-  }
+  },
 }
 </script>
 
