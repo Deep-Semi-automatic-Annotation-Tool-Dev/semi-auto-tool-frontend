@@ -143,7 +143,7 @@
                           v-for="tag in tags"
                           :key="tag"
                           :draggable="true"
-                          @dragstart="startDrag($event, [tag.tag_id, tag.tag_name])"
+                          @dragstart="startDrag($event, [tag.tag_id, tag.tag_name, `#${tag.tag_color}`])"
                           :style="[chipBackground(`#${tag.tag_color}`),
                           setChipBackgroundColor(`#${tag.tag_color}`)]"
                       >
@@ -493,6 +493,14 @@ export default {
     getProjectList(this);
   },
   methods: {
+    setChipBackgroundColor(hex) {
+      const rgb = hexToRgb(hex)
+
+      const brightness = Math.round(((parseInt(rgb.r) * 299) +
+          (parseInt(rgb.g) * 587) +
+          (parseInt(rgb.b) * 114)) / 1000);
+      return {'color': (brightness > 125) ? 'black' : 'white'};
+    },
     getTagClasses(tags) {
       let classes = []
       for (const obj in tags) {
@@ -558,6 +566,8 @@ export default {
       const dragElementText = document.createTextNode(item[1])
       dragElement.appendChild(dragElementText)
       dragElement.className = "dragItem"
+      dragElement.style.background = item[2]
+      dragElement.style.color = this.setChipBackgroundColor(item[2]).color
       document.body.appendChild(dragElement);
       document.addEventListener("dragend", function() {
         if (dragElement) {
@@ -652,14 +662,6 @@ export default {
         'background': color
       }
     },
-    setChipBackgroundColor(hex) {
-      const rgb = hexToRgb(hex)
-
-      const brightness = Math.round(((parseInt(rgb.r) * 299) +
-          (parseInt(rgb.g) * 587) +
-          (parseInt(rgb.b) * 114)) / 1000);
-      return {'color': (brightness > 125) ? 'black' : 'white'};
-    }
   },
 }
 </script>
