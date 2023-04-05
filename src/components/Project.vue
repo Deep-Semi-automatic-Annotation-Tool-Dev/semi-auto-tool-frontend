@@ -11,7 +11,8 @@
                 v-for="item in projectList"
                 :key="item.project_id"
                 class="list-vuetify-item"
-                @click.right="projectListClick($event, item.project_id, item.project_name)"
+                @click.left="projectListLeftClick($event, item.project_id)"
+                @click.right="projectListRightClick($event, item.project_id, item.project_name)"
                 @contextmenu.prevent
             >
               {{ item.project_name }}
@@ -72,13 +73,13 @@
                 @dragover.prevent
                 @drop.prevent="onDrop($event, idx)"
               >
-                <span class="text-word">{{ l.data }}</span>
-                <v-chip
-                    v-if="lineData[idx].tags[selectedTagGroup] !== undefined"
-                    size="small"
-                    >
-                  {{ lineData[idx].tags[selectedTagGroup].name }}
-                </v-chip>
+                <span class="text-word">{{ l.text }}</span>
+<!--                <v-chip-->
+<!--                    v-if="lineData[idx].tags[selectedTagGroup] !== undefined"-->
+<!--                    size="small"-->
+<!--                    >-->
+<!--                  {{ lineData[idx].tags[selectedTagGroup].name }}-->
+<!--                </v-chip>-->
               </p>
             </div>
 <!--            <p id="editor-main-lines" class="list-vuetify-light">-->
@@ -347,6 +348,21 @@
       ></Dialog>
     </v-dialog>
 
+    <!--  dialog - 프로젝트 선택 변경 전 저장 여부 물어보기  -->
+    <v-dialog
+        v-model="showChangeProjectDialog"
+        width="auto"
+    >
+      <Dialog
+          v-on:dialog-click="projectChangeDialogClicked"
+          :dialog-type="this.DIALOG_TYPE_SUBTITLE"
+          title="프로젝트 이동"
+          :subtitle="`현재 프로젝트의 변경사항을 저장하고 다른 프로젝트로 이동하시겠습니까?`"
+          text-accept="저장 후 이동"
+          text-deny="이동 취소"
+      ></Dialog>
+    </v-dialog>
+
     <!--  snackbar - 프로젝트 생성 경고  -->
     <v-snackbar
         v-model="snackbarMakeProjectTitleWarn"
@@ -374,6 +390,9 @@ import {
   deleteProject,
   renameProject
 } from'@/js/api/project.js'
+import {
+  getDataList
+} from '@/js/api/data.js'
 
 const generateRandomString = (num) => {
   const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -386,21 +405,21 @@ const generateRandomString = (num) => {
   return result;
 }
 
-const generateTestLines = () => {
-  const data = [];
-  for (let i = 0;i < 100;i++) {
-    const strLength = Math.floor(Math.random() * (100 - 25)) + 25;
-    let tags = {}
-    for (let j = 0;j < 6;j++) {
-      if (Math.round(Math.random() - 0.1)) {
-        const type = Math.floor(Math.random() * 6)
-        tags[j] = {groupId: j, name: `타입 ${type}`, type: type}
-      }
-    }
-    data.push({data: generateRandomString(strLength) + '.', tags: tags});
-  }
-  return data;
-}
+// const generateTestLines = () => {
+//   const data = [];
+//   for (let i = 0;i < 100;i++) {
+//     const strLength = Math.floor(Math.random() * (100 - 25)) + 25;
+//     let tags = {}
+//     for (let j = 0;j < 6;j++) {
+//       if (Math.round(Math.random() - 0.1)) {
+//         const type = Math.floor(Math.random() * 6)
+//         tags[j] = {groupId: j, name: `타입 ${type}`, type: type}
+//       }
+//     }
+//     data.push({data: generateRandomString(strLength) + '.', tags: tags});
+//   }
+//   return data;
+// }
 
 const generateTagGroups = () => {
   const group = []
@@ -458,7 +477,7 @@ export default {
         }
         return data;
       },
-      lineData: generateTestLines(),
+      lineData: [],
       tagGroups: generateTagGroups(),
       modelLists: generateModels(),
 
@@ -484,6 +503,10 @@ export default {
       projectRightClickedName: 'name',
       showDeleteProjectDialog: false,
       showRenameProjectDialog: false,
+
+      selectedProjectId: -1,
+      moveProjectId: -1,
+      showChangeProjectDialog: false
     }
   },
   components: {
@@ -597,7 +620,7 @@ export default {
       }
       this.showMakeProjectDialog = false
     },
-    projectListClick(e, id, name) {
+    projectListRightClick(e, id, name) {
       this.showProjectListMenu = true;
       this.optionsComponent.x = e.x;
       this.optionsComponent.y = e.y;
@@ -627,6 +650,25 @@ export default {
       }
       this.showRenameProjectDialog = false
     },
+    projectListLeftClick(e, id) {
+      // 프로젝트 선택
+      if (this.selectedProjectId === -1) {
+        this.selectedProjectId = id
+        getDataList(this, this.selectedProjectId, 0)
+      } else {
+        // 이전에 선택한 화면이 있다면 저장 여부 물어보기
+        this.moveProjectId = id
+        this.showChangeProjectDialog = true
+      }
+    },
+    projectChangeDialogClicked(data) {
+      // 프로젝트 이동 시 저장 여부 다이얼로그 버튼 클릭
+      if (data.type === this.DIALOG_CLICK_YES) {
+        this.selectedProjectId = this.moveProjectId
+        getDataList(this, this.selectedProjectId, 0)
+      } // move cancel
+      this.showChangeProjectDialog = false
+    }
   }
 }
 </script>
