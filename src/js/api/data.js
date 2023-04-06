@@ -11,16 +11,17 @@ export const getDataList = (context, id, page) => {
         });
 }
 
-export const addTagInData = async (context, projectId, tagGroupId, tagId) => {
+export const addTagInData = async (context, projectId, tagGroupId, tagId, dataId, dataIdx) => {
     await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data`, {
+        "id": dataId,
         "data_tags": [{
             "tag_group_id": tagGroupId,
             "tag_id": tagId
         }]
     })
         .then(response => {
-            context.lineData[]
-            // console.log(response);
+            // context.lineData[dataIdx].data_tags.push()
+            console.log(response, dataIdx);
         })
         .catch(error => {
             console.log('put tag in data error', error);

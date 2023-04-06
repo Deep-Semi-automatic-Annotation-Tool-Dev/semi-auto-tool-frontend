@@ -396,6 +396,7 @@ import {
   renameProject
 } from'@/js/api/project.js'
 import {
+  addTagInData,
   getDataList
 } from '@/js/api/data.js'
 import {
@@ -600,7 +601,8 @@ export default {
       event.dataTransfer.setData("selectedItem", item[0])
     },
     onDrop(event, colNum) {
-      console.log(this.lineData[colNum])
+      const draggedTagId = Number(event.dataTransfer.getData("selectedItem"))
+      addTagInData(this, this.selectedProjectId, this.selectedTagGroup, draggedTagId, this.lineData[colNum].id, colNum)
     },
 
     projectCreateDialogClicked(data) {
