@@ -11,9 +11,10 @@ export const getDataList = (context, id, page) => {
         });
 }
 
-export const addTagInData = async (context, projectId, tagGroupId, tagId, dataId, dataIdx) => {
+export const addTagInData = async (context, projectId, tagGroupId, tagId, dataId, dataText, dataIdx) => {
     await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data`, {
         "id": dataId,
+        "text": dataText,
         "data_tags": [{
             "tag_group_id": tagGroupId,
             "tag_id": tagId
