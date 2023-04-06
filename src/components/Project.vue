@@ -602,7 +602,8 @@ export default {
     },
     onDrop(event, colNum) {
       const draggedTagId = Number(event.dataTransfer.getData("selectedItem"))
-      addTagInData(this, this.selectedProjectId, this.selectedTagGroup, draggedTagId, this.lineData[colNum].id, colNum)
+      console.log(this.selectedProjectId, this.tagGroups[this.selectedTagGroup].tag_group_id, draggedTagId, this.lineData[colNum].id, colNum)
+      addTagInData(this, this.selectedProjectId, this.tagGroups[this.selectedTagGroup].tag_group_id, draggedTagId, this.lineData[colNum].id, colNum)
     },
 
     projectCreateDialogClicked(data) {
