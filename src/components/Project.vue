@@ -600,22 +600,7 @@ export default {
       event.dataTransfer.setData("selectedItem", item[0])
     },
     onDrop(event, colNum) {
-      const selectedItem = Number(event.dataTransfer.getData("selectedItem"))
-
-      console.log(colNum, selectedItem)
-      // let targetIdx
-      // let targetItem
-      // this.lists.forEach((obj, index) => {
-      //   obj.numberList.forEach((ob) => {
-      //     if(ob.content === selectedItem) {
-      //       targetIdx = index
-      //       targetItem = ob
-      //     }
-      //   })
-      // })
-
-      // this.lists[colNum].numberList.push(targetItem)
-      // this.lists[targetIdx].numberList.splice(this.lists[targetIdx].numberList.indexOf(targetItem), 1)
+      console.log(this.lineData[colNum])
     },
 
     projectCreateDialogClicked(data) {
