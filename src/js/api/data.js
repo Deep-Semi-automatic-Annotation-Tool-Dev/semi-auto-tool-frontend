@@ -11,18 +11,39 @@ export const getDataList = (context, id, page) => {
         });
 }
 
-export const addTagInData = async (context, projectId, tagGroupId, tagId, dataId, dataText, dataIdx) => {
-    await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data`, {
-        "id": dataId,
-        "text": dataText,
+export const addTagInData = async (context, projectId, targetTag, targetDataIdx, tagGroupId) => {
+    const targetData = context.lineData[targetDataIdx]
+    console.log(targetTag)
+    await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data`, [{
+        "id": targetData.id,
+        "text": targetData.text,
         "data_tags": [{
-            "tag_group_id": tagGroupId,
-            "tag_id": tagId
+            "tag_group_id": targetTag.tag_group_id,
+            "tag_id": targetTag.tag_id
         }]
-    })
-        .then(response => {
-            // context.lineData[dataIdx].data_tags.push()
-            console.log(response, dataIdx);
+    }])
+        .then(() => {
+            let found = 0
+            for (let tIdx in targetData.data_tags) {
+                const target = targetData.data_tags[tIdx]
+                if (target.tagGroupId === targetTag.tag_group_id) {
+                    target.tagId = targetTag.tag_id
+                    target.tagColor = targetTag.tag_color
+                    target.tagName = targetTag.tag_name
+                    found = 1
+                    break
+                }
+            }
+            if (!found) {
+                targetData.data_tags.push({
+                    'tagColor': targetTag.tag_color,
+                    'tagGroupId': targetTag.tag_group_id,
+                    'tagGroupName': context.tagGroups[tagGroupId].tag_group_name,
+                    'tagId': targetTag.tag_id,
+                    'tagName': targetTag.tag_name
+                })
+            }
+            // console.log(response, dataIdx);
         })
         .catch(error => {
             console.log('put tag in data error', error);

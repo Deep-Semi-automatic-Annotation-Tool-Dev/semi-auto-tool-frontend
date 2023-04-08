@@ -145,7 +145,7 @@
                           v-for="tag in tags"
                           :key="tag"
                           :draggable="true"
-                          @dragstart="startDrag($event, [tag.tag_id, tag.tag_name, `#${tag.tag_color}`])"
+                          @dragstart="startDrag($event, [tag.value, tag.tag_name, `#${tag.tag_color}`])"
                           :style="[chipBackground(`#${tag.tag_color}`),
                           setChipBackgroundColor(`#${tag.tag_color}`)]"
                       >
@@ -601,11 +601,10 @@ export default {
       event.dataTransfer.setData("selectedItem", item[0])
     },
     onDrop(event, colNum) {
-      const draggedTagId = Number(event.dataTransfer.getData("selectedItem"))
-      console.log(this.selectedProjectId, this.tagGroups[this.selectedTagGroup].tag_group_id, draggedTagId, this.lineData[colNum].id, this.lineData[colNum].text, colNum)
-      addTagInData(this, this.selectedProjectId, this.tagGroups[this.selectedTagGroup].tag_group_id, draggedTagId, this.lineData[colNum].id, this.lineData[colNum].text, colNum)
+      const draggedTagValue = Number(event.dataTransfer.getData("selectedItem"))
+      let targetTag = this.tags[draggedTagValue]
+      addTagInData(this, this.selectedProjectId, targetTag, colNum, this.selectedTagGroup)
     },
-
     projectCreateDialogClicked(data) {
       if (data.type === this.DIALOG_CLICK_YES) {
         const title = data.projectTitle;
