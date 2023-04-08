@@ -142,10 +142,10 @@
                         class="pa-3 list-vuetify-light"
                     >
                       <v-chip
-                          v-for="tag in tags"
+                          v-for="(tag, idx) in tags"
                           :key="tag"
                           :draggable="true"
-                          @dragstart="startDrag($event, [tag.value, tag.tag_name, `#${tag.tag_color}`])"
+                          @dragstart="startDrag($event, [idx, tag.tag_name, `#${tag.tag_color}`])"
                           :style="[chipBackground(`#${tag.tag_color}`),
                           setChipBackgroundColor(`#${tag.tag_color}`)]"
                       >
@@ -602,6 +602,7 @@ export default {
     },
     onDrop(event, colNum) {
       const draggedTagValue = Number(event.dataTransfer.getData("selectedItem"))
+      console.log(event.dataTransfer.getData("selectedItem"))
       let targetTag = this.tags[draggedTagValue]
       addTagInData(this, this.selectedProjectId, targetTag, colNum, this.selectedTagGroup)
     },
