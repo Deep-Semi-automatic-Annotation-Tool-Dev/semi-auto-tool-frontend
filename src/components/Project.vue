@@ -11,7 +11,7 @@
                 v-for="item in projectList"
                 :key="item.project_id"
                 class="list-vuetify-item"
-                @click.left="projectListLeftClick($event, item.project_id)"
+                @click.left="projectListLeftClick($event, item.project_id, item.project_name)"
                 @click.right="projectListRightClick($event, item.project_id, item.project_name)"
                 @contextmenu.prevent
             >
@@ -51,7 +51,7 @@
         <!--   문장/태그 편집 영역   -->
         <div id="layout-project-text-area">
           <div id="layout-project-editor-top">
-            <div id="editor-top-title">프로젝트 제목</div>
+            <div id="editor-top-title">{{ this.selectedProjectName }}</div>
             <v-btn color="light_magenta" height="30">
               저장
             </v-btn>
@@ -492,6 +492,9 @@ const checkTagGroupName = (context, title) => {
 }
 
 const loadProject = async (context, id) => {
+  context.lineData = []
+  context.tags = []
+  context.tagGroups = []
   await getTagGroupList(context, id)
   if (context.tagGroups.length > 0) {
     console.log(context.tagGroups)
@@ -549,6 +552,8 @@ export default {
 
       selectedProjectId: -1,
       moveProjectId: -1,
+      selectedProjectName: '프로젝트를 선택해 주세요.',
+      moveProjectName: '프로젝트를 선택해 주세요.',
       showChangeProjectDialog: false,
 
       showAddTagGroupDialog: false,
@@ -680,14 +685,16 @@ export default {
       }
       this.showRenameProjectDialog = false
     },
-    projectListLeftClick(e, id) {
+    projectListLeftClick(e, id, name) {
       // 프로젝트 선택
       if (this.selectedProjectId === -1) {
         this.selectedProjectId = id
+        this.selectedProjectName = name
         loadProject(this, this.selectedProjectId)
       } else {
         // 이전에 선택한 화면이 있다면 저장 여부 물어보기
         this.moveProjectId = id
+        this.moveProjectName = name
         this.showChangeProjectDialog = true
       }
     },
@@ -695,6 +702,7 @@ export default {
       // 프로젝트 이동 시 저장 여부 다이얼로그 버튼 클릭
       if (data.type === this.DIALOG_CLICK_YES) {
         this.selectedProjectId = this.moveProjectId
+        this.selectedProjectName = this.moveProjectName
         loadProject(this, this.selectedProjectId)
       } // move cancel
       this.showChangeProjectDialog = false
