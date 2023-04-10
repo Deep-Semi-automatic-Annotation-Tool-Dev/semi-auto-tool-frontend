@@ -122,10 +122,25 @@
                         item-value="value"
                         :hide-details="true"
                         @update:model-value="changeGroup"
-                    ></v-select>
+                    >
+                      <template v-slot:item="{ props }">
+                          <v-list-item v-bind="props">
+                            <template v-slot:append>
+                              <v-btn
+                                  color="grey-lighten-1"
+                                  icon="mdi-delete"
+                                  variant="text"
+                                  size="small"
+                                  @click="deleteTagGroup($event, props)"
+                                  @click.stop
+                              ></v-btn>
+                            </template>
+                          </v-list-item>
+                      </template>
+                    </v-select>
                   </v-container>
                   <v-container class="pa-0 ma-0">
-                    <v-btn color="light_magenta" id="tags-group-add-btn">
+                    <v-btn color="light_magenta" id="tags-group-add-btn" @click="addTagButtonClicked">
                       그룹 추가
                     </v-btn>
                   </v-container>
@@ -368,6 +383,34 @@
       ></Dialog>
     </v-dialog>
 
+    <!--  dialog - 태그 그룹 추가하기  -->
+    <v-dialog
+        v-model="showAddTagGroupDialog"
+        width="auto"
+    >
+      <Dialog
+          v-on:dialog-click="addTagButtonDialogClicked"
+          :dialog-type="this.DIALOG_TYPE_TEXTFIELD"
+          title="태그 그룹 추가"
+          text-accept="추가"
+          text-deny="취소"
+      ></Dialog>
+    </v-dialog>
+    <!--  dialog - 태그 그룹 삭제 확인  -->
+    <v-dialog
+        v-model="showDeleteTagGroupDialog"
+        width="auto"
+    >
+      <Dialog
+          v-on:dialog-click="deleteTagGroupDialogClicked"
+          :dialog-type="this.DIALOG_TYPE_SUBTITLE"
+          title="태그 그룹 삭제"
+          :subtitle="`'${selectedDeleteTagGroup.title}' 태그 그룹을 삭제하시겠습니까?`"
+          text-accept="삭제"
+          text-deny="취소"
+      ></Dialog>
+    </v-dialog>
+
     <!--  snackbar - 프로젝트 생성 경고  -->
     <v-snackbar
         v-model="snackbarMakeProjectTitleWarn"
@@ -401,7 +444,9 @@ import {
 } from '@/js/api/data.js'
 import {
   getTagGroupList,
-  getTagList
+  getTagList,
+  addTagGroup,
+  deleteTagGroup
 } from "@/js/api/tag";
 
 const generateModels = () => {
@@ -413,16 +458,35 @@ const generateModels = () => {
 }
 
 const checkProjectName = (context, title) => {
-  const titleRegEx = /^[a-z|A-Z|ㄱ-ㅎ|ㅏ-ㅣ|가-힣|0-9]+/;
+  const titleRegEx = /^[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9|]+$/;
   if (title.length > 20) {
-    context.snackbarMakeProjectTitleWarn = true
+    context.snackbarMakeProjectTitleWarn = false
     context.snackbarMakeProjectTitleWarnMsg = "프로젝트 이름은 20자 이하만 가능합니다."
+    context.snackbarMakeProjectTitleWarn = true
     return false
   } else if (titleRegEx.test(title)) {
     return true
   } else {
-    context.snackbarMakeProjectTitleWarn = true
+    context.snackbarMakeProjectTitleWarn = false
     context.snackbarMakeProjectTitleWarnMsg = "프로젝트 이름은 영어, 한글, 숫자만 입력 가능합니다."
+    context.snackbarMakeProjectTitleWarn = true
+    return false
+  }
+}
+
+const checkTagGroupName = (context, title) => {
+  const titleRegEx = /^[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9|]+$/;
+  if (title.length > 8) {
+    context.snackbarMakeProjectTitleWarn = false
+    context.snackbarMakeProjectTitleWarnMsg = "태그 그룹 이름은 8자 이하만 가능합니다."
+    context.snackbarMakeProjectTitleWarn = true
+    return false
+  } else if (titleRegEx.test(title)) {
+    return true
+  } else {
+    context.snackbarMakeProjectTitleWarn = false
+    context.snackbarMakeProjectTitleWarnMsg = "태그 그룹 이름은 영어, 한글, 숫자만 입력 가능합니다."
+    context.snackbarMakeProjectTitleWarn = true
     return false
   }
 }
@@ -485,7 +549,12 @@ export default {
 
       selectedProjectId: -1,
       moveProjectId: -1,
-      showChangeProjectDialog: false
+      showChangeProjectDialog: false,
+
+      showAddTagGroupDialog: false,
+
+      showDeleteTagGroupDialog: false,
+      selectedDeleteTagGroup: {}
     }
   },
   components: {
@@ -518,46 +587,6 @@ export default {
       }
     },
 
-    getTagClasses(tags) {
-      let classes = []
-      for (const obj in tags) {
-        if (this.selectedTagGroup === Number(obj)) {
-          classes.push(`highlight${tags[obj].type}`)
-        }
-      }
-      return classes
-    },
-    lineOver(event) {
-      const target = event.target;
-      const tooltipHtml = Number(target.dataset.tooltip);
-      const targetTags = this.lineData[tooltipHtml].tags;
-
-      if (targetTags[this.selectedTagGroup] === undefined) return
-      let tooltipElem = document.createElement('div');
-      tooltipElem.className = 'tooltip';
-      tooltipElem.innerHTML = targetTags[this.selectedTagGroup].name;
-      let coords = target.getBoundingClientRect();
-      let left = coords.left + (target.offsetWidth - tooltipElem.offsetWidth) / 2;
-      if (left < 0) left = 0;
-
-      let top = coords.top - tooltipElem.offsetHeight - 5;
-      if (top < 0) {
-        top = coords.top + target.offsetHeight + 5;
-      }
-
-      tooltipElem.style.left = (event.clientX + 5) + 'px';
-      tooltipElem.style.top = top + 'px';
-
-      document.body.append(tooltipElem);
-
-      document.onmouseout = function() {
-        if (tooltipElem) {
-          tooltipElem.remove();
-          tooltipElem = null;
-        }
-      };
-    },
-
     changeGroup(v) {
       // console.log(this.tagGroups[v])
       this.selectedTagGroup = v
@@ -566,6 +595,12 @@ export default {
     changeModel(v) {
       console.log(v)
       this.selectedModel = v
+    },
+    deleteTagGroup(e, item) {
+      console.log(e, item)
+      this.selectedDeleteTagGroup.value = item.value
+      this.selectedDeleteTagGroup.title = item.title
+      this.showDeleteTagGroupDialog = true
     },
 
     stepperNext() {
@@ -664,6 +699,27 @@ export default {
       } // move cancel
       this.showChangeProjectDialog = false
     },
+
+    addTagButtonClicked() {
+      this.showAddTagGroupDialog = true
+    },
+    addTagButtonDialogClicked(data) {
+      // 프로젝트 이동 시 저장 여부 다이얼로그 버튼 클릭
+      if (data.type === this.DIALOG_CLICK_YES) {
+        const title = data.projectTitle;
+        if (checkTagGroupName(this, title)) {
+          addTagGroup(this, this.selectedProjectId, title)
+        }
+      } // move cancel
+      this.showAddTagGroupDialog = false
+    },
+    deleteTagGroupDialogClicked(data) {
+      // 프로젝트 이동 시 저장 여부 다이얼로그 버튼 클릭
+      if (data.type === this.DIALOG_CLICK_YES) {
+        deleteTagGroup(this, this.selectedProjectId, this.tagGroups[this.selectedDeleteTagGroup.value].tag_group_id)
+      } // move cancel
+      this.showDeleteTagGroupDialog = false
+    }
   },
 }
 </script>
