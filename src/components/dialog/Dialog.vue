@@ -2,13 +2,20 @@
   <div id="dialog-root">
     <div id="dialog-title">{{ title }}</div>
     <div v-if="dialogType === this.DIALOG_TYPE_SUBTITLE" id="dialog-subtitle">{{ subtitle }}</div>
-    <div v-else id="dialog-textfield">
+    <div v-else-if="dialogType === this.DIALOG_TYPE_TEXTFIELD" id="dialog-textfield">
       <v-text-field
           :label="textFieldLabel"
           variant="outlined"
           hide-details="true"
           v-model="fieldText"
       ></v-text-field>
+    </div>
+    <div v-else-if="dialogType === this.DIALOG_TYPE_COLORPICKER">
+      <v-color-picker
+          v-model="colorText"
+          elevation="0"
+
+      ></v-color-picker>
     </div>
     <div id="dialog-buttons">
       <div class="dialog-button" id="dialog-button-yes" @click="onClickButton(this.DIALOG_CLICK_YES)">
@@ -48,11 +55,24 @@ export default {
     textFieldLabel: {
       type: String,
       default: 'label'
+    },
+    textFieldData: {
+      type: String,
+      default: 'data'
+    },
+    fieldTextInit: {
+      type: String,
+      default: ""
+    },
+    colorInit: {
+      type: String,
+      default: '#FFFFFF'
     }
   },
   data() {
     return {
-      fieldText: ""
+      fieldText: this.fieldTextInit,
+      colorText: this.colorInit
     }
   },
   methods: {
@@ -60,6 +80,8 @@ export default {
       let returnData = {type: type}
       if (this.dialogType === this.DIALOG_TYPE_TEXTFIELD) {
         returnData.projectTitle = this.fieldText;
+      } else if (this.dialogType === this.DIALOG_TYPE_COLORPICKER) {
+        returnData.color = this.colorText
       }
       this.$emit('dialog-click', returnData)
     }

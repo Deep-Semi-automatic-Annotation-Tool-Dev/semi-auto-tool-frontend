@@ -366,6 +366,8 @@
           v-on:dialog-click="projectRenameDialogClicked"
           :dialog-type="this.DIALOG_TYPE_TEXTFIELD"
           title="프로젝트 이름 변경"
+          :field-text-init="projectRightClickedName"
+          text-field-label="프로젝트 이름"
           :subtitle="`'${projectRightClickedName}' 프로젝트를 삭제하시겠습니까?`"
           text-accept="변경"
           text-deny="취소"
@@ -395,6 +397,7 @@
       <Dialog
           v-on:dialog-click="addTagButtonDialogClicked"
           :dialog-type="this.DIALOG_TYPE_TEXTFIELD"
+          text-field-label="태그 그룹 이름"
           title="태그 그룹 추가"
           text-accept="추가"
           text-deny="취소"
@@ -470,6 +473,22 @@
           v-on:dialog-click="renameTagDialogClicked"
           :dialog-type="this.DIALOG_TYPE_TEXTFIELD"
           title="태그 이름 변경"
+          :field-text-init="this.tagRightCLickItem.tag_name"
+          text-field-label="태그 이름"
+          text-accept="변경"
+          text-deny="취소"
+      ></Dialog>
+    </v-dialog>
+    <!--  dialog - 태그 색싱 변경 확인  -->
+    <v-dialog
+        v-model="showReColorTagDialog"
+        width="auto"
+    >
+      <Dialog
+          v-on:dialog-click="recolorTagDialogClicked"
+          :dialog-type="this.DIALOG_TYPE_COLORPICKER"
+          title="태그 색상 변경"
+          :color-init="'#' + this.tagRightCLickItem.tag_color"
           text-accept="변경"
           text-deny="취소"
       ></Dialog>
@@ -623,7 +642,8 @@ export default {
       },
       tagRightCLickItem: {},
       showDeleteTagDialog: false,
-      showRenameTagDialog: false
+      showRenameTagDialog: false,
+      showReColorTagDialog: false
     }
   },
   components: {
@@ -813,8 +833,8 @@ export default {
         this.showRenameTagDialog = true
       } else if (type === this.CONTEXTMENU_TAG_DELETE) {
         this.showDeleteTagDialog = true
-      } else if (type === this.CONTEXTMENU_TAG_COLOR ) {
-        this.showDeleteProjectDialog = true
+      } else if (type === this.CONTEXTMENU_TAG_COLOR) {
+        this.showReColorTagDialog = true
       }
     },
     deleteTagDialogClicked(data) {
@@ -839,6 +859,19 @@ export default {
         }
       }
       this.showRenameTagDialog = false
+    },
+    recolorTagDialogClicked(data) {
+      if (data.type === this.DIALOG_CLICK_YES) {
+        const tagColor = data.color;
+        // console.log(tagColor.slice(1), tagColor)
+        changeTagInform(this,
+            this.selectedProjectId,
+            this.tagRightCLickItem.tag_group_id,
+            this.tagRightCLickItem.tag_id,
+            this.tagRightCLickItem.tag_name,
+            tagColor.slice(1))
+      }
+      this.showReColorTagDialog = false
     },
   },
 }
