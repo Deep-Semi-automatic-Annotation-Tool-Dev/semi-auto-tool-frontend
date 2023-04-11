@@ -47,7 +47,7 @@
         </v-dialog>
 
       </div>
-      <div id="layout-project-editor">
+      <div v-if="selectedProjectId !== -1" id="layout-project-editor">
         <!--   문장/태그 편집 영역   -->
         <div id="layout-project-text-area">
           <div id="layout-project-editor-top">
@@ -105,7 +105,7 @@
                 <div class="stepper-item-top-circle-num">1</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 0 ? 'stepper-item-top-circle-title-selected' : ''">
-                태깅 - {{ tagGroups.length > 0 ? tagGroups[selectedTagGroup].tag_group_name : '' }}
+                태깅 - {{ tagGroups.length > 0 ? tagGroups[selectedTagGroupId].tag_group_name : '' }}
               </div>
             </div>
 
@@ -165,6 +165,8 @@
                           :key="tag"
                           :draggable="true"
                           @dragstart="startDrag($event, [idx, tag.tag_name, `#${tag.tag_color}`])"
+                          @click.right="tagChipRightClick($event, tag)"
+                          @contextmenu.prevent
                           :style="[chipBackground(`#${tag.tag_color}`),
                           setChipBackgroundColor(`#${tag.tag_color}`)]"
                       >
@@ -327,6 +329,7 @@
 
         </div>
       </div>
+      <div v-else>프로젝트를 선택하거나 생성해 주세요.</div>
     </div>
 
     <!--  context menu - 프로젝트 리스트 우클릭  -->
@@ -335,13 +338,10 @@
         :options="optionsComponent"
     >
       <context-menu-item label="이름 변경" @click="projectContextMenuClick(this.CONTEXTMENU_PROJECT_RENAME)"/>
-
       <context-menu-item
           label="삭제"
           @click="projectContextMenuClick(this.CONTEXTMENU_PROJECT_DELETE)">
-
       </context-menu-item>
-
     </context-menu>
     <!--  dialog - 프로젝트 삭제 확인  -->
     <v-dialog
@@ -430,6 +430,50 @@
         </v-btn>
       </template>
     </v-snackbar>
+
+    <!--  context menu - 태그 칩 컨택스트 매뉴  -->
+    <context-menu
+        v-model:show="showTagMenu"
+        :options="tagMenuOptionsComponent"
+    >
+      <context-menu-item
+          label="이름 변경"
+          @click="tagContextMenuClick(this.CONTEXTMENU_TAG_RENAME)"/>
+      <context-menu-item
+          label="색상 변경"
+          @click="tagContextMenuClick(this.CONTEXTMENU_TAG_COLOR)"/>
+      <context-menu-item
+          label="삭제"
+          @click="tagContextMenuClick(this.CONTEXTMENU_TAG_DELETE)">
+      </context-menu-item>
+    </context-menu>
+    <!--  dialog - 태그 삭제 확인  -->
+    <v-dialog
+        v-model="showDeleteTagDialog"
+        width="auto"
+    >
+      <Dialog
+          v-on:dialog-click="deleteTagDialogClicked"
+          :dialog-type="this.DIALOG_TYPE_SUBTITLE"
+          title="태그 삭제"
+          :subtitle="`'${tagRightCLickItem.tag_name}' 태그를 삭제하시겠습니까?`"
+          text-accept="삭제"
+          text-deny="취소"
+      ></Dialog>
+    </v-dialog>
+    <!--  dialog - 태그 이름 변경 확인  -->
+    <v-dialog
+        v-model="showRenameTagDialog"
+        width="auto"
+    >
+      <Dialog
+          v-on:dialog-click="renameTagDialogClicked"
+          :dialog-type="this.DIALOG_TYPE_TEXTFIELD"
+          title="태그 이름 변경"
+          text-accept="변경"
+          text-deny="취소"
+      ></Dialog>
+    </v-dialog>
   </div>
 </template>
 
@@ -450,7 +494,7 @@ import {
   getTagGroupList,
   getTagList,
   addTagGroup,
-  deleteTagGroup
+  deleteTagGroup, deleteTag, changeTagInform
 } from "@/js/api/tag";
 
 const generateModels = () => {
@@ -480,16 +524,16 @@ const checkProjectName = (context, title) => {
 
 const checkTagGroupName = (context, title) => {
   const titleRegEx = /^[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9|]+$/;
-  if (title.length > 8) {
+  if (title.length > 20) {
     context.snackbarMakeProjectTitleWarn = false
-    context.snackbarMakeProjectTitleWarnMsg = "태그 그룹 이름은 8자 이하만 가능합니다."
+    context.snackbarMakeProjectTitleWarnMsg = "태그 (그룹) 이름은 20자 이하만 가능합니다."
     context.snackbarMakeProjectTitleWarn = true
     return false
   } else if (titleRegEx.test(title)) {
     return true
   } else {
     context.snackbarMakeProjectTitleWarn = false
-    context.snackbarMakeProjectTitleWarnMsg = "태그 그룹 이름은 영어, 한글, 숫자만 입력 가능합니다."
+    context.snackbarMakeProjectTitleWarnMsg = "태그 (그룹) 이름은 영어, 한글, 숫자만 입력 가능합니다."
     context.snackbarMakeProjectTitleWarn = true
     return false
   }
@@ -504,7 +548,9 @@ const loadProject = async (context, id) => {
   await getTagGroupList(context, id)
   if (context.tagGroups.length > 0) {
     console.log(context.tagGroups)
-    await getTagList(context, id, context.tagGroups[context.selectedTagGroup].tag_group_id)
+    await getTagList(context,
+        id,
+        context.tagGroups[context.selectedTagGroup].tag_group_id)
   }
   await getDataList(context, id, 0)
 }
@@ -533,7 +579,7 @@ export default {
       tagGroups: [],
       modelLists: generateModels(),
 
-      selectedTagGroup: 0,
+      selectedTagGroupId: 0,
       tagGroupSelectionModel: 0,
       selectedModel: 0,
       tags: [],
@@ -566,7 +612,18 @@ export default {
       showAddTagGroupDialog: false,
 
       showDeleteTagGroupDialog: false,
-      selectedDeleteTagGroup: {}
+      selectedDeleteTagGroup: {},
+
+      showTagMenu: false,
+      tagMenuOptionsComponent: {
+        zIndex: 3,
+        minWidth: 230,
+        x: 500,
+        y: 200
+      },
+      tagRightCLickItem: {},
+      showDeleteTagDialog: false,
+      showRenameTagDialog: false
     }
   },
   components: {
@@ -579,7 +636,7 @@ export default {
   methods: {
     checkDataTag(tags) {
       for (let t of tags) {
-        if (t.tagGroupId === this.tagGroups[this.selectedTagGroup].tag_group_id) {
+        if (t.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
           return t
         }
       }
@@ -601,8 +658,10 @@ export default {
 
     changeGroup(v) {
       // console.log(this.tagGroups[v])
-      this.selectedTagGroup = v
-      getTagList(this, this.selectedProjectId, this.tagGroups[this.selectedTagGroup].tag_group_id)
+      this.selectedTagGroupId = v
+      getTagList(this,
+          this.selectedProjectId,
+          this.tagGroups[this.selectedTagGroupId].tag_group_id)
     },
     changeModel(v) {
       console.log(v)
@@ -651,7 +710,11 @@ export default {
       const draggedTagValue = Number(event.dataTransfer.getData("selectedItem"))
       console.log(event.dataTransfer.getData("selectedItem"))
       let targetTag = this.tags[draggedTagValue]
-      addTagInData(this, this.selectedProjectId, targetTag, colNum, this.selectedTagGroup)
+      addTagInData(this,
+          this.selectedProjectId,
+          targetTag,
+          colNum,
+          this.selectedTagGroupId)
     },
     projectCreateDialogClicked(data) {
       if (data.type === this.DIALOG_CLICK_YES) {
@@ -731,10 +794,52 @@ export default {
     deleteTagGroupDialogClicked(data) {
       // 프로젝트 이동 시 저장 여부 다이얼로그 버튼 클릭
       if (data.type === this.DIALOG_CLICK_YES) {
-        deleteTagGroup(this, this.selectedProjectId, this.tagGroups[this.selectedDeleteTagGroup.value].tag_group_id)
+        deleteTagGroup(this,
+            this.selectedProjectId,
+            this.tagGroups[this.selectedDeleteTagGroup.value].tag_group_id)
       } // move cancel
       this.showDeleteTagGroupDialog = false
-    }
+    },
+
+    tagChipRightClick(e, item) {
+      this.showTagMenu = true;
+      this.tagMenuOptionsComponent.x = e.x;
+      this.tagMenuOptionsComponent.y = e.y;
+      this.tagRightCLickItem = item
+      console.log(item)
+    },
+    tagContextMenuClick(type) {
+      if (type === this.CONTEXTMENU_TAG_RENAME) {
+        this.showRenameTagDialog = true
+      } else if (type === this.CONTEXTMENU_TAG_DELETE) {
+        this.showDeleteTagDialog = true
+      } else if (type === this.CONTEXTMENU_TAG_COLOR ) {
+        this.showDeleteProjectDialog = true
+      }
+    },
+    deleteTagDialogClicked(data) {
+      if (data.type === this.DIALOG_CLICK_YES) {
+        deleteTag(this,
+            this.selectedProjectId,
+            this.tagRightCLickItem.tag_group_id,
+            this.tagRightCLickItem.tag_id)
+      }
+      this.showDeleteTagDialog = false
+    },
+    renameTagDialogClicked(data) {
+      if (data.type === this.DIALOG_CLICK_YES) {
+        const tagName = data.projectTitle;
+        if (checkTagGroupName(this, tagName)) {
+          changeTagInform(this,
+              this.selectedProjectId,
+              this.tagRightCLickItem.tag_group_id,
+              this.tagRightCLickItem.tag_id,
+              tagName,
+              this.tagRightCLickItem.tag_color)
+        }
+      }
+      this.showRenameTagDialog = false
+    },
   },
 }
 </script>

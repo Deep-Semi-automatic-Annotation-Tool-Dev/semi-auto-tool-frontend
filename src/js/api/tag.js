@@ -1,13 +1,13 @@
 import axios from "axios";
 import {getDataList} from "@/js/api/data";
 
-const loadProject = async (context, id) => {
+const loadProject = async (context, id, page) => {
     await getTagGroupList(context, id)
     if (context.tagGroups.length > 0) {
         console.log(context.tagGroups)
         await getTagList(context, id, context.tagGroups[context.selectedTagGroup].tag_group_id)
     }
-    await getDataList(context, id, 0)
+    await getDataList(context, id, page)
 }
 
 export const getTagGroupList = async (context, projectId) => {
@@ -53,7 +53,7 @@ export const addTagGroup = async (context, projectId, groupText) => {
         "tag_group_name": groupText
     })
         .then(async () => {
-            loadProject(context, projectId)
+            loadProject(context, projectId, 0)
         })
         .catch(error => {
             console.log('add tag group error', error);
@@ -65,7 +65,47 @@ export const deleteTagGroup = async (context, projectId, tagGroupId,) => {
         .then(() => {
             // context.tags = response.data._embedded.tagResponseControllerDtoList;
             // console.log(response)
-            loadProject(context, projectId)
+            loadProject(context, projectId, 0)
+        })
+        .catch(error => {
+            console.log('delete tag group error', error);
+        });
+}
+
+export const addTag = async (context, projectId, tagGroupId, tag_name, tag_color) => {
+    await axios.post(`${context.$baseURL}api/v1/project/${projectId}/tagGroup/${tagGroupId}/tag`, {
+        "tag_name": tag_name,
+        "tag_color": tag_color
+    })
+        .then(async () => {
+            loadProject(context, projectId, 0)
+        })
+        .catch(error => {
+            console.log('add tag group error', error);
+        });
+}
+
+export const deleteTag = async (context, projectId, tagGroupId, tagId) => {
+    await axios.delete(`${context.$baseURL}api/v1/project/${projectId}/tagGroup/${tagGroupId}/tag/${tagId}`)
+        .then(() => {
+            // context.tags = response.data._embedded.tagResponseControllerDtoList;
+            // console.log(response)
+            loadProject(context, projectId, 0)
+        })
+        .catch(error => {
+            console.log('delete tag group error', error);
+        });
+}
+
+export const changeTagInform = async (context, projectId, tagGroupId, tagId, tag_name, tag_color) => {
+    await axios.put(`${context.$baseURL}api/v1/project/${projectId}/tagGroup/${tagGroupId}/tag/${tagId}`, {
+        "tag_name": tag_name,
+        "tag_color": tag_color
+    })
+        .then(() => {
+            // context.tags = response.data._embedded.tagResponseControllerDtoList;
+            // console.log(response)
+            loadProject(context, projectId, 0)
         })
         .catch(error => {
             console.log('delete tag group error', error);
