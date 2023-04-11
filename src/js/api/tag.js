@@ -53,7 +53,7 @@ export const addTagGroup = async (context, projectId, groupText) => {
         "tag_group_name": groupText
     })
         .then(async () => {
-            loadProject(context, projectId, 0)
+            loadProject(context, projectId, context.dataPage)
         })
         .catch(error => {
             console.log('add tag group error', error);
@@ -65,7 +65,7 @@ export const deleteTagGroup = async (context, projectId, tagGroupId,) => {
         .then(() => {
             // context.tags = response.data._embedded.tagResponseControllerDtoList;
             // console.log(response)
-            loadProject(context, projectId, 0)
+            loadProject(context, projectId, context.dataPage)
         })
         .catch(error => {
             console.log('delete tag group error', error);
@@ -78,7 +78,7 @@ export const addTag = async (context, projectId, tagGroupId, tag_name, tag_color
         "tag_color": tag_color
     })
         .then(async () => {
-            loadProject(context, projectId, 0)
+            loadProject(context, projectId, context.dataPage)
         })
         .catch(error => {
             console.log('add tag group error', error);
@@ -90,7 +90,7 @@ export const deleteTag = async (context, projectId, tagGroupId, tagId) => {
         .then(() => {
             // context.tags = response.data._embedded.tagResponseControllerDtoList;
             // console.log(response)
-            loadProject(context, projectId, 0)
+            loadProject(context, projectId, context.dataPage)
         })
         .catch(error => {
             console.log('delete tag group error', error);
@@ -105,7 +105,7 @@ export const changeTagInform = async (context, projectId, tagGroupId, tagId, tag
         .then(() => {
             // context.tags = response.data._embedded.tagResponseControllerDtoList;
             // console.log(response)
-            loadProject(context, projectId, 0)
+            loadProject(context, projectId, context.dataPage)
         })
         .catch(error => {
             console.log('delete tag group error', error);

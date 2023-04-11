@@ -11,14 +11,18 @@ const loadProject = async (context, id, page) => {
 }
 
 export const getDataList = (context, id, page) => {
-    axios.get(`${context.$baseURL}api/v1/project/${id}/data?size=100&page=${page}`)
+    axios.get(`${context.$baseURL}api/v1/project/${id}/data?size=500&page=${page}`)
         .then(response => {
             try {
                 context.lineData = response.data._embedded.dataResponseControllerDtoList;
+                context.dataPage = response.data.page.number + 1
+                context.dataTotalPage = response.data.page.totalPages
             } catch {
                 context.lineData = []
+                context.dataPage = 0
+                context.dataTotalPage = 0
             }
-            console.log(response.data._embedded);
+            console.log(response.data);
         })
         .catch(error => {
             console.log('get data error', error);
@@ -101,7 +105,7 @@ export const postData = (context, projectId, file, colName) => {
             }
         })
         .then(response => {
-            loadProject(context, projectId, 0)
+            loadProject(context, projectId, context.dataPage)
             console.log(response);
         })
         .catch(error => {

@@ -99,6 +99,13 @@
               </p>
             </div>
           </div>
+          <v-pagination
+              v-model="dataPage"
+              :length="dataTotalPage"
+              rounded="circle"
+              @update:modelValue="onPageChange"
+              id="layout-project-editor-pagination"
+          ></v-pagination>
         </div>
         <!--   태그 선택 및 학습 영역   -->
         <div id="layout-project-tag-area">
@@ -619,6 +626,8 @@ const loadProject = async (context, id) => {
   context.loadingDialogSubTitle = "프로젝트를 로딩 중 입니다."
   context.showLoadingDialog = true
 
+  context.dataPage = 0
+  context.dataTotalPage = 0
   context.selectedTagGroupId = 0
   context.stepperIdx = 0
   context.projectRightClickedId = 0
@@ -716,7 +725,10 @@ export default {
       showColumnNameDialog: false,
 
       fileData: undefined,
-      selectedFile: undefined
+      selectedFile: undefined,
+
+      dataPage: 0,
+      dataTotalPage: 0
     }
   },
   components: {
@@ -993,6 +1005,14 @@ export default {
       this.showColumnNameDialog = false
       this.fileData = undefined
     },
+
+    async onPageChange(page) {
+      this.loadingDialogTitle = '데이터 로드'
+      this.loadingDialogSubTitle = `${page} 페이지 데이터 로딩중...`
+      this.showLoadingDialog = true
+      await getDataList(this, this.selectedProjectId, page - 1)
+      this.showLoadingDialog = false
+    }
   },
 }
 </script>
