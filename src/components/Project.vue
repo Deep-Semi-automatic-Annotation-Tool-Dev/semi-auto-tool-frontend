@@ -52,9 +52,9 @@
         <div id="layout-project-text-area">
           <div id="layout-project-editor-top">
             <div id="editor-top-title">{{ this.selectedProjectName }}</div>
-            <v-btn color="light_magenta" height="30">
-              저장
-            </v-btn>
+<!--            <v-btn color="light_magenta" height="30">-->
+<!--              저장-->
+<!--            </v-btn>-->
             <v-btn color="light_brown" height="30">
               텍스트 로드
             </v-btn>
@@ -592,19 +592,23 @@ const loadProject = async (context, id) => {
   context.loadingDialogSubTitle = "프로젝트를 로딩 중 입니다."
   context.showLoadingDialog = true
 
+  context.selectedTagGroupId = 0
+  context.stepperIdx = 0
+  context.projectRightClickedId = 0
   context.lineData = []
   context.tags = []
   context.tagGroups = []
+  context.tagGroupSelectionModel = {}
 
-  context.tagGroupSelectionModel = 0
   context.loadingDialogSubTitle = "태그 그룹을 가져오는 중 입니다."
   await getTagGroupList(context, id)
   if (context.tagGroups.length > 0) {
+    context.tagGroupSelectionModel = context.tagGroups[0]
     console.log(context.tagGroups)
     context.loadingDialogSubTitle = "태그 목록을 가져오는 중 입니다."
     await getTagList(context,
         id,
-        context.tagGroups[context.selectedTagGroup].tag_group_id)
+        context.tagGroups[context.selectedTagGroupId].tag_group_id)
   }
   context.loadingDialogSubTitle = "텍스트 데이터를 가져오는 중 입니다."
   await getDataList(context, id, 0)
@@ -633,7 +637,7 @@ export default {
       modelLists: generateModels(),
 
       selectedTagGroupId: 0,
-      tagGroupSelectionModel: 0,
+      tagGroupSelectionModel: {},
       selectedModel: 0,
       tags: [],
       stepperIdx: 0,
@@ -714,6 +718,7 @@ export default {
     changeGroup(v) {
       // console.log(this.tagGroups[v])
       this.selectedTagGroupId = v
+      console.log(this.tagGroupSelectionModel)
       getTagList(this,
           this.selectedProjectId,
           this.tagGroups[this.selectedTagGroupId].tag_group_id)
@@ -898,7 +903,7 @@ export default {
     recolorTagDialogClicked(data) {
       if (data.type === this.DIALOG_CLICK_YES) {
         const tagColor = data.color;
-        // console.log(tagColor.slice(1), tagColor)
+        console.log(tagColor.slice(1), tagColor)
         changeTagInform(this,
             this.selectedProjectId,
             this.tagRightCLickItem.tag_group_id,
@@ -912,11 +917,12 @@ export default {
       if (data.type === this.DIALOG_CLICK_YES) {
         const tagName = data.projectTitle;
         if (checkTagGroupName(this, tagName)) {
+          let randomColor = Math.floor(Math.random()*16777215).toString(16);
           addTag(this,
               this.selectedProjectId,
               this.tagGroups[this.selectedTagGroupId].tag_group_id,
               tagName,
-              "FFFFFF")
+              randomColor)
         }
       }
       this.showAddTagDialog = false
