@@ -55,9 +55,21 @@
 <!--            <v-btn color="light_magenta" height="30">-->
 <!--              저장-->
 <!--            </v-btn>-->
-            <v-btn color="light_brown" height="30">
+            <v-btn
+                color="light_brown"
+                height="30"
+                :loading="isFileSelecting"
+                @click="handleFileImport"
+            >
               텍스트 로드
             </v-btn>
+            <input
+                ref="uploader"
+                class="d-none"
+                type="file"
+                accept="text/csv"
+                @change="onFileChanged"
+            >
           </div>
           <div id="layout-project-editor-main">
             <div id="layout-project-editor-main-title">
@@ -143,7 +155,14 @@
                 <div id="layout-project-tag-selection-area">
                   <div id="tag-selection-top">
                     <div id="tag-top-title">태그-선택된 그룹의 태그</div>
-                    <v-btn color="light_brown" height="30" width="80" id="tag-top-add-btn" @click="showAddTagDialog = true">
+                    <v-btn
+                        color="light_brown"
+                        height="30"
+                        width="80"
+                        id="tag-top-add-btn"
+                        @click="showAddTagDialog = true"
+                        :disabled="this.tagGroups.length === 0"
+                    >
                       태그추가
                     </v-btn>
                   </div>
@@ -674,6 +693,8 @@ export default {
       showRenameTagDialog: false,
       showReColorTagDialog: false,
       showAddTagDialog: false,
+
+      isFileSelecting: false
     }
   },
   components: {
@@ -924,7 +945,20 @@ export default {
           this.selectedProjectId,
           tag,
           dataIdx)
-    }
+    },
+
+    handleFileImport() {
+      this.isFileSelecting = true;
+      window.addEventListener('focus', () => {
+        this.isFileSelecting = false
+      }, { once: true });
+
+      this.$refs.uploader.click();
+    },
+    onFileChanged(e) {
+      console.log(e)
+      // this.selectedFile = e.target.files[0];
+    },
   },
 }
 </script>
