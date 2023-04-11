@@ -79,21 +79,12 @@
                       size="small"
                       :style="[chipBackground(`#${checkDataTag(l.data_tags).tagColor}`),
                       setChipBackgroundColor(`#${checkDataTag(l.data_tags).tagColor}`)]"
+                      @click="onDataTagClicked($event, checkDataTag(l.data_tags), idx)"
                     >
                   {{ checkDataTag(l.data_tags).tagName }}
                 </v-chip>
               </p>
             </div>
-<!--            <p id="editor-main-lines" class="list-vuetify-light">-->
-<!--              <span-->
-<!--                  v-for="(l, idx) in lineData"-->
-<!--                  :key="l"-->
-<!--                  :class="getTagClasses(l.tags)"-->
-<!--                  class="text-line"-->
-<!--                  :data-tooltip="idx"-->
-<!--                  @mouseover="lineOver"-->
-<!--              >{{ l.data }}</span>-->
-<!--            </p>-->
           </div>
         </div>
         <!--   태그 선택 및 학습 영역   -->
@@ -535,7 +526,7 @@ import {
   renameProject
 } from'@/js/api/project.js'
 import {
-  addTagInData,
+  addTagInData, deleteTagInData,
   getDataList
 } from '@/js/api/data.js'
 import {
@@ -773,8 +764,7 @@ export default {
       addTagInData(this,
           this.selectedProjectId,
           targetTag,
-          colNum,
-          this.selectedTagGroupId)
+          colNum)
     },
     projectCreateDialogClicked(data) {
       if (data.type === this.DIALOG_CLICK_YES) {
@@ -917,7 +907,7 @@ export default {
       if (data.type === this.DIALOG_CLICK_YES) {
         const tagName = data.projectTitle;
         if (checkTagGroupName(this, tagName)) {
-          let randomColor = Math.floor(Math.random()*16777215).toString(16);
+          let randomColor = Math.floor(Math.random() * 16777215).toString(16);
           addTag(this,
               this.selectedProjectId,
               this.tagGroups[this.selectedTagGroupId].tag_group_id,
@@ -927,6 +917,14 @@ export default {
       }
       this.showAddTagDialog = false
     },
+
+    onDataTagClicked(e, tag, dataIdx) {
+      console.log(e, tag, dataIdx)
+      deleteTagInData(this,
+          this.selectedProjectId,
+          tag,
+          dataIdx)
+    }
   },
 }
 </script>
