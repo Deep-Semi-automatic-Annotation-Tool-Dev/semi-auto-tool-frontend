@@ -64,6 +64,7 @@
               텍스트 로드
             </v-btn>
             <input
+                :value="fileData"
                 ref="uploader"
                 class="d-none"
                 type="file"
@@ -532,6 +533,22 @@
       >
       </Dialog>
     </v-dialog>
+
+    <!--  dialog 컬럼이름  -->
+    <v-dialog
+        v-model="showColumnNameDialog"
+        width="auto"
+        :close-on-back="false"
+        :persistent="true"
+    >
+      <Dialog
+          v-on:dialog-click="dataFieldClicked"
+          :dialog-type="this.DIALOG_TYPE_TEXTFIELD"
+          title="텍스트 데이터 필드명"
+          text-field-label="텍스트 데이터 필드명"
+      >
+      </Dialog>
+    </v-dialog>
   </div>
 </template>
 
@@ -546,7 +563,7 @@ import {
 } from'@/js/api/project.js'
 import {
   addTagInData, deleteTagInData,
-  getDataList
+  getDataList, postData
 } from '@/js/api/data.js'
 import {
   getTagGroupList,
@@ -694,7 +711,12 @@ export default {
       showReColorTagDialog: false,
       showAddTagDialog: false,
 
-      isFileSelecting: false
+      isFileSelecting: false,
+
+      showColumnNameDialog: false,
+
+      fileData: undefined,
+      selectedFile: undefined
     }
   },
   components: {
@@ -952,12 +974,24 @@ export default {
       window.addEventListener('focus', () => {
         this.isFileSelecting = false
       }, { once: true });
-
       this.$refs.uploader.click();
     },
     onFileChanged(e) {
       console.log(e)
-      // this.selectedFile = e.target.files[0];
+      this.selectedFile =  e.target.files[0]
+      this.showColumnNameDialog = true
+    },
+    dataFieldClicked(data) {
+      if (data.type === this.DIALOG_CLICK_YES) {
+        const colName = data.projectTitle;
+        console.log(colName)
+        postData(this,
+            this.selectedProjectId,
+            this.selectedFile,
+            colName)
+      }
+      this.showColumnNameDialog = false
+      this.fileData = undefined
     },
   },
 }

@@ -1,4 +1,14 @@
 import axios from "axios";
+import {getTagGroupList, getTagList} from "@/js/api/tag";
+
+const loadProject = async (context, id, page) => {
+    await getTagGroupList(context, id)
+    if (context.tagGroups.length > 0) {
+        console.log(context.tagGroups)
+        await getTagList(context, id, context.tagGroups[context.selectedTagGroup].tag_group_id)
+    }
+    await getDataList(context, id, page)
+}
 
 export const getDataList = (context, id, page) => {
     axios.get(`${context.$baseURL}api/v1/project/${id}/data?size=100&page=${page}`)
@@ -78,5 +88,23 @@ export const deleteTagInData = async (context, projectId, targetTag, targetDataI
         })
         .catch(error => {
             console.log('put tag delete in data error', error);
+        });
+}
+
+export const postData = (context, projectId, file, colName) => {
+    let dataFile = new FormData()
+    dataFile.append("file", file)
+    axios.post(`${context.$baseURL}api/v1/project/${projectId}/data?colName=${colName}`, dataFile,
+        {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        .then(response => {
+            loadProject(context, projectId, 0)
+            console.log(response);
+        })
+        .catch(error => {
+            console.log('post data error', error);
         });
 }
