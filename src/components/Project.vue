@@ -122,7 +122,11 @@
                         item-value="value"
                         :hide-details="true"
                         @update:model-value="changeGroup"
+                        v-model="tagGroupSelectionModel"
                     >
+                      <template v-slot:selection="{ item }">
+                        <div v-if="tagGroups.length > 0">{{ item.title }}</div>
+                      </template>
                       <template v-slot:item="{ props }">
                           <v-list-item v-bind="props">
                             <template v-slot:append>
@@ -495,6 +499,8 @@ const loadProject = async (context, id) => {
   context.lineData = []
   context.tags = []
   context.tagGroups = []
+
+  context.tagGroupSelectionModel = 0
   await getTagGroupList(context, id)
   if (context.tagGroups.length > 0) {
     console.log(context.tagGroups)
@@ -528,6 +534,7 @@ export default {
       modelLists: generateModels(),
 
       selectedTagGroup: 0,
+      tagGroupSelectionModel: 0,
       selectedModel: 0,
       tags: [],
       stepperIdx: 0,
