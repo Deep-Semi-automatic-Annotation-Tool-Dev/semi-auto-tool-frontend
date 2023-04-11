@@ -17,7 +17,11 @@
 
       ></v-color-picker>
     </div>
-    <div id="dialog-buttons">
+    <div v-else-if="dialogType === this.DIALOG_TYPE_PROGRESS_LINEAR_INFINITY"  id="dialog-progressbar">
+      <div>{{ subtitle }}</div>
+      <v-progress-linear indeterminate></v-progress-linear>
+    </div>
+    <div v-if="dialogType !== this.DIALOG_TYPE_PROGRESS_LINEAR_INFINITY" id="dialog-buttons">
       <div class="dialog-button" id="dialog-button-yes" @click="onClickButton(this.DIALOG_CLICK_YES)">
         <div class="dialog-button-text">{{ textAccept }}</div>
       </div>

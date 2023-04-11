@@ -507,6 +507,21 @@
           text-deny="취소"
       ></Dialog>
     </v-dialog>
+
+    <!--  dialog 로딩중 화면  -->
+    <v-dialog
+        v-model="showLoadingDialog"
+        width="auto"
+        :close-on-back="false"
+        :persistent="true"
+    >
+      <Dialog
+          :dialog-type="this.DIALOG_TYPE_PROGRESS_LINEAR_INFINITY"
+          :title="this.loadingDialogTitle"
+          :subtitle="this.loadingDialogSubTitle"
+      >
+      </Dialog>
+    </v-dialog>
   </div>
 </template>
 
@@ -573,19 +588,27 @@ const checkTagGroupName = (context, title) => {
 }
 
 const loadProject = async (context, id) => {
+  context.loadingDialogTitle = "프로젝트 로딩"
+  context.loadingDialogSubTitle = "프로젝트를 로딩 중 입니다."
+  context.showLoadingDialog = true
+
   context.lineData = []
   context.tags = []
   context.tagGroups = []
 
   context.tagGroupSelectionModel = 0
+  context.loadingDialogSubTitle = "태그 그룹을 가져오는 중 입니다."
   await getTagGroupList(context, id)
   if (context.tagGroups.length > 0) {
     console.log(context.tagGroups)
+    context.loadingDialogSubTitle = "태그 목록을 가져오는 중 입니다."
     await getTagList(context,
         id,
         context.tagGroups[context.selectedTagGroup].tag_group_id)
   }
+  context.loadingDialogSubTitle = "텍스트 데이터를 가져오는 중 입니다."
   await getDataList(context, id, 0)
+  context.showLoadingDialog = false
 }
 
 const hexToRgb = (hex) => {
@@ -601,13 +624,10 @@ export default {
   name: "ProjectComponent",
   data() {
     return {
-      items: () => {
-        const data = [];
-        for (let i = 0;i < 100;i++) {
-          data.push({title: `${i}` + ' item', value: i});
-        }
-        return data;
-      },
+      showLoadingDialog: false,
+      loadingDialogTitle: "",
+      loadingDialogSubTitle: "",
+
       lineData: [],
       tagGroups: [],
       modelLists: generateModels(),

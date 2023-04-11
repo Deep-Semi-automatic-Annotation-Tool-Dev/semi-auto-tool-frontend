@@ -17,6 +17,7 @@ app.config.globalProperties.DIALOG_CLICK_NO = 0;
 app.config.globalProperties.DIALOG_TYPE_SUBTITLE = 100;
 app.config.globalProperties.DIALOG_TYPE_TEXTFIELD = 110;
 app.config.globalProperties.DIALOG_TYPE_COLORPICKER = 120;
+app.config.globalProperties.DIALOG_TYPE_PROGRESS_LINEAR_INFINITY = 130;
 
 app.config.globalProperties.CONTEXTMENU_PROJECT_RENAME = 200;
 app.config.globalProperties.CONTEXTMENU_PROJECT_DELETE = 210;
