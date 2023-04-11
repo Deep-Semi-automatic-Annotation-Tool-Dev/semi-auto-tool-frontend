@@ -152,7 +152,7 @@
                 <div id="layout-project-tag-selection-area">
                   <div id="tag-selection-top">
                     <div id="tag-top-title">태그-선택된 그룹의 태그</div>
-                    <v-btn color="light_brown" height="30" width="80" id="tag-top-add-btn">
+                    <v-btn color="light_brown" height="30" width="80" id="tag-top-add-btn" @click="showAddTagDialog = true">
                       태그추가
                     </v-btn>
                   </div>
@@ -434,6 +434,20 @@
       </template>
     </v-snackbar>
 
+    <!--  dialog - 태그 생성 다이얼로그  -->
+    <v-dialog
+        v-model="showAddTagDialog"
+        width="auto"
+    >
+      <Dialog
+          v-on:dialog-click="addTagDialogClicked"
+          :dialog-type="this.DIALOG_TYPE_TEXTFIELD"
+          title="태그 추가"
+          text-field-label="태그 이름"
+          text-accept="추가"
+          text-deny="취소"
+      ></Dialog>
+    </v-dialog>
     <!--  context menu - 태그 칩 컨택스트 매뉴  -->
     <context-menu
         v-model:show="showTagMenu"
@@ -513,7 +527,7 @@ import {
   getTagGroupList,
   getTagList,
   addTagGroup,
-  deleteTagGroup, deleteTag, changeTagInform
+  deleteTagGroup, deleteTag, changeTagInform, addTag
 } from "@/js/api/tag";
 
 const generateModels = () => {
@@ -525,7 +539,7 @@ const generateModels = () => {
 }
 
 const checkProjectName = (context, title) => {
-  const titleRegEx = /^[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9|]+$/;
+  const titleRegEx = /^[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9| ]+$/;
   if (title.length > 20) {
     context.snackbarMakeProjectTitleWarn = false
     context.snackbarMakeProjectTitleWarnMsg = "프로젝트 이름은 20자 이하만 가능합니다."
@@ -542,7 +556,7 @@ const checkProjectName = (context, title) => {
 }
 
 const checkTagGroupName = (context, title) => {
-  const titleRegEx = /^[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9|]+$/;
+  const titleRegEx = /^[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9| ]+$/;
   if (title.length > 20) {
     context.snackbarMakeProjectTitleWarn = false
     context.snackbarMakeProjectTitleWarnMsg = "태그 (그룹) 이름은 20자 이하만 가능합니다."
@@ -643,7 +657,8 @@ export default {
       tagRightCLickItem: {},
       showDeleteTagDialog: false,
       showRenameTagDialog: false,
-      showReColorTagDialog: false
+      showReColorTagDialog: false,
+      showAddTagDialog: false,
     }
   },
   components: {
@@ -872,6 +887,19 @@ export default {
             tagColor.slice(1))
       }
       this.showReColorTagDialog = false
+    },
+    addTagDialogClicked(data) {
+      if (data.type === this.DIALOG_CLICK_YES) {
+        const tagName = data.projectTitle;
+        if (checkTagGroupName(this, tagName)) {
+          addTag(this,
+              this.selectedProjectId,
+              this.tagGroups[this.selectedTagGroupId].tag_group_id,
+              tagName,
+              "FFFFFF")
+        }
+      }
+      this.showAddTagDialog = false
     },
   },
 }
