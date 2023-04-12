@@ -76,7 +76,30 @@
             <div id="layout-project-editor-main-title">
               <div id="editor-main-title">-선택된 태그구성-</div>
             </div>
-            <div id="editor-main-lines" class="list-vuetify-light">
+            <div
+                id="editor-main-lines"
+                class="list-vuetify-light"
+            >
+              <div
+                  id="editor-main-data-search"
+                  v-show="dataFind"
+              >
+                <v-text-field
+                    label="Label"
+                    variant="outlined"
+                    hide-details="true"
+                    density="compact"
+                ></v-text-field>
+                <v-btn
+                    density="compact"
+                    icon="mdi-close"
+                    variant="tonal"
+                    width="24"
+                    height="24"
+                    color="gray"
+                >
+                </v-btn>
+              </div>
               <p
                 v-for="(l, idx) in lineData"
                 :key="l"
@@ -723,7 +746,9 @@ export default {
       selectedFile: undefined,
 
       dataPage: 0,
-      dataTotalPage: 0
+      dataTotalPage: 0,
+
+      dataFind: false
     }
   },
   components: {
@@ -732,6 +757,16 @@ export default {
   },
   created() {
     getProjectList(this);
+    window.onkeydown = (e) => {
+      if ((e.keyCode === 70 && (e.ctrlKey || e.metaKey ))) {
+        e.preventDefault();
+        if (this.lineData.length > 0) {
+          this.dataFind = !this.dataFind
+        } else {
+          console.log("undefind")
+        }
+      }
+    }
   },
   methods: {
     checkDataTag(tags) {
@@ -1004,6 +1039,10 @@ export default {
 
     async onPageChange(page) {
       await getDataList(this, this.selectedProjectId, page - 1)
+    },
+
+    controlF(e) {
+      console.log(e)
     }
   },
 }
