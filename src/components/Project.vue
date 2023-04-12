@@ -401,9 +401,9 @@
           v-on:dialog-click="projectChangeDialogClicked"
           :dialog-type="this.DIALOG_TYPE_SUBTITLE"
           title="프로젝트 이동"
-          :subtitle="`현재 프로젝트의 변경사항을 저장하고 다른 프로젝트로 이동하시겠습니까?`"
-          text-accept="저장 후 이동"
-          text-deny="이동 취소"
+          :subtitle="`다른 프로젝트로 이동하시겠습니까?`"
+          text-accept="이동"
+          text-deny="취소"
       ></Dialog>
     </v-dialog>
 
@@ -621,11 +621,7 @@ const checkTagGroupName = (context, title) => {
   }
 }
 
-const loadProject = async (context, id) => {
-  context.loadingDialogTitle = "프로젝트 로딩"
-  context.loadingDialogSubTitle = "프로젝트를 로딩 중 입니다."
-  context.showLoadingDialog = true
-
+const initVariables = (context) => {
   context.dataPage = 0
   context.dataTotalPage = 0
   context.selectedTagGroupId = 0
@@ -634,21 +630,20 @@ const loadProject = async (context, id) => {
   context.lineData = []
   context.tags = []
   context.tagGroups = []
-  context.tagGroupSelectionModel = {}
+  context.tagGroupSelectionModel = 0
+}
 
-  context.loadingDialogSubTitle = "태그 그룹을 가져오는 중 입니다."
+const loadProject = async (context, id) => {
+  initVariables(context)
+
   await getTagGroupList(context, id)
   if (context.tagGroups.length > 0) {
-    context.tagGroupSelectionModel = context.tagGroups[0]
     console.log(context.tagGroups)
-    context.loadingDialogSubTitle = "태그 목록을 가져오는 중 입니다."
     await getTagList(context,
         id,
         context.tagGroups[context.selectedTagGroupId].tag_group_id)
   }
-  context.loadingDialogSubTitle = "텍스트 데이터를 가져오는 중 입니다."
   await getDataList(context, id, 0)
-  context.showLoadingDialog = false
 }
 
 const hexToRgb = (hex) => {
@@ -673,7 +668,7 @@ export default {
       modelLists: generateModels(),
 
       selectedTagGroupId: 0,
-      tagGroupSelectionModel: {},
+      tagGroupSelectionModel: 0,
       selectedModel: 0,
       tags: [],
       stepperIdx: 0,
@@ -761,11 +756,11 @@ export default {
       }
     },
 
-    changeGroup(v) {
+    async changeGroup(v) {
       // console.log(this.tagGroups[v])
       this.selectedTagGroupId = v
       console.log(this.tagGroupSelectionModel)
-      getTagList(this,
+      await getTagList(this,
           this.selectedProjectId,
           this.tagGroups[this.selectedTagGroupId].tag_group_id)
     },
@@ -812,23 +807,23 @@ export default {
       event.dataTransfer.setDragImage(dragElement, 0, 0)
       event.dataTransfer.setData("selectedItem", item[0])
     },
-    onDrop(event, colNum) {
+    async onDrop(event, colNum) {
       const draggedTagValue = Number(event.dataTransfer.getData("selectedItem"))
       console.log(event.dataTransfer.getData("selectedItem"))
       let targetTag = this.tags[draggedTagValue]
-      addTagInData(this,
+      await addTagInData(this,
           this.selectedProjectId,
           targetTag,
           colNum)
     },
-    projectCreateDialogClicked(data) {
+    async projectCreateDialogClicked(data) {
+      this.showMakeProjectDialog = false
       if (data.type === this.DIALOG_CLICK_YES) {
         const title = data.projectTitle;
         if (checkProjectName(this, title)) {
-          createProject(this, title)
+          await createProject(this, title)
         }
       }
-      this.showMakeProjectDialog = false
     },
     projectListRightClick(e, id, name) {
       this.showProjectListMenu = true;
@@ -845,20 +840,21 @@ export default {
         this.showDeleteProjectDialog = true
       }
     },
-    projectDeleteDialogClicked(data) {
-      if (data.type === this.DIALOG_CLICK_YES) {
-        deleteProject(this, this.projectRightClickedId)
-      }
+    async projectDeleteDialogClicked(data) {
       this.showDeleteProjectDialog = false
+      if (data.type === this.DIALOG_CLICK_YES) {
+        await deleteProject(this, this.projectRightClickedId)
+        initVariables(this)
+      }
     },
-    projectRenameDialogClicked(data) {
+    async projectRenameDialogClicked(data) {
+      this.showRenameProjectDialog = false
       if (data.type === this.DIALOG_CLICK_YES) {
         const title = data.projectTitle;
         if (checkProjectName(this, title)) {
-          renameProject(this, title, this.projectRightClickedId)
+          await renameProject(this, title, this.projectRightClickedId)
         }
       }
-      this.showRenameProjectDialog = false
     },
     projectListLeftClick(e, id, name) {
       // 프로젝트 선택
@@ -874,36 +870,36 @@ export default {
       }
     },
     projectChangeDialogClicked(data) {
+      this.showChangeProjectDialog = false
       // 프로젝트 이동 시 저장 여부 다이얼로그 버튼 클릭
       if (data.type === this.DIALOG_CLICK_YES) {
         this.selectedProjectId = this.moveProjectId
         this.selectedProjectName = this.moveProjectName
         loadProject(this, this.selectedProjectId)
       } // move cancel
-      this.showChangeProjectDialog = false
     },
 
     addTagButtonClicked() {
       this.showAddTagGroupDialog = true
     },
-    addTagButtonDialogClicked(data) {
+    async addTagButtonDialogClicked(data) {
+      this.showAddTagGroupDialog = false
       // 프로젝트 이동 시 저장 여부 다이얼로그 버튼 클릭
       if (data.type === this.DIALOG_CLICK_YES) {
         const title = data.projectTitle;
         if (checkTagGroupName(this, title)) {
-          addTagGroup(this, this.selectedProjectId, title)
+          await addTagGroup(this, this.selectedProjectId, title)
         }
       } // move cancel
-      this.showAddTagGroupDialog = false
     },
-    deleteTagGroupDialogClicked(data) {
+    async deleteTagGroupDialogClicked(data) {
+      this.showDeleteTagGroupDialog = false
       // 프로젝트 이동 시 저장 여부 다이얼로그 버튼 클릭
       if (data.type === this.DIALOG_CLICK_YES) {
-        deleteTagGroup(this,
+        await deleteTagGroup(this,
             this.selectedProjectId,
             this.tagGroups[this.selectedDeleteTagGroup.value].tag_group_id)
       } // move cancel
-      this.showDeleteTagGroupDialog = false
     },
 
     tagChipRightClick(e, item) {
@@ -922,20 +918,21 @@ export default {
         this.showReColorTagDialog = true
       }
     },
-    deleteTagDialogClicked(data) {
+    async deleteTagDialogClicked(data) {
+      this.showDeleteTagDialog = false
       if (data.type === this.DIALOG_CLICK_YES) {
-        deleteTag(this,
+        await deleteTag(this,
             this.selectedProjectId,
             this.tagRightCLickItem.tag_group_id,
             this.tagRightCLickItem.tag_id)
       }
-      this.showDeleteTagDialog = false
     },
-    renameTagDialogClicked(data) {
+    async renameTagDialogClicked(data) {
+      this.showRenameTagDialog = false
       if (data.type === this.DIALOG_CLICK_YES) {
         const tagName = data.projectTitle;
         if (checkTagGroupName(this, tagName)) {
-          changeTagInform(this,
+          await changeTagInform(this,
               this.selectedProjectId,
               this.tagRightCLickItem.tag_group_id,
               this.tagRightCLickItem.tag_id,
@@ -943,39 +940,38 @@ export default {
               this.tagRightCLickItem.tag_color)
         }
       }
-      this.showRenameTagDialog = false
     },
-    recolorTagDialogClicked(data) {
+    async recolorTagDialogClicked(data) {
+      this.showReColorTagDialog = false
       if (data.type === this.DIALOG_CLICK_YES) {
         const tagColor = data.color;
         console.log(tagColor.slice(1), tagColor)
-        changeTagInform(this,
+        await changeTagInform(this,
             this.selectedProjectId,
             this.tagRightCLickItem.tag_group_id,
             this.tagRightCLickItem.tag_id,
             this.tagRightCLickItem.tag_name,
             tagColor.slice(1))
       }
-      this.showReColorTagDialog = false
     },
-    addTagDialogClicked(data) {
+    async addTagDialogClicked(data) {
+      this.showAddTagDialog = false
       if (data.type === this.DIALOG_CLICK_YES) {
         const tagName = data.projectTitle;
         if (checkTagGroupName(this, tagName)) {
           let randomColor = Math.floor(Math.random() * 16777215).toString(16);
-          addTag(this,
+          await addTag(this,
               this.selectedProjectId,
               this.tagGroups[this.selectedTagGroupId].tag_group_id,
               tagName,
               randomColor)
         }
       }
-      this.showAddTagDialog = false
     },
 
-    onDataTagClicked(e, tag, dataIdx) {
+    async onDataTagClicked(e, tag, dataIdx) {
       console.log(e, tag, dataIdx)
-      deleteTagInData(this,
+      await deleteTagInData(this,
           this.selectedProjectId,
           tag,
           dataIdx)
@@ -993,25 +989,21 @@ export default {
       this.selectedFile =  e.target.files[0]
       this.showColumnNameDialog = true
     },
-    dataFieldClicked(data) {
+    async dataFieldClicked(data) {
+      this.showColumnNameDialog = false
+      this.fileData = undefined
       if (data.type === this.DIALOG_CLICK_YES) {
         const colName = data.projectTitle;
         console.log(colName)
-        postData(this,
+        await postData(this,
             this.selectedProjectId,
             this.selectedFile,
             colName)
       }
-      this.showColumnNameDialog = false
-      this.fileData = undefined
     },
 
     async onPageChange(page) {
-      this.loadingDialogTitle = '데이터 로드'
-      this.loadingDialogSubTitle = `${page} 페이지 데이터 로딩중...`
-      this.showLoadingDialog = true
       await getDataList(this, this.selectedProjectId, page - 1)
-      this.showLoadingDialog = false
     }
   },
 }
