@@ -2,6 +2,7 @@ import axios from "axios";
 import {getDataList} from "@/js/api/data";
 
 const loadProject = async (context, id, page) => {
+
     context.dataPage = 0
     context.dataTotalPage = 0
     context.selectedTagGroupId = 0
