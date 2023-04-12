@@ -85,23 +85,18 @@
                   v-show="dataFind"
               >
                 <v-text-field
-                    label="Label"
+                    v-model="searchValue"
+                    label="검색"
                     variant="outlined"
                     hide-details="true"
                     density="compact"
+                    append-inner-icon="mdi-close-circle"
+                    @click:appendInner="searchClose"
+                    @update:modelValue="search"
                 ></v-text-field>
-                <v-btn
-                    density="compact"
-                    icon="mdi-close"
-                    variant="tonal"
-                    width="24"
-                    height="24"
-                    color="gray"
-                >
-                </v-btn>
               </div>
               <p
-                v-for="(l, idx) in lineData"
+                v-for="(l, idx) in lineData.filter(data => data.search)"
                 :key="l"
                 class="text-line"
                 :data-tooltip="idx"
@@ -748,7 +743,8 @@ export default {
       dataPage: 0,
       dataTotalPage: 0,
 
-      dataFind: false
+      dataFind: false,
+      searchValue: ''
     }
   },
   components: {
@@ -1041,8 +1037,14 @@ export default {
       await getDataList(this, this.selectedProjectId, page - 1)
     },
 
-    controlF(e) {
-      console.log(e)
+    searchClose() {
+      this.dataFind = false
+    },
+    search() {
+      console.log(this.searchValue)
+      for (let d of this.lineData) {
+
+      }
     }
   },
 }

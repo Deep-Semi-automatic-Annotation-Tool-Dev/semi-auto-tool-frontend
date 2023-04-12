@@ -31,6 +31,10 @@ export const getDataList = (context, id, page) => {
                 context.lineData = response.data._embedded.dataResponseControllerDtoList;
                 context.dataPage = response.data.page.number + 1
                 context.dataTotalPage = response.data.page.totalPages
+
+                for (let d of context.lineData) {
+                    d.search = true
+                }
             } catch {
                 context.lineData = []
                 context.dataPage = 0
