@@ -96,7 +96,7 @@
                 ></v-text-field>
               </div>
               <p
-                v-for="(l, idx) in lineData.filter(data => data.search)"
+                v-for="(l, idx) in lineData"
                 :key="l"
                 class="text-line"
                 :data-tooltip="idx"
@@ -104,9 +104,9 @@
                 @dragover.prevent
                 @drop.prevent="onDrop($event, idx)"
               >
-                <span class="text-word">{{ l.text }}</span>
+                <span v-if="l.search" class="text-word">{{ l.text }}</span>
                 <v-chip
-                      v-if="checkDataTag(l.data_tags) !== undefined"
+                      v-if="l.search && checkDataTag(l.data_tags) !== undefined"
                       size="small"
                       :style="[chipBackground(`#${checkDataTag(l.data_tags).tagColor}`),
                       setChipBackgroundColor(`#${checkDataTag(l.data_tags).tagColor}`)]"
@@ -1039,11 +1039,17 @@ export default {
 
     searchClose() {
       this.dataFind = false
+      this.searchValue = ''
+      this.search()
     },
     search() {
       console.log(this.searchValue)
       for (let d of this.lineData) {
-
+        if (d.text.includes(this.searchValue)) {
+          d.search = true
+        } else {
+          d.search = false
+        }
       }
     }
   },
