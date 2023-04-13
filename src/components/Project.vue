@@ -758,6 +758,7 @@ export default {
         e.preventDefault();
         if (this.lineData.length > 0) {
           this.dataFind = !this.dataFind
+          if (!this.dataFind) this.searchClose()
         } else {
           console.log("undefind")
         }
