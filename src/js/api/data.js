@@ -25,7 +25,7 @@ export const getDataList = (context, id, page) => {
     context.loadingDialogTitle = '데이터 로딩'
     context.loadingDialogSubTitle = "텍스트 데이터를 가져오는 중 입니다."
     context.showLoadingDialog = true
-    axios.get(`${context.$baseURL}api/v1/project/${id}/data?size=500&page=${page}`)
+    axios.get(`${context.$baseURL}api/v1/project/${id}/data?size=150&page=${page}`)
         .then(response => {
             try {
                 context.lineData = response.data._embedded.dataResponseControllerDtoList;
