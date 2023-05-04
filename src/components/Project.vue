@@ -75,7 +75,14 @@
           <div id="layout-project-editor-main">
             <div id="layout-project-editor-main-title">
 <!--              <div id="editor-main-title">-선택된 태그구성-</div>-->
-              <vue-select :options="documentDatas"></vue-select>
+              <select>
+                <option
+                    v-for="i in 10"
+                    :key="i"
+                >
+                  test {{ i }}
+                </option>
+              </select>
             </div>
             <div
                 id="editor-main-lines"
