@@ -74,7 +74,8 @@
           </div>
           <div id="layout-project-editor-main">
             <div id="layout-project-editor-main-title">
-              <div id="editor-main-title">-선택된 태그구성-</div>
+<!--              <div id="editor-main-title">-선택된 태그구성-</div>-->
+              <vue-select :options="documentDatas"></vue-select>
             </div>
             <div
                 id="editor-main-lines"
@@ -744,7 +745,14 @@ export default {
       dataTotalPage: 0,
 
       dataFind: false,
-      searchValue: ''
+      searchValue: '',
+
+      documentDatas: [
+        {'title': 'title1'},
+        {'title': 'title2'},
+        {'title': 'title3'},
+        {'title': 'title4'},
+      ]
     }
   },
   components: {

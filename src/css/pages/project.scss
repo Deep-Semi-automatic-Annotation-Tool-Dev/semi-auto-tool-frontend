@@ -217,6 +217,9 @@
   width: 100%;
   height: 39px;
 
+  display: flex;
+  justify-content: center;
+
   background: #232323;
   //border-radius: 8px 8px 0 0;
 
@@ -622,4 +625,14 @@
 .tag-selection-item {
   display: flex;
   flex-direction: row;
+}
+
+#editor-main-doc-selector {
+  height: 100%;
+  border-radius: 4px;
+  border-color: white;
+  outline: white solid 1px;
+
+  padding: 0px 4px 4px 4px;
+  color: $text-white;
 }
