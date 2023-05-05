@@ -197,7 +197,6 @@
                         v-model="tagMod"
                         color="deep-purple-accent-3"
                         variant="outlined"
-
                     >
                       <v-btn value="paragraph" width="85">
                         문단
@@ -220,7 +219,7 @@
                         <v-chip
                             v-for="(tag, idx) in tags"
                             :key="tag"
-                            :draggable="true"
+                            :draggable="tagMod === 'sentence'"
                             @dragstart="startDrag($event, [idx, tag.tag_name, `#${tag.tag_color}`])"
                             @click.right="tagChipRightClick($event, tag)"
                             @contextmenu.prevent
@@ -856,6 +855,7 @@ export default {
     },
 
     startDrag(event, item) {
+      if (this.tagMod !== "sentence") return
       event.dataTransfer.dropEffect = "move"
       event.dataTransfer.effectAllowed = "move"
 
