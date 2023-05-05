@@ -85,6 +85,9 @@
 }
 
 .list-vuetify-item {
+  width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
   cursor: pointer;
   padding: 5px 10px 5px 10px;
   border-radius: 5px;
