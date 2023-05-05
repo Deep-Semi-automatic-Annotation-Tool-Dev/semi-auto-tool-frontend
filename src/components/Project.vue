@@ -75,14 +75,17 @@
           <div id="layout-project-editor-main">
             <div id="layout-project-editor-main-title">
 <!--              <div id="editor-main-title">-선택된 태그구성-</div>-->
-              <select>
-                <option
-                    v-for="i in 10"
-                    :key="i"
-                >
-                  test {{ i }}
-                </option>
-              </select>
+              <div class="select-container">
+                <button class="btn-select" @click="selectBoxClick">document</button>
+                <ul class="list-member" @click="selectBoxChange">
+                  <li
+                      v-for="i in 10"
+                      :key="i"
+                  >
+                    <button type="button">doc {{i}}</button>
+                  </li>
+                </ul>
+              </div>
             </div>
             <div
                 id="editor-main-lines"
@@ -1066,6 +1069,17 @@ export default {
         } else {
           d.search = false
         }
+      }
+    },
+
+    selectBoxClick(e) {
+      e.target.classList.add("on");
+    },
+    selectBoxChange(e) {
+      let btn = document.getElementsByClassName("btn-select")[0]
+      if (e.target.nodeName === "BUTTON") {
+        btn.innerText = e.target.innerText;
+        btn.classList.remove('on');
       }
     }
   },
