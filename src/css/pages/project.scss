@@ -309,6 +309,7 @@
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: center;
   padding: 0;
   gap: 10px;
 
@@ -343,6 +344,11 @@
 #tag-top-add-btn {
   flex: none;
   order: 1;
+  width: 100%;
+}
+
+#tag-mod-group {
+  //width: 256px;
 }
 
 #tag-chips {
@@ -366,11 +372,14 @@
   overflow-y: hidden;
 }
 
+#tag-selection-container {
+  height: 100%;
+}
+
 .text-line {
   width: 100%;
   display: block;
   margin: 6px 0px 6px 0;
-  cursor: pointer;
 }
 
 .text-word {
@@ -378,7 +387,6 @@
   display: inline;
   word-wrap:break-word;
   margin-right: 6px;
-  cursor: pointer;
 }
 
 .highlight0 {

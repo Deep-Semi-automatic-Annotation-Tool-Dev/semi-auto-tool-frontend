@@ -190,36 +190,55 @@
                   </v-container>
                 </div>
                 <div id="layout-project-tag-selection-area">
-                  <div id="tag-selection-top">
-                    <div id="tag-top-title">태그-선택된 그룹의 태그</div>
+                  <v-container id="tag-selection-top">
+                    <v-btn-toggle
+                        density="compact"
+                        id="tag-mod-group"
+                        v-model="tagMod"
+                        color="deep-purple-accent-3"
+                        variant="outlined"
+
+                    >
+                      <v-btn value="paragraph" width="85">
+                        문단
+                      </v-btn>
+                      <v-btn value="sentence" width="85">
+                        문장
+                      </v-btn>
+                      <v-btn value="word" width="85">
+                        단어
+                      </v-btn>
+                    </v-btn-toggle>
+                  </v-container>
+                  <div id="tag-chips">
+                    <div
+                        id="tag-selection-container"
+                    >
+                      <v-chip-group
+                          class="pa-3 list-vuetify-light"
+                      >
+                        <v-chip
+                            v-for="(tag, idx) in tags"
+                            :key="tag"
+                            :draggable="true"
+                            @dragstart="startDrag($event, [idx, tag.tag_name, `#${tag.tag_color}`])"
+                            @click.right="tagChipRightClick($event, tag)"
+                            @contextmenu.prevent
+                            :style="[chipBackground(`#${tag.tag_color}`),
+                          setChipBackgroundColor(`#${tag.tag_color}`)]"
+                        >
+                          {{ tag.tag_name }}
+                        </v-chip>
+                      </v-chip-group>
+                    </div>
                     <v-btn
                         color="light_brown"
-                        height="30"
-                        width="80"
                         id="tag-top-add-btn"
                         @click="showAddTagDialog = true"
                         :disabled="this.tagGroups.length === 0"
                     >
                       태그추가
                     </v-btn>
-                  </div>
-                  <div id="tag-chips">
-                    <v-chip-group
-                        class="pa-3 list-vuetify-light"
-                    >
-                      <v-chip
-                          v-for="(tag, idx) in tags"
-                          :key="tag"
-                          :draggable="true"
-                          @dragstart="startDrag($event, [idx, tag.tag_name, `#${tag.tag_color}`])"
-                          @click.right="tagChipRightClick($event, tag)"
-                          @contextmenu.prevent
-                          :style="[chipBackground(`#${tag.tag_color}`),
-                          setChipBackgroundColor(`#${tag.tag_color}`)]"
-                      >
-                        {{ tag.tag_name }}
-                      </v-chip>
-                    </v-chip-group>
                   </div>
                 </div>
 
@@ -762,7 +781,8 @@ export default {
         {'title': 'title2'},
         {'title': 'title3'},
         {'title': 'title4'},
-      ]
+      ],
+      tagMod: 'sentence'
     }
   },
   components: {
