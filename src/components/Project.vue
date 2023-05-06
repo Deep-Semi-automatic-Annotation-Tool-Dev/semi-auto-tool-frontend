@@ -197,6 +197,7 @@
                         v-model="tagMod"
                         color="deep-purple-accent-3"
                         variant="outlined"
+                        @update:modelValue="changeTagMod"
                     >
                       <v-btn value="paragraph" width="85">
                         문단
@@ -215,10 +216,13 @@
                     >
                       <v-chip-group
                           class="pa-3 list-vuetify-light"
+                          @update:modelValue="changeTagSelection"
+                          mandatory
                       >
                         <v-chip
                             v-for="(tag, idx) in tags"
                             :key="tag"
+                            :prepend-icon="selectedTag === idx && this.tagMod !== 'sentence' ? 'mdi-check' : ''"
                             :draggable="tagMod === 'sentence'"
                             @dragstart="startDrag($event, [idx, tag.tag_name, `#${tag.tag_color}`])"
                             @click.right="tagChipRightClick($event, tag)"
@@ -279,17 +283,6 @@
                         @update:model-value="changeModel"
                     ></v-select>
                   </v-container>
-<!--                  <div id="model-learning-selection">-->
-<!--                    <v-btn color="color_accept" class="learning-btn">-->
-<!--                      모델학습-->
-<!--                    </v-btn>-->
-<!--                    <v-btn color="color_deny" class="learning-btn">-->
-<!--                      데이터리로드-->
-<!--                    </v-btn>-->
-<!--                  </div>-->
-<!--                  <v-btn color="color_second" id="annotation-btn">-->
-<!--                    Auto Annotation-->
-<!--                  </v-btn>-->
                 </div>
                 <div class="stepper-item-buttons">
                   <v-btn color="color_accept" size="small" @click="stepperNext">
@@ -781,7 +774,8 @@ export default {
         {'title': 'title3'},
         {'title': 'title4'},
       ],
-      tagMod: 'sentence'
+      tagMod: 'sentence',
+      selectedTag: 0
     }
   },
   components: {
@@ -1101,6 +1095,20 @@ export default {
         btn.innerText = e.target.innerText;
         btn.classList.remove('on');
       }
+    },
+
+    changeTagMod(d) {
+      this.selectedTag = 0
+      switch (d) {
+        case 'word': {
+          console.log("word!")
+          break
+        }
+      }
+    },
+    changeTagSelection(d) {
+      this.selectedTag = d
+      console.log(d)
     }
   },
 }
