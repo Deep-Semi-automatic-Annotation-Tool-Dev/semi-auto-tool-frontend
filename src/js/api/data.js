@@ -12,6 +12,9 @@ const loadProject = async (context, id, page) => {
     context.tags = []
     context.tagGroups = []
     context.tagGroupSelectionModel = 0
+    context.selectedTag = 0
+    context.sentence = 'sentence'
+    context.documentDatas = []
 
     await getTagGroupList(context, id)
     if (context.tagGroups.length > 0) {

@@ -671,6 +671,9 @@ const initVariables = (context) => {
   context.tags = []
   context.tagGroups = []
   context.tagGroupSelectionModel = 0
+  context.selectedTag = 0
+  context.sentence = 'sentence'
+  context.documentDatas = []
 }
 
 const loadProject = async (context, id) => {
