@@ -11,9 +11,12 @@ export const initVariables = (context) => {
     context.tags = []
     context.tagGroups = []
     context.tagGroupSelectionModel = 0
+    context.selectedTag = 0
+    context.sentence = 'sentence'
+    context.documentDatas = []
 }
 
-export const loadProject = async (context, id) => {
+export const loadProject = async (context, id, page) => {
     initVariables(context)
 
     await getTagGroupList(context, id)
@@ -23,5 +26,5 @@ export const loadProject = async (context, id) => {
             id,
             context.tagGroups[context.selectedTagGroupId].tag_group_id)
     }
-    await getDataList(context, id, 0)
+    await getDataList(context, id, page)
 }

@@ -1,25 +1,5 @@
 import axios from "axios";
-import {getDataList} from "@/js/api/data";
-
-const loadProject = async (context, id, page) => {
-
-    context.dataPage = 0
-    context.dataTotalPage = 0
-    context.selectedTagGroupId = 0
-    context.stepperIdx = 0
-    context.projectRightClickedId = 0
-    context.lineData = []
-    context.tags = []
-    context.tagGroups = []
-    context.tagGroupSelectionModel = 0
-
-    await getTagGroupList(context, id)
-    if (context.tagGroups.length > 0) {
-        console.log(context.tagGroups)
-        await getTagList(context, id, context.tagGroups[context.selectedTagGroup].tag_group_id)
-    }
-    await getDataList(context, id, page)
-}
+import {loadProject} from "@/js/api/common";
 
 export const getTagGroupList = async (context, projectId) => {
     context.loadingDialogTitle = "태그 그룹"
@@ -76,7 +56,7 @@ export const addTagGroup = async (context, projectId, groupText) => {
         "project_id": projectId,
         "tag_group_name": groupText
     })
-        .then(async () => {
+        .then(() => {
             context.showLoadingDialog = false
             loadProject(context, projectId, context.dataPage - 1)
         })
@@ -109,7 +89,7 @@ export const addTag = async (context, projectId, tagGroupId, tag_name, tag_color
         "tag_name": tag_name,
         "tag_color": tag_color
     })
-        .then(async () => {
+        .then(() => {
             context.showLoadingDialog = false
             loadProject(context, projectId, context.dataPage - 1)
         })

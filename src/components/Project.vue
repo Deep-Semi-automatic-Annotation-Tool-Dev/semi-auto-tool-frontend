@@ -613,11 +613,11 @@ import {
   getDataList, postData
 } from '@/js/api/data.js'
 import {
-  getTagGroupList,
   getTagList,
   addTagGroup,
   deleteTagGroup, deleteTag, changeTagInform, addTag
 } from "@/js/api/tag";
+import {initVariables, loadProject} from "@/js/api/common";
 
 const generateModels = () => {
   const group = []
@@ -659,34 +659,6 @@ const checkTagGroupName = (context, title) => {
     context.snackbarMakeProjectTitleWarn = true
     return false
   }
-}
-
-const initVariables = (context) => {
-  context.dataPage = 0
-  context.dataTotalPage = 0
-  context.selectedTagGroupId = 0
-  context.stepperIdx = 0
-  context.projectRightClickedId = 0
-  context.lineData = []
-  context.tags = []
-  context.tagGroups = []
-  context.tagGroupSelectionModel = 0
-  context.selectedTag = 0
-  context.sentence = 'sentence'
-  context.documentDatas = []
-}
-
-const loadProject = async (context, id) => {
-  initVariables(context)
-
-  await getTagGroupList(context, id)
-  if (context.tagGroups.length > 0) {
-    console.log(context.tagGroups)
-    await getTagList(context,
-        id,
-        context.tagGroups[context.selectedTagGroupId].tag_group_id)
-  }
-  await getDataList(context, id, 0)
 }
 
 const hexToRgb = (hex) => {
@@ -928,7 +900,7 @@ export default {
       if (this.selectedProjectId === -1) {
         this.selectedProjectId = id
         this.selectedProjectName = name
-        loadProject(this, this.selectedProjectId)
+        loadProject(this, this.selectedProjectId, 0)
       } else {
         // 이전에 선택한 화면이 있다면 저장 여부 물어보기
         this.moveProjectId = id
@@ -942,7 +914,7 @@ export default {
       if (data.type === this.DIALOG_CLICK_YES) {
         this.selectedProjectId = this.moveProjectId
         this.selectedProjectName = this.moveProjectName
-        loadProject(this, this.selectedProjectId)
+        loadProject(this, this.selectedProjectId, 0)
       } // move cancel
     },
 
