@@ -1,32 +1,43 @@
 import axios from "axios";
 import {loadProject} from "@/js/api/common";
 
-export const getDataList = (context, id, page) => {
+export const getDataList = async (context, id, page) => {
     context.loadingDialogTitle = '데이터 로딩'
     context.loadingDialogSubTitle = "텍스트 데이터를 가져오는 중 입니다."
     context.showLoadingDialog = true
-    axios.get(`${context.$baseURL}api/v1/project/${id}/data?size=150&page=${page}`)
-        .then(response => {
-            try {
-                context.lineData = response.data._embedded.dataResponseControllerDtoList;
-                context.dataPage = response.data.page.number + 1
-                context.dataTotalPage = response.data.page.totalPages
+    try {
+        const result = await axios.get(`${context.$baseURL}api/v1/project/${id}/data?size=100&page=${page}`)
+        context.lineData = result.data._embedded.dataResponseControllerDtoList;
+        context.dataPage = result.data.page.number + 1
+        context.dataTotalPage = result.data.page.totalPages
 
-                for (let d of context.lineData) {
-                    d.search = true
-                }
-            } catch {
-                context.lineData = []
-                context.dataPage = 0
-                context.dataTotalPage = 0
-            }
-            context.showLoadingDialog = false
-            console.log(response.data);
-        })
-        .catch(error => {
-            context.showLoadingDialog = false
-            console.log('get data error', error);
-        });
+        for (let d of context.lineData) {
+            d.search = true
+        }
+
+        console.log(result.data);
+    } catch (error) {
+        context.lineData = []
+        context.dataPage = 0
+        context.dataTotalPage = 0
+        console.log('get data error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
+}
+
+export const getWordDataList = async (context, projectId, startIndex, endIndex) => {
+    context.loadingDialogTitle = '단어 데이터 로딩'
+    context.loadingDialogSubTitle = "단어 태깅 데이터를 가져오는 중 입니다."
+    context.showLoadingDialog = true
+    try {
+        const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/data/word?startIndex=${startIndex}&endIndex=${endIndex}`)
+        console.log(result.data);
+    } catch (error) {
+        console.log('get word data error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
 }
 
 export const addTagInData = async (context, projectId, targetTag, targetDataIdx) => {
@@ -57,6 +68,7 @@ export const addTagInData = async (context, projectId, targetTag, targetDataIdx)
         })
     }
     console.log(newTags)
+
     await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data`, [{
         "id": targetData.id,
         "text": targetData.text,

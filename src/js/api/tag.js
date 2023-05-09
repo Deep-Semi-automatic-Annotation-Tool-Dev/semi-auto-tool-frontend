@@ -5,47 +5,33 @@ export const getTagGroupList = async (context, projectId) => {
     context.loadingDialogTitle = "태그 그룹"
     context.loadingDialogSubTitle = "태그 그룹을 가져오는 중 입니다."
     context.showLoadingDialog = true
-    await axios.get(`${context.$baseURL}api/v1/project/${projectId}/tagGroup?size=100`)
-        .then(response => {
-            try {
-                let tagGroupData = response.data._embedded.tagGroupResponseControllerDtoList;
-                for (let i = 0;i < tagGroupData.length;i++) {
-                    tagGroupData[i].value = i;
-                }
-                context.tagGroups = tagGroupData
-                context.selectedTagGroup = 0
-            } catch {
-                context.tagGroups = []
-                context.selectedTagGroup = 0
-            }
-
-            context.showLoadingDialog = false
-            // console.log(tagGroupData);
-        })
-        .catch(error => {
-            context.showLoadingDialog = false
-            console.log('get tag group error', error);
-        });
+    try {
+        const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/tagGroup?size=100`)
+        let tagGroupData = result.data._embedded.tagGroupResponseControllerDtoList;
+        for (let i = 0;i < tagGroupData.length;i++) tagGroupData[i].value = i;
+        context.tagGroups = tagGroupData
+    } catch(error) {
+        context.tagGroups = []
+        console.log('get tag group error', error);
+    } finally {
+        context.selectedTagGroup = 0
+        context.showLoadingDialog = false
+    }
 }
 
 export const getTagList = async (context, projectId, tagGroupId) => {
     context.loadingDialogTitle = '태그 목록'
     context.loadingDialogSubTitle = '태그 목록 가져오는 중...'
     context.showLoadingDialog = true
-    await axios.get(`${context.$baseURL}api/v1/project/${projectId}/tagGroup/${tagGroupId}/tag?size=100`)
-        .then(response => {
-            try {
-                context.tags = response.data._embedded.tagResponseControllerDtoList;
-            } catch {
-                context.tags = []
-            }
-            // console.log(response);
-            context.showLoadingDialog = false
-        })
-        .catch(error => {
-            context.showLoadingDialog = false
-            console.log('get tag group error', error);
-        });
+    try {
+        const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/tagGroup/${tagGroupId}/tag?size=100`)
+        context.tags = result.data._embedded.tagResponseControllerDtoList;
+    } catch (error) {
+        context.tags = []
+        console.log('get tag group error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
 }
 
 export const addTagGroup = async (context, projectId, groupText) => {
