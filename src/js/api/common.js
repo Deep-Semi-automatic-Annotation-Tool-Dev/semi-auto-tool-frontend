@@ -1,5 +1,5 @@
 import {getTagGroupList, getTagList} from "@/js/api/tag";
-import {getDataList, getWordDataList} from "@/js/api/data";
+import {getDataList} from "@/js/api/data";
 
 export const initVariables = (context) => {
     context.dataPage = 0
@@ -12,7 +12,7 @@ export const initVariables = (context) => {
     context.tagGroups = []
     context.tagGroupSelectionModel = 0
     context.selectedTag = 0
-    context.sentence = 'sentence'
+    context.tagMod = 'sentence'
     context.documentDatas = []
 }
 
@@ -27,9 +27,4 @@ export const loadProject = async (context, id, page) => {
             context.tagGroups[context.selectedTagGroupId].tag_group_id)
     }
     await getDataList(context, id, page)
-    if (context.lineData.length > 0) {
-        let startIdx = context.lineData[0].id
-        let endIdx = context.lineData[context.lineData.length - 1].id
-        await getWordDataList(context, id, endIdx, startIdx)
-    }
 }

@@ -106,26 +106,38 @@
                     @update:modelValue="search"
                 ></v-text-field>
               </div>
-              <p
-                v-for="(l, idx) in lineData"
-                :key="l"
-                class="text-line"
-                :data-tooltip="idx"
-                @dragenter.prevent
-                @dragover.prevent
-                @drop.prevent="onDrop($event, idx)"
-              >
-                <span v-if="l.search" class="text-word">{{ l.text }}</span>
-                <v-chip
+              <div v-if="tagMod === 'sentence'">
+                <p
+                    v-for="(l, idx) in lineData"
+                    :key="l"
+                    class="text-line"
+                    :data-tooltip="idx"
+                    @dragenter.prevent
+                    @dragover.prevent
+                    @drop.prevent="onDrop($event, idx)"
+                >
+                  <span v-if="l.search" class="text-word">{{ l.text }}</span>
+                  <v-chip
                       v-if="l.search && checkDataTag(l.data_tags) !== undefined"
                       size="small"
                       :style="[chipBackground(`#${checkDataTag(l.data_tags).tagColor}`),
                       setChipBackgroundColor(`#${checkDataTag(l.data_tags).tagColor}`)]"
                       @click="onDataTagClicked($event, checkDataTag(l.data_tags), idx)"
-                    >
-                  {{ checkDataTag(l.data_tags).tagName }}
-                </v-chip>
-              </p>
+                  >
+                    {{ checkDataTag(l.data_tags).tagName }}
+                  </v-chip>
+                </p>
+              </div>
+              <div v-if="tagMod === 'word'">
+                <p
+                    v-for="(l, idx) in lineData"
+                    :key="l"
+                    class="text-line"
+                    :data-tooltip="idx"
+                >
+                  <span v-if="l.search" class="text-word">{{ l.text }}</span>
+                </p>
+              </div>
             </div>
           </div>
           <v-pagination
@@ -610,7 +622,7 @@ import {
 } from'@/js/api/project.js'
 import {
   addTagInData, deleteTagInData,
-  getDataList, postData
+  getDataList, getWordDataList, postData
 } from '@/js/api/data.js'
 import {
   getTagList,
@@ -1077,6 +1089,15 @@ export default {
       switch (d) {
         case 'word': {
           console.log("word!")
+          if (this.lineData.length > 0) {
+            let startIdx = this.lineData[0].id
+            let endIdx = this.lineData[this.lineData.length - 1].id
+            getWordDataList(this, this.selectedProjectId, endIdx, startIdx)
+          }
+          break
+        }
+        case 'sentence': {
+          getDataList(this, this.selectedProjectId, this.dataPage - 1)
           break
         }
       }
