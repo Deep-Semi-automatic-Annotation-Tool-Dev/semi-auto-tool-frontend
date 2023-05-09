@@ -1,77 +1,63 @@
 import axios from "axios";
+import {initVariables} from "@/js/api/common";
 
-export const getProjectList = (context) => {
-    axios.get(`${context.$baseURL}api/v1/project?size=100`)
-        .then(response => {
-            context.projectList = response.data._embedded.projectResponseControllerDtoList;
-            // console.log(projectList);
-        })
-        .catch(error => {
-            console.log('get project error', error);
-        });
+export const getProjectList = async (context) => {
+    try {
+        const result = await axios.get(`${context.$baseURL}api/v1/project?size=100`)
+        context.projectList = result.data._embedded.projectResponseControllerDtoList;
+    } catch (error) {
+        console.log('get project error', error);
+    }
 }
 
-export const createProject = (context, title) => {
+export const createProject = async (context, title) => {
     context.showLoadingDialog = true
     context.loadingDialogTitle = '프로젝트 생성'
     context.loadingDialogSubTitle = '프로젝트 생성 중...'
     // console.log(title.length)
-    axios.post(`${context.$baseURL}api/v1/project`, {
-        project_name: title
-    })
-        // eslint-disable-next-line no-unused-vars
-        .then(async response => {
-            context.showLoadingDialog = false
-            await getProjectList(context)
+
+    try {
+        await axios.post(`${context.$baseURL}api/v1/project`, {
+            project_name: title
         })
-        .catch(error => {
-            context.showLoadingDialog = false
-            console.log('post project error', error);
-        });
+        context.showLoadingDialog = false
+        getProjectList(context)
+    } catch (error) {
+        console.log('post project error', error);
+        context.showLoadingDialog = false
+    }
 }
 
-export const renameProject = (context, title, id) => {
+export const renameProject = async (context, title, id) => {
     context.showLoadingDialog = true
     context.loadingDialogTitle = '프로젝트 이름 변경'
     context.loadingDialogSubTitle = '프로젝트 이름 변경 중...'
     // console.log(title.length)
-    axios.put(`${context.$baseURL}api/v1/project/${id}`, {
-        project_name: title
-    })
-        // eslint-disable-next-line no-unused-vars
-        .then(async response => {
-            context.showLoadingDialog = false
-            await getProjectList(context)
+
+    try {
+        await axios.put(`${context.$baseURL}api/v1/project/${id}`, {
+            project_name: title
         })
-        .catch(error => {
-            context.showLoadingDialog = false
-            console.log('put project error', error);
-        });
+        context.showLoadingDialog = false
+        getProjectList(context)
+    } catch (error) {
+        context.showLoadingDialog = false
+        console.log('put project error', error);
+    }
 }
 
-export const deleteProject = (context, id) => {
+export const deleteProject = async (context, id) => {
     context.showLoadingDialog = true
     context.loadingDialogTitle = '프로젝트 삭제'
     context.loadingDialogSubTitle = '프로젝트 삭제 중...'
-    axios.delete(`${context.$baseURL}api/v1/project/${id}`)
-        // eslint-disable-next-line no-unused-vars
-        .then(async response => {
-            context.showLoadingDialog = false
 
-            context.dataPage = 0
-            context.dataTotalPage = 0
-            context.selectedTagGroupId = 0
-            context.stepperIdx = 0
-            context.projectRightClickedId = 0
-            context.lineData = []
-            context.tags = []
-            context.tagGroups = []
-            context.tagGroupSelectionModel = 0
-
-            await getProjectList(context)
-        })
-        .catch(error => {
-            context.showLoadingDialog = false
-            console.log('delete project error', error);
-        });
+    try {
+        await axios.delete(`${context.$baseURL}api/v1/project/${id}`)
+        context.showLoadingDialog = false
+        initVariables(context)
+        getProjectList(context)
+    } catch (error) {
+        context.showLoadingDialog = false
+        console.log('delete project error', error);
+    }
 }

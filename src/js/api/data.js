@@ -69,20 +69,19 @@ export const addTagInData = async (context, projectId, targetTag, targetDataIdx)
     }
     console.log(newTags)
 
-    await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data`, [{
-        "id": targetData.id,
-        "text": targetData.text,
-        "data_tags": newTags
-    }])
-        .then((response) => {
-            targetData.data_tags = response.data[0].data_tags
-            console.log(response.data[0].data_tags);
-            context.showLoadingDialog = false
-        })
-        .catch(error => {
-            context.showLoadingDialog = false
-            console.log('put tag in data error', error);
-        });
+    try {
+        const result = await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data`, [{
+            "id": targetData.id,
+            "text": targetData.text,
+            "data_tags": newTags
+        }])
+        targetData.data_tags = result.data[0].data_tags
+        console.log(result.data[0].data_tags);
+    } catch (error) {
+        console.log('put tag in data error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
 }
 
 export const deleteTagInData = async (context, projectId, targetTag, targetDataIdx) => {
@@ -103,23 +102,23 @@ export const deleteTagInData = async (context, projectId, targetTag, targetDataI
         newTags.push(insertData)
     }
     console.log(newTags)
-    await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data`, [{
-        "id": targetData.id,
-        "text": targetData.text,
-        "data_tags": newTags
-    }])
-        .then((response) => {
-            console.log(response.data[0].data_tags);
-            targetData.data_tags = response.data[0].data_tags
-            context.showLoadingDialog = false
-        })
-        .catch(error => {
-            context.showLoadingDialog = false
-            console.log('put tag delete in data error', error);
-        });
+
+    try {
+        const result = await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data`, [{
+            "id": targetData.id,
+            "text": targetData.text,
+            "data_tags": newTags
+        }])
+        console.log(result.data[0].data_tags);
+        targetData.data_tags = result.data[0].data_tags
+    } catch (error) {
+        console.log('put tag delete in data error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
 }
 
-export const postData = (context, projectId, file, colName) => {
+export const postData = async (context, projectId, file, colName) => {
     context.showLoadingDialog = true
     context.loadingDialogTitle = '데이터 업로드'
     context.loadingDialogSubTitle = '데이터에 업로드 중...'
@@ -127,19 +126,18 @@ export const postData = (context, projectId, file, colName) => {
     let dataFile = new FormData()
     dataFile.append("file", file)
 
-    axios.post(`${context.$baseURL}api/v1/project/${projectId}/data?colName=${colName}`, dataFile,
-        {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        })
-        .then(response => {
-            context.showLoadingDialog = false
-            loadProject(context, projectId, 0)
-            console.log(response);
-        })
-        .catch(error => {
-            context.showLoadingDialog = false
-            console.log('post data error', error);
-        });
+    try {
+        const result = await axios.post(`${context.$baseURL}api/v1/project/${projectId}/data?colName=${colName}`, dataFile,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
+        console.log(result);
+        context.showLoadingDialog = false
+        loadProject(context, projectId, 0)
+    } catch (error) {
+        console.log('post data error', error);
+        context.showLoadingDialog = false
+    }
 }

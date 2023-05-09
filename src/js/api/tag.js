@@ -38,86 +38,82 @@ export const addTagGroup = async (context, projectId, groupText) => {
     context.showLoadingDialog = true
     context.loadingDialogTitle = '태그 그룹 추가'
     context.loadingDialogSubTitle = '태그 그룹 추가 중...'
-    await axios.post(`${context.$baseURL}api/v1/project/${projectId}/tagGroup`, {
-        "project_id": projectId,
-        "tag_group_name": groupText
-    })
-        .then(() => {
-            context.showLoadingDialog = false
-            loadProject(context, projectId, context.dataPage - 1)
+
+    try {
+        await axios.post(`${context.$baseURL}api/v1/project/${projectId}/tagGroup`, {
+            "project_id": projectId,
+            "tag_group_name": groupText
         })
-        .catch(error => {
-            context.showLoadingDialog = false
-            console.log('add tag group error', error);
-        });
+        loadProject(context, projectId, context.dataPage - 1)
+    } catch (error) {
+        console.log('add tag group error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
 }
 
 export const deleteTagGroup = async (context, projectId, tagGroupId,) => {
     context.showLoadingDialog = true
     context.loadingDialogTitle = '태그 그룹 삭제'
     context.loadingDialogSubTitle = '태그 그룹 삭제 중...'
-    await axios.delete(`${context.$baseURL}api/v1/project/${projectId}/tagGroup/${tagGroupId}`)
-        .then(() => {
-            context.showLoadingDialog = false
-            loadProject(context, projectId, context.dataPage - 1)
-        })
-        .catch(error => {
-            context.showLoadingDialog = false
-            console.log('delete tag group error', error);
-        });
+
+    try {
+        await axios.delete(`${context.$baseURL}api/v1/project/${projectId}/tagGroup/${tagGroupId}`)
+        loadProject(context, projectId, context.dataPage - 1)
+    } catch (error) {
+        console.log('delete tag group error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
 }
 
 export const addTag = async (context, projectId, tagGroupId, tag_name, tag_color) => {
     context.showLoadingDialog = true
     context.loadingDialogTitle = '태그 추가'
     context.loadingDialogSubTitle = '태그 추가 중...'
-    await axios.post(`${context.$baseURL}api/v1/project/${projectId}/tagGroup/${tagGroupId}/tag`, {
-        "tag_name": tag_name,
-        "tag_color": tag_color
-    })
-        .then(() => {
-            context.showLoadingDialog = false
-            loadProject(context, projectId, context.dataPage - 1)
+
+    try {
+        await axios.post(`${context.$baseURL}api/v1/project/${projectId}/tagGroup/${tagGroupId}/tag`, {
+            "tag_name": tag_name,
+            "tag_color": tag_color
         })
-        .catch(error => {
-            context.showLoadingDialog = false
-            console.log('add tag group error', error);
-        });
+        loadProject(context, projectId, context.dataPage - 1)
+    } catch (error) {
+        console.log('add tag group error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
 }
 
 export const deleteTag = async (context, projectId, tagGroupId, tagId) => {
     context.showLoadingDialog = true
     context.loadingDialogTitle = '태그 삭제'
     context.loadingDialogSubTitle = '태그 삭제 중...'
-    await axios.delete(`${context.$baseURL}api/v1/project/${projectId}/tagGroup/${tagGroupId}/tag/${tagId}`)
-        .then(() => {
-            // context.tags = response.data._embedded.tagResponseControllerDtoList;
-            // console.log(response)
-            context.showLoadingDialog = false
-            loadProject(context, projectId, context.dataPage - 1)
-        })
-        .catch(error => {
-            context.showLoadingDialog = false
-            console.log('delete tag group error', error);
-        });
+
+    try {
+        await axios.delete(`${context.$baseURL}api/v1/project/${projectId}/tagGroup/${tagGroupId}/tag/${tagId}`)
+        loadProject(context, projectId, context.dataPage - 1)
+    } catch (error) {
+        console.log('delete tag group error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
 }
 
 export const changeTagInform = async (context, projectId, tagGroupId, tagId, tag_name, tag_color) => {
     context.showLoadingDialog = true
     context.loadingDialogTitle = '태그 정보 변경'
     context.loadingDialogSubTitle = '태그 정보 변경 중...'
-    await axios.put(`${context.$baseURL}api/v1/project/${projectId}/tagGroup/${tagGroupId}/tag/${tagId}`, {
-        "tag_name": tag_name,
-        "tag_color": tag_color
-    })
-        .then(() => {
-            // context.tags = response.data._embedded.tagResponseControllerDtoList;
-            // console.log(response)
-            context.showLoadingDialog = false
-            loadProject(context, projectId, context.dataPage - 1)
+
+    try {
+        await axios.put(`${context.$baseURL}api/v1/project/${projectId}/tagGroup/${tagGroupId}/tag/${tagId}`, {
+            "tag_name": tag_name,
+            "tag_color": tag_color
         })
-        .catch(error => {
-            context.showLoadingDialog = false
-            console.log('delete tag group error', error);
-        });
+        loadProject(context, projectId, context.dataPage - 1)
+    } catch (error) {
+        console.log('delete tag group error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
 }
