@@ -1141,6 +1141,7 @@ export default {
     },
     onWordSelection() {
       const selection = window.getSelection()
+      console.log(selection)
       console.log(selection.anchorOffset, selection.anchorOffset + selection.toString().length)
       console.log(selection.toString())
     }
