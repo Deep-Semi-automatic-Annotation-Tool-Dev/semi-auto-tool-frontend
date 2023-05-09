@@ -128,15 +128,23 @@
                   </v-chip>
                 </p>
               </div>
-              <div v-else-if="tagMod === 'word'">
-                <p
+              <div v-else-if="tagMod === 'word'" id="editor-words">
+                <div
                     v-for="(l, idx) in lineData"
                     :key="l"
-                    class="text-line"
-                    :data-tooltip="idx"
-                    v-html="setWordHighlight(l, wordTagData)"
-                    @mouseup="onWordSelection"
-                ></p>
+                >
+                  <p
+                      class="text-line"
+                      v-html="setWordHighlight(l, wordTagData)"
+                  ></p>
+                  <p
+                      class="text-line-selection"
+                      :data-tooltip="idx"
+                      @mouseup="onWordSelection"
+                  >
+                    {{ l.text }}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -691,6 +699,13 @@ const setTextColorToBackground = (hex) => {
   return (brightness > 125) ? 'black' : 'white'
 }
 
+
+const setTextStroke = (hex) => {
+  const color = setTextColorToBackground(hex)
+  if (color === 'black') return 'none'
+  return `-1px 0px ${color}, 0px 1px ${color}, 1px 0px ${color}, 0px -1px ${color}`
+}
+
 export default {
   name: "ProjectComponent",
   data() {
@@ -1130,7 +1145,7 @@ export default {
           result += word.text.slice(lastEndIdx, tag.end_index + 1)
         } else {
           result += word.text.slice(lastEndIdx, tag.start_index)
-          result += `<span style="background-color: #${nowTagInfo.tagColor}; color: ${setTextColorToBackground(nowTagInfo.tagColor)}">`
+          result += `<span style="background-color: #${nowTagInfo.tagColor}; text-shadow: ${setTextStroke(nowTagInfo.tagColor)}">`
               + word.text.slice(tag.start_index, tag.end_index + 1) + '</span>'
         }
         lastEndIdx = tag.end_index + 1

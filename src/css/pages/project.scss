@@ -643,3 +643,14 @@
   padding: 0px 4px 4px 4px;
   color: $text-white;
 }
+
+#editor-words div {
+  position: relative;
+  display: block;
+}
+
+#editor-words div .text-line-selection {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
