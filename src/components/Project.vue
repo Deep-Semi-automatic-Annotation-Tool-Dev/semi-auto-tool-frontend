@@ -128,15 +128,14 @@
                   </v-chip>
                 </p>
               </div>
-              <div v-if="tagMod === 'word'">
+              <div v-else-if="tagMod === 'word'">
                 <p
                     v-for="(l, idx) in lineData"
                     :key="l"
                     class="text-line"
                     :data-tooltip="idx"
-                >
-                  <span v-if="l.search" class="text-word">{{ l.text }}</span>
-                </p>
+                    v-html="setWordHighlight(l, wordTagData)"
+                ></p>
               </div>
             </div>
           </div>
@@ -210,6 +209,7 @@
                         color="deep-purple-accent-3"
                         variant="outlined"
                         @update:modelValue="changeTagMod"
+                        mandatory
                     >
                       <v-btn value="paragraph" width="85">
                         문단
@@ -682,6 +682,14 @@ const hexToRgb = (hex) => {
   } : null;
 }
 
+const setTextColorToBackground = (hex) => {
+  const rgb = hexToRgb(hex)
+  const brightness = Math.round(((parseInt(rgb.r) * 299) +
+      (parseInt(rgb.g) * 587) +
+      (parseInt(rgb.b) * 114)) / 1000)
+  return (brightness > 125) ? 'black' : 'white'
+}
+
 export default {
   name: "ProjectComponent",
   data() {
@@ -755,14 +763,10 @@ export default {
       dataFind: false,
       searchValue: '',
 
-      documentDatas: [
-        {'title': 'title1'},
-        {'title': 'title2'},
-        {'title': 'title3'},
-        {'title': 'title4'},
-      ],
       tagMod: 'sentence',
-      selectedTag: 0
+      selectedTag: 0,
+
+      wordTagData: {}
     }
   },
   components: {
@@ -793,12 +797,7 @@ export default {
       return undefined
     },
     setChipBackgroundColor(hex) {
-      const rgb = hexToRgb(hex)
-
-      const brightness = Math.round(((parseInt(rgb.r) * 299) +
-          (parseInt(rgb.g) * 587) +
-          (parseInt(rgb.b) * 114)) / 1000);
-      return {'color': (brightness > 125) ? 'black' : 'white'};
+      return {'color': setTextColorToBackground(hex)};
     },
     chipBackground (color) {
       return {
@@ -1088,15 +1087,16 @@ export default {
       this.selectedTag = 0
       switch (d) {
         case 'word': {
-          console.log("word!")
+          this.wordTagData = []
           if (this.lineData.length > 0) {
-            let startIdx = this.lineData[0].id
-            let endIdx = this.lineData[this.lineData.length - 1].id
-            getWordDataList(this, this.selectedProjectId, endIdx, startIdx)
+            let startIdx = this.lineData[this.lineData.length - 1].id
+            let endIdx = this.lineData[0].id
+            getWordDataList(this, this.selectedProjectId, startIdx, endIdx)
           }
           break
         }
         case 'sentence': {
+          this.lineData = []
           getDataList(this, this.selectedProjectId, this.dataPage - 1)
           break
         }
@@ -1105,6 +1105,38 @@ export default {
     changeTagSelection(d) {
       this.selectedTag = d
       console.log(d)
+    },
+
+    setWordHighlight(word, wordTag) {
+      const sentenceIdx = word.id
+      const targetInfo = wordTag[sentenceIdx]
+      if (targetInfo === undefined) return word.text
+      targetInfo.sort((a, b) => {
+        return a.start_index - b.start_index
+      })
+
+      let lastEndIdx = 0
+      let result = ""
+      for (let tag of targetInfo) {
+        let nowTagInfo = null
+        for (let t of tag.data_target_tags) {
+          if (t.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
+            nowTagInfo = t
+            break
+          }
+        }
+        if (nowTagInfo === null) {
+          result += word.text.slice(lastEndIdx, tag.end_index + 1)
+        } else {
+          result += word.text.slice(lastEndIdx, tag.start_index)
+          result += `<span style="background-color: #${nowTagInfo.tagColor}; color: ${setTextColorToBackground(nowTagInfo.tagColor)}">`
+              + word.text.slice(tag.start_index, tag.end_index + 1) + '</span>'
+        }
+        lastEndIdx = tag.end_index + 1
+      }
+      if (lastEndIdx !== word.text.length) result += word.text.slice(lastEndIdx, word.text.length)
+
+      return result
     }
   },
 }

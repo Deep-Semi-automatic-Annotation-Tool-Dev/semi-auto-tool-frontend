@@ -32,6 +32,12 @@ export const getWordDataList = async (context, projectId, startIndex, endIndex) 
     context.showLoadingDialog = true
     try {
         const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/data/word?startIndex=${startIndex}&endIndex=${endIndex}`)
+
+        for (let word of result.data) {
+            let parentId = word.parent_id
+            if (context.wordTagData[parentId] === undefined) context.wordTagData[parentId] = []
+            context.wordTagData[parentId].push(word)
+        }
         console.log(result.data);
     } catch (error) {
         console.log('get word data error', error);

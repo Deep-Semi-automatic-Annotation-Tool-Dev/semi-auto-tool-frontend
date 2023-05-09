@@ -13,7 +13,7 @@ export const initVariables = (context) => {
     context.tagGroupSelectionModel = 0
     context.selectedTag = 0
     context.tagMod = 'sentence'
-    context.documentDatas = []
+    context.wordTagData = {}
 }
 
 export const loadProject = async (context, id, page) => {
