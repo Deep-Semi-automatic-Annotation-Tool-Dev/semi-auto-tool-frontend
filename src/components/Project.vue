@@ -135,6 +135,7 @@
                     class="text-line"
                     :data-tooltip="idx"
                     v-html="setWordHighlight(l, wordTagData)"
+                    @mouseup="onWordSelection"
                 ></p>
               </div>
             </div>
@@ -1137,6 +1138,11 @@ export default {
       if (lastEndIdx !== word.text.length) result += word.text.slice(lastEndIdx, word.text.length)
 
       return result
+    },
+    onWordSelection() {
+      const selection = window.getSelection()
+      console.log(selection.anchorOffset, selection.anchorOffset + selection.toString().length)
+      console.log(selection.toString())
     }
   },
 }
