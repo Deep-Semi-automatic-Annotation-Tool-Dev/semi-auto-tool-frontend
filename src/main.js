@@ -8,6 +8,8 @@ import pinia from "@/plugins/pinia";
 import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css'
 import ContextMenu from '@imengyu/vue3-context-menu'
 
+import VueSSE from 'vue-sse'
+
 const app = createApp(App)
 app.config.globalProperties.$baseURL = "https://autotag.hrabit64.xyz/";
 app.config.globalProperties.$mlURL = "https://autotag-ml.hrabit64.xyz/";
@@ -29,6 +31,7 @@ app.config.globalProperties.CONTEXTMENU_TAG_COLOR = 320;
 
 app.use(router)
     .use(vuetify)
+    .use(VueSSE)
     .use(pinia)
     .use(ContextMenu)
     .mount('#app')

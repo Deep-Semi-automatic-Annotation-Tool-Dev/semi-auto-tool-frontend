@@ -10,5 +10,17 @@ module.exports = defineConfig({
          `,
       }
     }
+  },
+  devServer: {
+    proxy: {
+      '/api/v1/model': {
+        target: 'https://autotag-ml.hrabit64.xyz/',
+        changeOrigin: true
+      },
+      '/api/v1/stream': {
+        target: 'https://autotag-ml.hrabit64.xyz/',
+        changeOrigin: true
+      },
+    }
   }
 })

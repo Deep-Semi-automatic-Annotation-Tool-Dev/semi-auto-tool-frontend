@@ -376,7 +376,7 @@
                   </v-slider>
                 </v-container>
                 <v-container class="parameter-set-items pr-4">
-                  <div>{{ `learning rate ${trainLearningRate}` }}</div>
+                  <div>{{ `lr ${trainLearningRate}` }}</div>
                   <v-slider
                       v-model="trainLearningRate"
                       :max="1"
@@ -415,14 +415,14 @@
 
                 <div class="model-summary">학습이 완료되면 자동으로 다음 단계로 넘어갑니다.</div>
                 <v-progress-linear indeterminate></v-progress-linear>
-                <div class="stepper-item-buttons">
-                  <v-btn color="color_accept" size="small" @click="stepperNext">
-                    다음
-                  </v-btn>
-                  <v-btn color="color_deny" size="small" @click="stepperPrev">
-                    이전
-                  </v-btn>
-                </div>
+<!--                <div class="stepper-item-buttons">-->
+<!--                  <v-btn color="color_accept" size="small" @click="stepperNext">-->
+<!--                    다음-->
+<!--                  </v-btn>-->
+<!--                  <v-btn color="color_deny" size="small" @click="stepperPrev">-->
+<!--                    이전-->
+<!--                  </v-btn>-->
+<!--                </div>-->
               </div>
             </div>
           </div>
@@ -792,6 +792,41 @@ const setTextStroke = (hex) => {
   return `-1px 0px ${color}, 0px 1px ${color}, 1px 0px ${color}, 0px -1px ${color}`
 }
 
+const initLogSSE = (context, streamKey) => {
+  sseTrainLogging = context.$sse.create({
+    url: `/api/v1/stream/${streamKey}`,
+    format: 'plain',
+    withCredentials: true,
+    // polyfill: true,
+  })
+  sseTrainLogging.on('run', context.handleMessage);
+  sseTrainLogging.on('success', context.handleSuccess);
+  sseTrainLogging.on('error', context.handleError);
+
+  // let start = Date.now(), now = start;
+  // while (now - start < 3 * 1000) {
+  //   now = Date.now();
+  // }
+
+  sseTrainLogging.connect()
+      .then(sse => {
+        console.log('We\'re connected!');
+        console.log(sse)
+
+        setTimeout(() => {
+          sseTrainLogging.off('run', context.handleMessage);
+          localStorage.removeItem('streamKey')
+          console.log('Stopped listening to event-less messages!');
+        }, 2 * 1000);
+      })
+      .catch((err) => {
+        console.error('Failed to connect to server', err);
+        localStorage.removeItem('streamKey')
+      });
+}
+
+let sseTrainLogging = null;
+
 export default {
   name: "ProjectComponent",
   data() {
@@ -874,8 +909,8 @@ export default {
       showTrainStart: false,
       trainName: '',
 
-      trainEpoch: 0,
-      trainLearningRate: 0
+      trainEpoch: 1,
+      trainLearningRate: 0.00001
     }
   },
   components: {
@@ -894,6 +929,11 @@ export default {
           console.log("undefind")
         }
       }
+    }
+    const streamKey = localStorage.getItem("streamKey")
+    if (streamKey !== null) {
+      this.stepperIdx = 2
+      initLogSSE(this, streamKey)
     }
   },
   methods: {
@@ -1284,15 +1324,38 @@ export default {
       console.log(selection.toString())
     },
 
-    startTrainCheck(data) {
+    handleMessage(message, lastEventId) {
+      console.warn('Received a message w/o an event!', message, lastEventId);
+    },
+    handleError(message, lastEventId) {
+      console.warn('Received a error w/o an event!', message, lastEventId);
+      sseTrainLogging.disconnect()
+      sseTrainLogging = null
+      localStorage.removeItem('streamKey')
+    },
+    handleSuccess(message, lastEventId) {
+      console.warn('Received a success w/o an event!', message, lastEventId);
+      sseTrainLogging.disconnect()
+      sseTrainLogging = null
+      localStorage.removeItem('streamKey')
+    },
+
+    async startTrainCheck(data) {
       this.showTrainStart = false
       // 프로젝트 이동 시 저장 여부 다이얼로그 버튼 클릭
       if (data.type === this.DIALOG_CLICK_YES) {
-        startTrain(this,
+        const streamKey = await startTrain(this,
             this.selectedProjectId,
             this.tagGroups[this.selectedTagGroupId].tag_group_id,
-            this.trainName
+            this.trainName,
+            this.trainEpoch,
+            this.trainLearningRate
         )
+        if (streamKey !== null) {
+          localStorage.setItem("streamKey", streamKey)
+          initLogSSE(this, streamKey)
+          this.stepperIdx++
+        }
       }
     },
     startTrain() {
@@ -1303,6 +1366,9 @@ export default {
         this.showTrainStart = true
       }
     }
+  },
+  beforeUnmount() {
+    if (sseTrainLogging !== null) sseTrainLogging.disconnect();
   },
 }
 </script>
