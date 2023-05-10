@@ -155,7 +155,7 @@
                       class="text-line"
                       :data-tooltip="idx"
                       :style="[setParagraphBackground(l)]"
-                  >{{l.text}}</p>
+                  > {{l.text}} </p>
                 </div>
               </div>
             </div>
@@ -841,7 +841,15 @@ export default {
         // if (d.end_index < nowData.id) continue
         // if (d.start_index > nowData.id) break
         if (d.start_index <= nowData.id && nowData.id <= d.end_index) {
-          color = "#4848e8"
+          let nowTagInfo = null
+          for (let t of d.data_target_tags) {
+            if (t.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
+              nowTagInfo = t
+              break
+            }
+          }
+          if (nowTagInfo === null) return
+          color = `#${nowTagInfo.tagColor}`
           break
         }
       }

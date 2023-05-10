@@ -56,7 +56,7 @@ export const getParagraphDataList = async (context, projectId, startIndex, endIn
         result.data.paragraph_indexes.sort((a, b) => {
             return b.start_index - a.start_index
         })
-        console.log(result.data.paragraph_indexes);
+        console.log(result.data);
         context.paragraphData = result.data
     } catch (error) {
         console.log('get word data error', error);
