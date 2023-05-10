@@ -709,6 +709,13 @@ import {
 import {initVariables, loadProject} from "@/js/api/common";
 import {startTrain} from "@/js/api/train";
 
+import * as Y from 'yjs'
+import io from 'socket.io-client';
+import { fromUint8Array, toUint8Array } from 'js-base64';
+
+const ydoc = new Y.Doc();
+const sentence_map = ydoc.getMap('sentence');
+
 const generateModels = () => {
   const group = []
   for (let i = 0;i < 3;i++) {
@@ -825,7 +832,75 @@ const initLogSSE = (context, streamKey) => {
       });
 }
 
+const initSocket = (context) => {
+  socket = io('http://localhost:3000',{
+    cors: { origin: '*' },
+    transports: ['websocket']
+  });
+
+  socket.on('connect', () => {
+    console.log('connected to server');
+    socket.emit('join',"test")
+
+    socket.once('disconnect', () => {
+      console.log('disconnected from server');
+    });
+
+    let syncInProgress = false;
+    // 서버로부터 변경사항을 받음
+    socket.on('sync_sentence', (sync_str) =>{
+      if (syncInProgress) {
+        return;
+      }
+      syncInProgress = true;
+      const encodedSync = toUint8Array(sync_str)
+      console.log("sync start. update before", sentence_map.toJSON())
+      Y.applyUpdate(ydoc, encodedSync)
+      console.log("sync fin. after", sentence_map.toJSON())
+
+      const map = ydoc.getMap('sentence');
+      tags.length = 0;
+      map.forEach((value, key) => {
+        tags.push({
+          id: key,
+          tag: value
+        })
+      })
+      jsonKey += 1;
+      dataKey += 1;
+
+      syncInProgress = false;
+    })
+
+    let isEmitting = false;
+
+    socket.on('update_sentence_ok', () =>{
+      isEmitting = false;
+    })
+
+    const sync = () => {
+      if (isEmitting) {
+        return;
+      }
+      isEmitting = true;
+      const changes = Y.encodeStateAsUpdate(ydoc)
+      const encodeChanges = fromUint8Array(changes)
+      if (encodeChanges.length > 0) {
+        // 다른 클라이언트에게 변경사항을 전송
+        socket.emit('update_sentence', {room: "test", msg: encodeChanges});
+      }
+      jsonKey += 1;
+      dataKey += 1;
+    }
+    setInterval(sync, 100);
+
+    jsonKey += 1;
+    dataKey += 1;
+  })
+}
+
 let sseTrainLogging = null;
+let socket = null;
 
 export default {
   name: "ProjectComponent",
@@ -935,6 +1010,8 @@ export default {
       this.stepperIdx = 2
       initLogSSE(this, streamKey)
     }
+
+    initSocket(this)
   },
   methods: {
     checkDataTag(tags) {
