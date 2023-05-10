@@ -655,6 +655,12 @@
   top: 0;
 }
 
-#editor-paragraphs {
+#editor-paragraphs div {
+  box-sizing: border-box;
+}
 
+#editor-paragraphs div p {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 3px 0;
 }

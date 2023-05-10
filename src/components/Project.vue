@@ -150,11 +150,12 @@
                 <div
                     v-for="(l, idx) in lineData"
                     :key="l"
-                    style="background-color: #6fd5d5"
                 >
                   <p
                       class="text-line"
-                  >{{l.text}}{{idx}}</p>
+                      :data-tooltip="idx"
+                      :style="[setParagraphBackground(l)]"
+                  >{{l.text}}</p>
                 </div>
               </div>
             </div>
@@ -832,6 +833,21 @@ export default {
         'background': color
       }
     },
+    setParagraphBackground(nowData) {
+      let color = null;
+      if (this.paragraphData.paragraph_indexes === undefined || this.paragraphData.paragraph_indexes.length === 0) return {}
+      // console.log(this.paragraphData.paragraph_indexes)
+      for (let d of this.paragraphData.paragraph_indexes) {
+        // if (d.end_index < nowData.id) continue
+        // if (d.start_index > nowData.id) break
+        if (d.start_index <= nowData.id && nowData.id <= d.end_index) {
+          color = "#4848e8"
+          break
+        }
+      }
+      if (color === null) return {}
+      return {'background': color, 'color': setTextColorToBackground(color)}
+    },
 
     async changeGroup(v) {
       // console.log(this.tagGroups[v])
@@ -1111,7 +1127,7 @@ export default {
       }
     },
 
-    changeTagMod(d) {
+    async changeTagMod(d) {
       this.selectedTag = 0
       switch (d) {
         case 'word': {
@@ -1119,20 +1135,20 @@ export default {
           if (this.lineData.length > 0) {
             let startIdx = this.lineData[this.lineData.length - 1].id
             let endIdx = this.lineData[0].id
-            getWordDataList(this, this.selectedProjectId, startIdx, endIdx)
+            await getWordDataList(this, this.selectedProjectId, startIdx, endIdx)
           }
           break
         }
         case 'sentence': {
           this.lineData = []
-          getDataList(this, this.selectedProjectId, this.dataPage - 1)
+          await getDataList(this, this.selectedProjectId, this.dataPage - 1)
           break
         }
         case 'paragraph': {
           this.paragraphData = []
           let startIdx = this.lineData[this.lineData.length - 1].id
           let endIdx = this.lineData[0].id
-          getParagraphDataList(this, this.selectedProjectId, startIdx, endIdx)
+          await getParagraphDataList(this, this.selectedProjectId, startIdx, endIdx)
           break
         }
       }
