@@ -46,6 +46,25 @@ export const getWordDataList = async (context, projectId, startIndex, endIndex) 
     }
 }
 
+export const getParagraphDataList = async (context, projectId, startIndex, endIndex) => {
+    context.loadingDialogTitle = '문단 데이터 로딩'
+    context.loadingDialogSubTitle = "문단 태깅 데이터를 가져오는 중 입니다."
+    context.showLoadingDialog = true
+    try {
+        const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/data/paragraph?startIndex=${startIndex}&endIndex=${endIndex}`)
+
+        result.data.paragraph_indexes.sort((a, b) => {
+            return b.start_index - a.start_index
+        })
+        console.log(result.data.paragraph_indexes);
+        this.paragraphData = result.data
+    } catch (error) {
+        console.log('get word data error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
+}
+
 export const addTagInData = async (context, projectId, targetTag, targetDataIdx) => {
     context.showLoadingDialog = true
     context.loadingDialogTitle = '태그 할당'

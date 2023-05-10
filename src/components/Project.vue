@@ -146,6 +146,17 @@
                   </p>
                 </div>
               </div>
+              <div v-else-if="tagMod === 'paragraph'" id="editor-paragraphs">
+                <div
+                    v-for="(l, idx) in lineData"
+                    :key="l"
+                    style="background-color: #6fd5d5"
+                >
+                  <p
+                      class="text-line"
+                  >{{l.text}}{{idx}}</p>
+                </div>
+              </div>
             </div>
           </div>
           <v-pagination
@@ -631,7 +642,7 @@ import {
 } from'@/js/api/project.js'
 import {
   addTagInData, deleteTagInData,
-  getDataList, getWordDataList, postData
+  getDataList, getParagraphDataList, getWordDataList, postData
 } from '@/js/api/data.js'
 import {
   getTagList,
@@ -782,7 +793,8 @@ export default {
       tagMod: 'sentence',
       selectedTag: 0,
 
-      wordTagData: {}
+      wordTagData: [],
+      paragraphData: []
     }
   },
   components: {
@@ -1103,7 +1115,7 @@ export default {
       this.selectedTag = 0
       switch (d) {
         case 'word': {
-          this.wordTagData = []
+          this.wordTagData = {}
           if (this.lineData.length > 0) {
             let startIdx = this.lineData[this.lineData.length - 1].id
             let endIdx = this.lineData[0].id
@@ -1114,6 +1126,13 @@ export default {
         case 'sentence': {
           this.lineData = []
           getDataList(this, this.selectedProjectId, this.dataPage - 1)
+          break
+        }
+        case 'paragraph': {
+          this.paragraphData = []
+          let startIdx = this.lineData[this.lineData.length - 1].id
+          let endIdx = this.lineData[0].id
+          getParagraphDataList(this, this.selectedProjectId, startIdx, endIdx)
           break
         }
       }
