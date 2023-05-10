@@ -344,6 +344,7 @@
               <div class="stepper-item-content-area" :class="stepperIdx !== 1 ? 'unselected' : ''">
                 <v-container class="parameter-set-items">
                   <v-text-field
+                      v-model="trainName"
                       label="학습이름"
                       variant="outlined"
                       density="compact"
@@ -365,15 +366,19 @@
                 </v-container>
                 <v-container class="parameter-set-items">
                   <v-slider
+                      :max="1"
+                      :min="0.01"
+                      :step="0.001"
+                      thumb-label
                   >
                   </v-slider>
                 </v-container>
                 <div class="stepper-item-buttons">
-                  <v-btn color="color_accept" size="small" @click="stepperNext">
-                    다음
+                  <v-btn color="color_accept" size="small" @click="checkTrainStart">
+                    학습시작
                   </v-btn>
                   <v-btn color="color_deny" size="small" @click="stepperPrev">
-                    이전
+                    태깅 다시하기
                   </v-btn>
                 </div>
               </div>
@@ -662,7 +667,7 @@
           v-on:dialog-click="startTrainCheck"
           :dialog-type="this.DIALOG_TYPE_SUBTITLE"
           title="학습 시작"
-          :subtitle="`'${tagRightCLickItem.tag_name}' 태그 그룹을 기준으로 학습을 시작하시`"
+          :subtitle="`'${tagGroups[selectedTagGroupId].tag_group_name}' 태그 그룹을 '${trainName}'으로 학습을 시작하시겠습니까?`"
           text-accept="시작"
           text-deny="취소"
       ></Dialog>
@@ -727,6 +732,23 @@ const checkTagGroupName = (context, title) => {
   } else {
     context.snackbarMakeProjectTitleWarn = false
     context.snackbarMakeProjectTitleWarnMsg = "태그 (그룹) 이름은 영어, 한글, 숫자만 입력 가능합니다."
+    context.snackbarMakeProjectTitleWarn = true
+    return false
+  }
+}
+
+const checkTrainName = (context, title) => {
+  const titleRegEx = /^[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9| ]+$/;
+  if (title.length > 20) {
+    context.snackbarMakeProjectTitleWarn = false
+    context.snackbarMakeProjectTitleWarnMsg = "학습 이름은 20자 이하만 가능합니다."
+    context.snackbarMakeProjectTitleWarn = true
+    return false
+  } else if (titleRegEx.test(title)) {
+    return true
+  } else {
+    context.snackbarMakeProjectTitleWarn = false
+    context.snackbarMakeProjectTitleWarnMsg = "학습 이름은 영어, 한글, 숫자만 입력 가능합니다."
     context.snackbarMakeProjectTitleWarn = true
     return false
   }
@@ -836,6 +858,7 @@ export default {
       paragraphData: [],
 
       showTrainStart: false,
+      trainName: ''
     }
   },
   components: {
@@ -1249,6 +1272,11 @@ export default {
     },
     startTrain() {
       this.stepperNext()
+    },
+    checkTrainStart() {
+      if (checkTrainName(this, this.trainName)) {
+        this.showTrainStart = true
+      }
     }
   },
 }
