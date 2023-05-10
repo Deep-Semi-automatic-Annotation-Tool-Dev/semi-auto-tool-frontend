@@ -280,7 +280,7 @@
 
                 <div class="stepper-item-buttons">
                   <v-btn color="color_accept" size="small" @click="stepperNext">
-                    모델선택
+                    학습시작
                   </v-btn>
 <!--                  <v-btn color="color_deny" size="small" @click="stepperPrev">-->
 <!--                    이전-->
