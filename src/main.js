@@ -10,6 +10,7 @@ import ContextMenu from '@imengyu/vue3-context-menu'
 
 const app = createApp(App)
 app.config.globalProperties.$baseURL = "https://autotag.hrabit64.xyz/";
+app.config.globalProperties.$mlURL = "https://autotag-ml.hrabit64.xyz/";
 
 app.config.globalProperties.DIALOG_CLICK_YES = 1;
 app.config.globalProperties.DIALOG_CLICK_NO = 0;
