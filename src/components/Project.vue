@@ -707,6 +707,7 @@ import {
   deleteTagGroup, deleteTag, changeTagInform, addTag
 } from "@/js/api/tag";
 import {initVariables, loadProject} from "@/js/api/common";
+import {startTrain} from "@/js/api/train";
 
 const generateModels = () => {
   const group = []
@@ -1287,9 +1288,11 @@ export default {
       this.showTrainStart = false
       // 프로젝트 이동 시 저장 여부 다이얼로그 버튼 클릭
       if (data.type === this.DIALOG_CLICK_YES) {
-        // this.selectedProjectId = this.moveProjectId
-        // this.selectedProjectName = this.moveProjectName
-        // loadProject(this, this.selectedProjectId, 0)
+        startTrain(this,
+            this.selectedProjectId,
+            this.tagGroups[this.selectedTagGroupId].tag_group_id,
+            this.trainName
+        )
       }
     },
     startTrain() {
