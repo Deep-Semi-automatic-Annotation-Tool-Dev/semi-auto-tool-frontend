@@ -290,44 +290,101 @@
             </div>
           </div>
 
+<!--          <div class="stepper-item" :class="stepperIdx === 1 ? 'selected' : ''">-->
+<!--            <div class="stepper-item-top">-->
+<!--              <div class="stepper-item-top-circle" :class="stepperIdx === 1 ? 'selected' : ''">-->
+<!--                <div class="stepper-item-top-circle-num">2</div>-->
+<!--              </div>-->
+<!--              <div class="stepper-item-top-circle-title" :class="stepperIdx === 1 ? 'stepper-item-top-circle-title-selected' : ''">-->
+<!--                모델 - {{ modelLists[selectedModel].name }}-->
+<!--              </div>-->
+<!--            </div>-->
+
+<!--            <div class="stepper-item-content">-->
+<!--              <v-divider class="stepper-item-divider" vertical></v-divider>-->
+<!--              <div class="stepper-item-content-area" :class="stepperIdx !== 1 ? 'unselected' : ''">-->
+<!--                <div id="layout-project-model-area">-->
+<!--                  <div class="model-summary">Active Learning을 진행할 모델을 선택해주세요.</div>-->
+<!--                  <v-container class="pa-0 ma-0">-->
+<!--                    <v-select-->
+<!--                        label="모델 목록"-->
+<!--                        density="comfortable"-->
+<!--                        :items="modelLists"-->
+<!--                        item-title="name"-->
+<!--                        item-value="value"-->
+<!--                        :hide-details="true"-->
+<!--                        @update:model-value="changeModel"-->
+<!--                    ></v-select>-->
+<!--                  </v-container>-->
+<!--                </div>-->
+<!--                <div class="stepper-item-buttons">-->
+<!--                  <v-btn color="color_accept" size="small" @click="stepperNext">-->
+<!--                    학습-->
+<!--                  </v-btn>-->
+<!--                  <v-btn color="color_deny" size="small" @click="stepperPrev">-->
+<!--                    태깅 다시하기-->
+<!--                  </v-btn>-->
+<!--                </div>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
+
           <div class="stepper-item" :class="stepperIdx === 1 ? 'selected' : ''">
             <div class="stepper-item-top">
               <div class="stepper-item-top-circle" :class="stepperIdx === 1 ? 'selected' : ''">
                 <div class="stepper-item-top-circle-num">2</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 1 ? 'stepper-item-top-circle-title-selected' : ''">
-                모델 - {{ modelLists[selectedModel].name }}
+                Training
               </div>
             </div>
 
             <div class="stepper-item-content">
               <v-divider class="stepper-item-divider" vertical></v-divider>
               <div class="stepper-item-content-area" :class="stepperIdx !== 1 ? 'unselected' : ''">
-                <div id="layout-project-model-area">
-                  <div class="model-summary">Active Learning을 진행할 모델을 선택해주세요.</div>
-                  <v-container class="pa-0 ma-0">
-                    <v-select
-                        label="모델 목록"
-                        density="comfortable"
-                        :items="modelLists"
-                        item-title="name"
-                        item-value="value"
-                        :hide-details="true"
-                        @update:model-value="changeModel"
-                    ></v-select>
-                  </v-container>
-                </div>
+
+                <div class="model-summary">학습이 완료되면 자동으로 다음 단계로 넘어갑니다.</div>
+                <v-progress-linear indeterminate></v-progress-linear>
                 <div class="stepper-item-buttons">
                   <v-btn color="color_accept" size="small" @click="stepperNext">
-                    학습
+                    다음
                   </v-btn>
                   <v-btn color="color_deny" size="small" @click="stepperPrev">
-                    태깅 다시하기
+                    이전
                   </v-btn>
                 </div>
               </div>
             </div>
           </div>
+
+<!--          <div class="stepper-item" :class="stepperIdx === 2 ? 'selected' : ''">-->
+<!--            <div class="stepper-item-top">-->
+<!--              <div class="stepper-item-top-circle" :class="stepperIdx === 2 ? 'selected' : ''">-->
+<!--                <div class="stepper-item-top-circle-num">3</div>-->
+<!--              </div>-->
+<!--              <div class="stepper-item-top-circle-title" :class="stepperIdx === 2 ? 'stepper-item-top-circle-title-selected' : ''">-->
+<!--                Auto Annotation-->
+<!--              </div>-->
+<!--            </div>-->
+
+<!--            <div class="stepper-item-content">-->
+<!--              <v-divider class="stepper-item-divider" vertical></v-divider>-->
+<!--              <div class="stepper-item-content-area" :class="stepperIdx !== 2 ? 'unselected' : ''">-->
+
+
+<!--                <div class="model-summary">학습이 완료되면 자동으로 다음 단계로 넘어갑니다.</div>-->
+<!--                <v-progress-linear indeterminate></v-progress-linear>-->
+<!--                <div class="stepper-item-buttons">-->
+<!--                  <v-btn color="color_accept" size="small" @click="stepperNext">-->
+<!--                    다음-->
+<!--                  </v-btn>-->
+<!--                  <v-btn color="color_deny" size="small" @click="stepperPrev">-->
+<!--                    이전-->
+<!--                  </v-btn>-->
+<!--                </div>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
 
           <div class="stepper-item" :class="stepperIdx === 2 ? 'selected' : ''">
             <div class="stepper-item-top">
@@ -335,70 +392,13 @@
                 <div class="stepper-item-top-circle-num">3</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 2 ? 'stepper-item-top-circle-title-selected' : ''">
-                Training
-              </div>
-            </div>
-
-            <div class="stepper-item-content">
-              <v-divider class="stepper-item-divider" vertical></v-divider>
-              <div class="stepper-item-content-area" :class="stepperIdx !== 2 ? 'unselected' : ''">
-
-                <div class="model-summary">학습이 완료되면 자동으로 다음 단계로 넘어갑니다.</div>
-                <v-progress-linear indeterminate></v-progress-linear>
-                <div class="stepper-item-buttons">
-                  <v-btn color="color_accept" size="small" @click="stepperNext">
-                    다음
-                  </v-btn>
-                  <v-btn color="color_deny" size="small" @click="stepperPrev">
-                    이전
-                  </v-btn>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="stepper-item" :class="stepperIdx === 3 ? 'selected' : ''">
-            <div class="stepper-item-top">
-              <div class="stepper-item-top-circle" :class="stepperIdx === 3 ? 'selected' : ''">
-                <div class="stepper-item-top-circle-num">4</div>
-              </div>
-              <div class="stepper-item-top-circle-title" :class="stepperIdx === 3 ? 'stepper-item-top-circle-title-selected' : ''">
-                Auto Annotation
-              </div>
-            </div>
-
-            <div class="stepper-item-content">
-              <v-divider class="stepper-item-divider" vertical></v-divider>
-              <div class="stepper-item-content-area" :class="stepperIdx !== 3 ? 'unselected' : ''">
-
-
-                <div class="model-summary">학습이 완료되면 자동으로 다음 단계로 넘어갑니다.</div>
-                <v-progress-linear indeterminate></v-progress-linear>
-                <div class="stepper-item-buttons">
-                  <v-btn color="color_accept" size="small" @click="stepperNext">
-                    다음
-                  </v-btn>
-                  <v-btn color="color_deny" size="small" @click="stepperPrev">
-                    이전
-                  </v-btn>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="stepper-item" :class="stepperIdx === 4 ? 'selected' : ''">
-            <div class="stepper-item-top">
-              <div class="stepper-item-top-circle" :class="stepperIdx === 4 ? 'selected' : ''">
-                <div class="stepper-item-top-circle-num">5</div>
-              </div>
-              <div class="stepper-item-top-circle-title" :class="stepperIdx === 4 ? 'stepper-item-top-circle-title-selected' : ''">
                 Data Reload
               </div>
             </div>
 
             <div class="stepper-item-content stepper-item-content-last">
 <!--              <v-divider vertical></v-divider>-->
-              <div class="stepper-item-content-area" :class="stepperIdx !== 4 ? 'unselected' : ''">
+              <div class="stepper-item-content-area" :class="stepperIdx !== 2 ? 'unselected' : ''">
 
                 <div>
 
@@ -735,7 +735,7 @@ export default {
       selectedModel: 0,
       tags: [],
       stepperIdx: 0,
-      stepperMax: 4,
+      stepperMax: 2,
       projectList: [],
 
       showMakeProjectDialog: false,
