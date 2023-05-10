@@ -1,5 +1,5 @@
 <template>
-  <div id="layout-root">
+  <v-app id="layout-root">
     <AppBar></AppBar>
     <div id="layout-project-root">
       <div id="layout-project-sidebar">
@@ -342,9 +342,32 @@
             <div class="stepper-item-content">
               <v-divider class="stepper-item-divider" vertical></v-divider>
               <div class="stepper-item-content-area" :class="stepperIdx !== 1 ? 'unselected' : ''">
-
-                <div class="model-summary">학습이 완료되면 자동으로 다음 단계로 넘어갑니다.</div>
-                <v-progress-linear indeterminate></v-progress-linear>
+                <v-container class="parameter-set-items">
+                  <v-text-field
+                      label="학습이름"
+                      variant="outlined"
+                      density="compact"
+                      :hide-details="true"
+                  ></v-text-field>
+                </v-container>
+                <v-container class="parameter-set-items">
+                  <v-select
+                      label="학습할 태그 그룹"
+                      :items="tagGroups"
+                      item-title="tag_group_name"
+                      item-value="value"
+                      :hide-details="true"
+                      @update:model-value="changeGroup"
+                      v-model="tagGroupSelectionModel"
+                      variant="outlined"
+                      density="compact"
+                  ></v-select>
+                </v-container>
+                <v-container class="parameter-set-items">
+                  <v-slider
+                  >
+                  </v-slider>
+                </v-container>
                 <div class="stepper-item-buttons">
                   <v-btn color="color_accept" size="small" @click="stepperNext">
                     다음
@@ -644,7 +667,7 @@
           text-deny="취소"
       ></Dialog>
     </v-dialog>
-  </div>
+  </v-app>
 </template>
 
 <script>
