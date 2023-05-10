@@ -364,11 +364,24 @@
                       density="compact"
                   ></v-select>
                 </v-container>
-                <v-container class="parameter-set-items">
+                <v-container class="parameter-set-items pr-4">
+                  <div>{{ `epoch ${trainEpoch}` }}</div>
                   <v-slider
+                      v-model="trainEpoch"
+                      :max="500"
+                      :min="1"
+                      :step="1"
+                      thumb-label
+                  >
+                  </v-slider>
+                </v-container>
+                <v-container class="parameter-set-items pr-4">
+                  <div>{{ `learning rate ${trainLearningRate}` }}</div>
+                  <v-slider
+                      v-model="trainLearningRate"
                       :max="1"
-                      :min="0.01"
-                      :step="0.001"
+                      :min="0.00001"
+                      :step="0.00001"
                       thumb-label
                   >
                   </v-slider>
@@ -858,7 +871,10 @@ export default {
       paragraphData: [],
 
       showTrainStart: false,
-      trainName: ''
+      trainName: '',
+
+      trainEpoch: 0,
+      trainLearningRate: 0
     }
   },
   components: {
@@ -1267,8 +1283,14 @@ export default {
       console.log(selection.toString())
     },
 
-    startTrainCheck() {
-
+    startTrainCheck(data) {
+      this.showTrainStart = false
+      // 프로젝트 이동 시 저장 여부 다이얼로그 버튼 클릭
+      if (data.type === this.DIALOG_CLICK_YES) {
+        // this.selectedProjectId = this.moveProjectId
+        // this.selectedProjectName = this.moveProjectName
+        // loadProject(this, this.selectedProjectId, 0)
+      }
     },
     startTrain() {
       this.stepperNext()
