@@ -21,7 +21,7 @@ export const startTrain = async (context, project_id, tag_group_id, train_name, 
         console.log(result.data)
         return result.data.stream_key
     } catch (error) {
-        console.log('train start error', error);
+        console.error('train start error', error);
         return null
     }
 }

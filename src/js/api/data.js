@@ -20,7 +20,7 @@ export const getDataList = async (context, id, page) => {
         context.lineData = []
         context.dataPage = 0
         context.dataTotalPage = 0
-        console.log('get data error', error);
+        console.error('get data error', error);
     } finally {
         context.showLoadingDialog = false
     }
@@ -40,7 +40,7 @@ export const getWordDataList = async (context, projectId, startIndex, endIndex) 
         }
         console.log(result.data);
     } catch (error) {
-        console.log('get word data error', error);
+        console.error('get word data error', error);
     } finally {
         context.showLoadingDialog = false
     }
@@ -59,7 +59,7 @@ export const getParagraphDataList = async (context, projectId, startIndex, endIn
         console.log(result.data);
         context.paragraphData = result.data
     } catch (error) {
-        console.log('get word data error', error);
+        console.error('get word data error', error);
     } finally {
         context.showLoadingDialog = false
     }
@@ -103,7 +103,7 @@ export const addTagInData = async (context, projectId, targetTag, targetDataIdx)
         targetData.data_tags = result.data[0].data_tags
         console.log(result.data[0].data_tags);
     } catch (error) {
-        console.log('put tag in data error', error);
+        console.error('put tag in data error', error);
     } finally {
         context.showLoadingDialog = false
     }
@@ -137,7 +137,7 @@ export const deleteTagInData = async (context, projectId, targetTag, targetDataI
         console.log(result.data[0].data_tags);
         targetData.data_tags = result.data[0].data_tags
     } catch (error) {
-        console.log('put tag delete in data error', error);
+        console.error('put tag delete in data error', error);
     } finally {
         context.showLoadingDialog = false
     }
@@ -162,7 +162,7 @@ export const postData = async (context, projectId, file, colName) => {
         context.showLoadingDialog = false
         loadProject(context, projectId, 0)
     } catch (error) {
-        console.log('post data error', error);
+        console.error('post data error', error);
         context.showLoadingDialog = false
     }
 }

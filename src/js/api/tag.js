@@ -12,7 +12,7 @@ export const getTagGroupList = async (context, projectId) => {
         context.tagGroups = tagGroupData
     } catch(error) {
         context.tagGroups = []
-        console.log('get tag group error', error);
+        console.error('get tag group error', error);
     } finally {
         context.selectedTagGroup = 0
         context.showLoadingDialog = false
@@ -28,7 +28,7 @@ export const getTagList = async (context, projectId, tagGroupId) => {
         context.tags = result.data._embedded.tagResponseControllerDtoList;
     } catch (error) {
         context.tags = []
-        console.log('get tag group error', error);
+        console.error('get tag group error', error);
     } finally {
         context.showLoadingDialog = false
     }
@@ -46,7 +46,7 @@ export const addTagGroup = async (context, projectId, groupText) => {
         })
         loadProject(context, projectId, context.dataPage - 1)
     } catch (error) {
-        console.log('add tag group error', error);
+        console.error('add tag group error', error);
     } finally {
         context.showLoadingDialog = false
     }
@@ -61,7 +61,7 @@ export const deleteTagGroup = async (context, projectId, tagGroupId,) => {
         await axios.delete(`${context.$baseURL}api/v1/project/${projectId}/tagGroup/${tagGroupId}`)
         loadProject(context, projectId, context.dataPage - 1)
     } catch (error) {
-        console.log('delete tag group error', error);
+        console.error('delete tag group error', error);
     } finally {
         context.showLoadingDialog = false
     }
@@ -79,7 +79,7 @@ export const addTag = async (context, projectId, tagGroupId, tag_name, tag_color
         })
         loadProject(context, projectId, context.dataPage - 1)
     } catch (error) {
-        console.log('add tag group error', error);
+        console.error('add tag group error', error);
     } finally {
         context.showLoadingDialog = false
     }
@@ -94,7 +94,7 @@ export const deleteTag = async (context, projectId, tagGroupId, tagId) => {
         await axios.delete(`${context.$baseURL}api/v1/project/${projectId}/tagGroup/${tagGroupId}/tag/${tagId}`)
         loadProject(context, projectId, context.dataPage - 1)
     } catch (error) {
-        console.log('delete tag group error', error);
+        console.error('delete tag group error', error);
     } finally {
         context.showLoadingDialog = false
     }
@@ -112,7 +112,7 @@ export const changeTagInform = async (context, projectId, tagGroupId, tagId, tag
         })
         loadProject(context, projectId, context.dataPage - 1)
     } catch (error) {
-        console.log('delete tag group error', error);
+        console.error('delete tag group error', error);
     } finally {
         context.showLoadingDialog = false
     }

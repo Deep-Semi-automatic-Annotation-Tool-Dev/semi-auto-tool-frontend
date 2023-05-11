@@ -6,7 +6,7 @@ export const getProjectList = async (context) => {
         const result = await axios.get(`${context.$baseURL}api/v1/project?size=100`)
         context.projectList = result.data._embedded.projectResponseControllerDtoList;
     } catch (error) {
-        console.log('get project error', error);
+        console.error('get project error', error);
     }
 }
 
@@ -23,7 +23,7 @@ export const createProject = async (context, title) => {
         context.showLoadingDialog = false
         getProjectList(context)
     } catch (error) {
-        console.log('post project error', error);
+        console.error('post project error', error);
         context.showLoadingDialog = false
     }
 }
@@ -42,7 +42,7 @@ export const renameProject = async (context, title, id) => {
         getProjectList(context)
     } catch (error) {
         context.showLoadingDialog = false
-        console.log('put project error', error);
+        console.error('put project error', error);
     }
 }
 
@@ -58,6 +58,6 @@ export const deleteProject = async (context, id) => {
         getProjectList(context)
     } catch (error) {
         context.showLoadingDialog = false
-        console.log('delete project error', error);
+        console.error('delete project error', error);
     }
 }
