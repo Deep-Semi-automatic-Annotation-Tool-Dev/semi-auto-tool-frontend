@@ -49,7 +49,7 @@
       </div>
       <div v-if="selectedProjectId !== -1" id="layout-project-editor">
         <!--   문장/태그 편집 영역   -->
-        <div id="layout-project-text-area">
+        <div v-if="trainStatus === -1" id="layout-project-text-area">
           <div id="layout-project-editor-top">
             <div id="editor-top-title">{{ this.selectedProjectName }}</div>
 <!--            <v-btn color="light_magenta" height="30">-->
@@ -712,6 +712,7 @@ import {startTrain} from "@/js/api/train";
 import * as Y from 'yjs'
 // eslint-disable-next-line no-unused-vars
 import { fromUint8Array, toUint8Array } from 'js-base64';
+import {disconnectLoggingSSE} from "@/js/sse/train";
 
 const ydoc = new Y.Doc();
 // eslint-disable-next-line no-unused-vars
@@ -800,34 +801,6 @@ const setTextStroke = (hex) => {
   return `-1px 0px ${color}, 0px 1px ${color}, 1px 0px ${color}, 0px -1px ${color}`
 }
 
-const initLogSSE = (context, streamKey) => {
-  sseTrainLogging = context.$sse.create({
-    url: `/api/v1/stream/${streamKey}`,
-    format: 'plain',
-    withCredentials: true,
-    // polyfill: true,
-  })
-  sseTrainLogging.on('run', context.handleMessage);
-  sseTrainLogging.on('success', context.handleSuccess);
-  sseTrainLogging.on('error', context.handleError);
-
-  sseTrainLogging.connect()
-      .then(sse => {
-        console.log('We\'re connected!');
-        console.log(sse)
-
-        setTimeout(() => {
-          sseTrainLogging.off('run', context.handleMessage);
-          console.log('Stopped listening to event-less messages!');
-        }, 2 * 1000);
-      })
-      .catch((err) => {
-        console.error('Failed to connect to server', err);
-      });
-}
-
-let sseTrainLogging = null;
-
 export default {
   name: "ProjectComponent",
   data() {
@@ -911,7 +884,9 @@ export default {
       trainName: '',
 
       trainEpoch: 1,
-      trainLearningRate: 0.00001
+      trainLearningRate: 0.00001,
+
+      trainStatus: -1
     }
   },
   components: {
@@ -1332,13 +1307,11 @@ export default {
     },
     handleError(message, lastEventId) {
       console.warn('Received a error w/o an event!', message, lastEventId);
-      sseTrainLogging.disconnect()
-      sseTrainLogging = null
+      disconnectLoggingSSE()
     },
     handleSuccess(message, lastEventId) {
       console.warn('Received a success w/o an event!', message, lastEventId);
-      sseTrainLogging.disconnect()
-      sseTrainLogging = null
+      disconnectLoggingSSE()
     },
 
     async startTrainCheck(data) {
@@ -1353,7 +1326,6 @@ export default {
             this.trainLearningRate
         )
         if (streamKey !== null) {
-          initLogSSE(this, streamKey)
           this.stepperIdx++
         }
       }
@@ -1365,10 +1337,21 @@ export default {
       if (checkTrainName(this, this.trainName)) {
         this.showTrainStart = true
       }
+    },
+
+
+    receiveStatus(message, lastEventId) {
+      const data = JSON.parse(message.replaceAll("'", '"'))
+      console.log('Received status', data, lastEventId);
+      if (data.stream_key !== '-1') {
+        this.trainStatus = data.stream_key
+      } else {
+        this.trainStatus = -1
+      }
     }
   },
   beforeUnmount() {
-    if (sseTrainLogging !== null) sseTrainLogging.disconnect();
+    disconnectLoggingSSE()
   },
 }
 </script>

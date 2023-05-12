@@ -1,5 +1,6 @@
 import {getTagGroupList, getTagList} from "@/js/api/tag";
 import {getDataList} from "@/js/api/data";
+import {initStatusSSE} from "@/js/sse/train";
 // import {getProjectStatus} from "@/js/api/train";
 
 export const initVariables = (context) => {
@@ -28,5 +29,6 @@ export const loadProject = async (context, id, page) => {
             context.tagGroups[context.selectedTagGroupId].tag_group_id)
     }
     await getDataList(context, id, page)
+    initStatusSSE(context, id)
     // await getProjectStatus(context, context.tagGroups[context.selectedTagGroupId].tag_group_id)
 }
