@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const startTrain = async (context, project_id, tag_group_id, train_name, epoch, lr) => {
     try {
-        const result = await axios.post(
+        await axios.post(
             `${context.$mlURL}api/v1/model/${project_id}/train/${tag_group_id}`,
             {
                 'train_name': train_name,
@@ -18,19 +18,7 @@ export const startTrain = async (context, project_id, tag_group_id, train_name, 
             //     }
             // }
         )
-        console.log(result.data)
-        return result.data.stream_key
-    } catch (error) {
-        console.error('train start error', error);
-        return null
-    }
-}
-
-export const getProjectStatus = async (context, project_id) => {
-    try {
-        const result = await axios.get(`${context.$mlURL}api/v1/model/${project_id}/status`,)
-        console.log(result)
-        return result.data.stream_key
+        // console.log(result.data)
     } catch (error) {
         console.error('train start error', error);
         return null

@@ -390,6 +390,9 @@
                   <v-btn color="color_accept" size="small" @click="checkTrainStart">
                     학습시작
                   </v-btn>
+                  <v-btn color="light_magenta" size="small" @click="skipTrain">
+                    학습 건너뛰기
+                  </v-btn>
                   <v-btn color="color_deny" size="small" @click="stepperPrev">
                     태깅 다시하기
                   </v-btn>
@@ -401,7 +404,7 @@
           <div class="stepper-item" :class="stepperIdx === 2 ? 'selected' : ''">
             <div class="stepper-item-top">
               <div class="stepper-item-top-circle" :class="stepperIdx === 2 ? 'selected' : ''">
-                <div class="stepper-item-top-circle-num">4</div>
+                <div class="stepper-item-top-circle-num">3</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 2 ? 'stepper-item-top-circle-title-selected' : ''">
                 Training
@@ -430,7 +433,7 @@
           <div class="stepper-item" :class="stepperIdx === 3 ? 'selected' : ''">
             <div class="stepper-item-top">
               <div class="stepper-item-top-circle" :class="stepperIdx === 3 ? 'selected' : ''">
-                <div class="stepper-item-top-circle-num">3</div>
+                <div class="stepper-item-top-circle-num">4</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 3 ? 'stepper-item-top-circle-title-selected' : ''">
                 Data Reload
@@ -452,7 +455,10 @@
 <!--                    다음-->
 <!--                  </v-btn>-->
                   <v-btn color="color_deny" size="small" @click="dataReloading">
-                    data reload
+                    데이터 리로드
+                  </v-btn>
+                  <v-btn color="light_magenta" size="small" @click="gotoTag">
+                    태깅으로 돌아가기
                   </v-btn>
                 </div>
               </div>
@@ -821,6 +827,8 @@ export default {
       stepperMax: 3,
       projectList: [],
 
+      initStatus: true,
+
       showMakeProjectDialog: false,
       snackbarMakeProjectTitleWarn: false,
       snackbarMakeProjectTitleWarnMsg: "",
@@ -981,6 +989,9 @@ export default {
       if (this.stepperIdx - 1 >= 0) this.stepperIdx--;
     },
     dataReloading() {
+      this.stepperIdx = 0;
+    },
+    gotoTag() {
       this.stepperIdx = 0;
     },
 
@@ -1318,16 +1329,13 @@ export default {
       this.showTrainStart = false
       // 프로젝트 이동 시 저장 여부 다이얼로그 버튼 클릭
       if (data.type === this.DIALOG_CLICK_YES) {
-        const streamKey = await startTrain(this,
+        await startTrain(this,
             this.selectedProjectId,
             this.tagGroups[this.selectedTagGroupId].tag_group_id,
             this.trainName,
             this.trainEpoch,
             this.trainLearningRate
         )
-        if (streamKey !== null) {
-          this.stepperIdx++
-        }
       }
     },
     startTrain() {
@@ -1338,6 +1346,9 @@ export default {
         this.showTrainStart = true
       }
     },
+    skipTrain() {
+      this.stepperIdx = 3
+    },
 
 
     receiveStatus(message, lastEventId) {
@@ -1345,9 +1356,16 @@ export default {
       console.log('Received status', data, lastEventId);
       if (data.stream_key !== '-1') {
         this.trainStatus = data.stream_key
+        this.stepperIdx = 2
       } else {
         this.trainStatus = -1
+        if (this.initStatus) {
+          this.stepperIdx = 0
+        } else {
+          this.stepperIdx = 3
+        }
       }
+      this.initStatus = false
     }
   },
   beforeUnmount() {

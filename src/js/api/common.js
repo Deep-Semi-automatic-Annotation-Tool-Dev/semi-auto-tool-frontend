@@ -4,6 +4,8 @@ import {initStatusSSE} from "@/js/sse/train";
 // import {getProjectStatus} from "@/js/api/train";
 
 export const initVariables = (context) => {
+    context.initStatus = true
+
     context.dataPage = 0
     context.dataTotalPage = 0
     context.selectedTagGroupId = 0
