@@ -718,7 +718,7 @@ import {startTrain} from "@/js/api/train";
 import * as Y from 'yjs'
 // eslint-disable-next-line no-unused-vars
 import { fromUint8Array, toUint8Array } from 'js-base64';
-import {disconnectLoggingSSE} from "@/js/sse/train";
+import {disconnectLoggingSSE, disconnectStatusSSE, initLogSSE} from "@/js/sse/train";
 
 const ydoc = new Y.Doc();
 // eslint-disable-next-line no-unused-vars
@@ -1357,6 +1357,7 @@ export default {
       if (data.stream_key !== '-1') {
         this.trainStatus = data.stream_key
         this.stepperIdx = 2
+        initLogSSE(this, this.trainStatus)
       } else {
         this.trainStatus = -1
         if (this.initStatus) {
@@ -1370,6 +1371,7 @@ export default {
   },
   beforeUnmount() {
     disconnectLoggingSSE()
+    disconnectStatusSSE()
   },
 }
 </script>

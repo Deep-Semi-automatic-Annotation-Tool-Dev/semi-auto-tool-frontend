@@ -46,9 +46,9 @@ export const initLogSSE = (context, streamKey) => {
     disconnectLoggingSSE()
 
     sseTrain = context.$sse.create({
-        url: `/api/v1/stream/${streamKey}`,
+        url: `${context.$mlURL}api/v1/stream/${streamKey}`,
         format: 'plain',
-        withCredentials: true,
+        // withCredentials: true,
         // polyfill: true,
     })
     sseTrain.on('run', context.handleMessage);
@@ -60,10 +60,10 @@ export const initLogSSE = (context, streamKey) => {
             console.log('We\'re connected!');
             console.log(sse)
 
-            setTimeout(() => {
-                sseTrain.off('run', context.handleMessage);
-                console.log('Stopped listening to event-less messages!');
-            }, 2 * 1000);
+            // setTimeout(() => {
+            //     sseTrain.off('run', context.handleMessage);
+            //     console.log('Stopped listening to event-less messages!');
+            // }, 2 * 1000);
         })
         .catch((err) => {
             console.error('Failed to connect to server', err);
