@@ -49,7 +49,7 @@
       </div>
       <div v-if="selectedProjectId !== -1" id="layout-project-editor">
         <!--   문장/태그 편집 영역   -->
-        <div v-if="trainStatus === -1" id="layout-project-text-area">
+        <div v-if="!(trainStatus !== -1 || (trainStatus === -1 && stepperIdx === 3))" id="layout-project-text-area">
           <div id="layout-project-editor-top">
             <div id="editor-top-title">{{ this.selectedProjectName }}</div>
 <!--            <v-btn color="light_magenta" height="30">-->
@@ -711,8 +711,8 @@ import {
   createProject,
   getProjectList,
   deleteProject,
-  renameProject
-} from'@/js/api/project.js'
+  renameProject, getRecentTrainResult
+} from '@/js/api/project.js'
 import {
   addTagInData, deleteTagInData,
   getDataList, getParagraphDataList, getWordDataList, postData
@@ -1392,6 +1392,7 @@ export default {
     },
     skipTrain() {
       this.stepperIdx = 3
+      getRecentTrainResult(this, this.selectedProjectId)
     },
 
 
@@ -1408,6 +1409,7 @@ export default {
           this.stepperIdx = 0
         } else {
           this.stepperIdx = 3
+          getRecentTrainResult(this, this.selectedProjectId)
         }
       }
       this.initStatus = false

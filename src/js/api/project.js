@@ -61,3 +61,13 @@ export const deleteProject = async (context, id) => {
         console.error('delete project error', error);
     }
 }
+
+export const getRecentTrainResult = async (context, projectId) => {
+    try {
+        const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/statistics`)
+        console.log(result.data)
+    } catch (error) {
+        console.error('get train result error', error);
+        return null
+    }
+}
