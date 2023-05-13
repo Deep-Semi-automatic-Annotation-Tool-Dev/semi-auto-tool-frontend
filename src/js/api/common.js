@@ -18,6 +18,8 @@ export const initVariables = (context) => {
     context.selectedTag = 0
     context.tagMod = 'sentence'
     context.wordTagData = {}
+    context.selectionRank = 'sumRank'
+    context.trainResultData = null
 }
 
 export const loadProject = async (context, id, page) => {

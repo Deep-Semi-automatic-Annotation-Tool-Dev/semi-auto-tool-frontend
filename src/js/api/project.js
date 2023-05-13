@@ -63,6 +63,9 @@ export const deleteProject = async (context, id) => {
 }
 
 export const getRecentTrainResult = async (context, projectId) => {
+    context.showLoadingDialog = true
+    context.loadingDialogTitle = '학습결과 가져오기'
+    context.loadingDialogSubTitle = '최근 학습 결과 가져오는 중...'
     try {
         const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/statistics`)
         console.log(result.data)
@@ -73,5 +76,7 @@ export const getRecentTrainResult = async (context, projectId) => {
     } catch (error) {
         console.error('get train result error', error);
         context.trainResultData = null
+    }  finally {
+        context.showLoadingDialog = false
     }
 }

@@ -476,6 +476,16 @@
                     </tr>
                     </tbody>
                   </v-table>
+                  <v-select
+                      label="리로드할 Rank 선택"
+                      :items="['sumRank', 'bertRank', 'gptRank']"
+                      item-title="tag_group_name"
+                      item-value="value"
+                      :hide-details="true"
+                      v-model="selectionRank"
+                      variant="outlined"
+                      density="compact"
+                  ></v-select>
                 </div>
                 <div class="stepper-item-buttons">
 <!--                  <v-btn color="color_accept" size="small" @click="stepperNext">-->
@@ -929,6 +939,7 @@ export default {
       logProgressNow: 0,
 
       trainResultData: null,
+      selectionRank: 'sumRank',
     }
   },
   components: {
