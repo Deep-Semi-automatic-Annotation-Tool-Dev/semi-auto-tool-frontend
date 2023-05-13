@@ -453,12 +453,29 @@
             <div class="stepper-item-content stepper-item-content-last">
 <!--              <v-divider vertical></v-divider>-->
               <div class="stepper-item-content-area" :class="stepperIdx !== 3 ? 'unselected' : ''">
-
-                <div>
-
-                  <div class="model-summary">정답 데이터: n개</div>
-                  <div class="model-summary">오답 데이터: n개</div>
-                  <div class="model-summary">data reload를 진행할 시 정답 데이터를 제외하고 태깅 단계로 되돌아 갑니다.</div>
+                <div v-if=" tagGroups.length > 0" style="width: 100%">
+                  <div class="model-summary">{{ tagGroups[selectedTagGroupId].tag_group_name }} - 최근 학습 결과</div>
+                  <v-table v-if="trainResultData !== null" class="table-result">
+                    <thead>
+                    <tr>
+                      <th></th>
+                      <th>GPT</th>
+                      <th>Bert</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                      <td>train</td>
+                      <td>{{ trainResultData[tagGroups[selectedTagGroupId].tag_group_name].current_train_tag_group_gpt_train_acc }}</td>
+                      <td>{{ trainResultData[tagGroups[selectedTagGroupId].tag_group_name].current_train_tag_group_bert_train_acc }}</td>
+                    </tr>
+                    <tr>
+                      <td>test</td>
+                      <td>{{ trainResultData[tagGroups[selectedTagGroupId].tag_group_name].current_train_tag_group_gpt_test_acc }}</td>
+                      <td>{{ trainResultData[tagGroups[selectedTagGroupId].tag_group_name].current_train_tag_group_bert_test_acc }}</td>
+                    </tr>
+                    </tbody>
+                  </v-table>
                 </div>
                 <div class="stepper-item-buttons">
 <!--                  <v-btn color="color_accept" size="small" @click="stepperNext">-->
@@ -909,7 +926,9 @@ export default {
       logMsg: "",
       isIndeterminate: true,
       logProgressMax: 0,
-      logProgressNow: 0
+      logProgressNow: 0,
+
+      trainResultData: null,
     }
   },
   components: {
