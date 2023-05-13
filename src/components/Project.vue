@@ -364,17 +364,17 @@
                       density="compact"
                   ></v-select>
                 </v-container>
-                <v-container class="parameter-set-items pr-4">
-                  <div>{{ `epoch ${trainEpoch}` }}</div>
-                  <v-slider
-                      v-model="trainEpoch"
-                      :max="500"
-                      :min="1"
-                      :step="1"
-                      thumb-label
-                  >
-                  </v-slider>
-                </v-container>
+<!--                <v-container class="parameter-set-items pr-4">-->
+<!--                  <div>{{ `epoch ${trainEpoch}` }}</div>-->
+<!--                  <v-slider-->
+<!--                      v-model="trainEpoch"-->
+<!--                      :max="500"-->
+<!--                      :min="1"-->
+<!--                      :step="1"-->
+<!--                      thumb-label-->
+<!--                  >-->
+<!--                  </v-slider>-->
+<!--                </v-container>-->
                 <v-container class="parameter-set-items pr-4">
                   <div>{{ `lr ${trainLearningRate}` }}</div>
                   <v-slider
@@ -414,10 +414,20 @@
             <div class="stepper-item-content">
               <v-divider class="stepper-item-divider" vertical></v-divider>
               <div class="stepper-item-content-area" :class="stepperIdx !== 2 ? 'unselected' : ''">
-
-
-                <div class="model-summary">학습이 완료되면 자동으로 다음 단계로 넘어갑니다.</div>
-                <v-progress-linear indeterminate></v-progress-linear>
+                <div class="model-summary">{{ selectedProjectName }} 프로젝트 - 학습이 완료되면 자동으로 다음 단계로 넘어갑니다.</div>
+                <div class="model-summary">{{ logMsg }}</div>
+                <v-progress-linear
+                    :indeterminate="isIndeterminate"
+                    :min="0"
+                    :max="logProgressMax"
+                    v-model="logProgressNow"
+                ></v-progress-linear>
+                <div id="show-train-log">
+                  <div
+                      v-for="log in logDatas"
+                      :key="log"
+                  >{{ log }}</div>
+                </div>
 <!--                <div class="stepper-item-buttons">-->
 <!--                  <v-btn color="color_accept" size="small" @click="stepperNext">-->
 <!--                    다음-->
@@ -894,7 +904,12 @@ export default {
       trainEpoch: 1,
       trainLearningRate: 0.00001,
 
-      trainStatus: -1
+      trainStatus: -1,
+      logDatas: [],
+      logMsg: "",
+      isIndeterminate: true,
+      logProgressMax: 0,
+      logProgressNow: 0
     }
   },
   components: {
@@ -1314,15 +1329,44 @@ export default {
     },
 
     handleMessage(message, lastEventId) {
+      message = JSON.parse(message
+          .replace("'{", "{").replace("}'", "}")
+          .replace('"{', "{").replace('}"', "}")
+          .replaceAll("'", '"'))
       console.warn('Received a message w/o an event!', message, lastEventId);
+
+      if (message.step === "Gpt_Progress" || message.step === "Bert_Progress") {
+        if (message.step === "Gpt_Progress") this.logMsg = "Gpt 학습 중..."
+        else this.logMsg = "Bert 학습 중..."
+        this.isIndeterminate = false
+        this.logProgressMax = message.message.total_batch
+        this.logProgressNow = message.message.batch
+        this.logMsg += ` ${Math.round(message.message.batch / message.message.total_batch * 10000) / 100}%`
+        this.logDatas.unshift(
+            `epoch: ${message.message.epoch}\tloss: ${message.message.loss}
+          \taccuracy: ${message.message.accuracy}\tbatch: ${message.message.batch}
+          \ttotal batch: ${message.message.total_batch}`
+        )
+      } else {
+        this.isIndeterminate = true
+        if (message.step === "Gpt") this.logMsg = "GPT 학습"
+        else if (message.step === "Bert") this.logMsg = "Bert 학습"
+
+        this.logDatas.unshift(message.message)
+      }
+      if (this.logDatas.length > 100) this.logDatas.pop()
     },
     handleError(message, lastEventId) {
       console.warn('Received a error w/o an event!', message, lastEventId);
       disconnectLoggingSSE()
+      this.logMsg = "학습 오류"
+      this.isIndeterminate = true
     },
     handleSuccess(message, lastEventId) {
       console.warn('Received a success w/o an event!', message, lastEventId);
       disconnectLoggingSSE()
+      this.logMsg = "학습 성공"
+      this.isIndeterminate = true
     },
 
     async startTrainCheck(data) {

@@ -673,3 +673,21 @@
   padding: 0;
   margin: 0;
 }
+
+#show-train-log {
+  //background-color: #6fd5d5;
+  overflow-y: scroll;
+
+  font-size: 14px;
+
+  padding: 10px;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  border-color: black;
+  border-width: 1px;
+  border-style: solid;
+
+  display: flex;
+  flex-direction: column;
+}

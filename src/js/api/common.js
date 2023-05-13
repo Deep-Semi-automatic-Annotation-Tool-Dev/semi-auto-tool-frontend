@@ -22,6 +22,7 @@ export const initVariables = (context) => {
 
 export const loadProject = async (context, id, page) => {
     initVariables(context)
+    initStatusSSE(context, id)
 
     await getTagGroupList(context, id)
     if (context.tagGroups.length > 0) {
@@ -31,6 +32,5 @@ export const loadProject = async (context, id, page) => {
             context.tagGroups[context.selectedTagGroupId].tag_group_id)
     }
     await getDataList(context, id, page)
-    initStatusSSE(context, id)
     // await getProjectStatus(context, context.tagGroups[context.selectedTagGroupId].tag_group_id)
 }
