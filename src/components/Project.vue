@@ -752,14 +752,9 @@ import {
 import {initVariables, loadProject} from "@/js/api/common";
 import {startTrain} from "@/js/api/train";
 
-import * as Y from 'yjs'
-// eslint-disable-next-line no-unused-vars
-import { fromUint8Array, toUint8Array } from 'js-base64';
 import {disconnectLoggingSSE, disconnectStatusSSE, initLogSSE} from "@/js/sse/train";
 
-const ydoc = new Y.Doc();
-// eslint-disable-next-line no-unused-vars
-const sentence_map = ydoc.getMap('sentence');
+import * as Y from 'yjs'
 
 const generateModels = () => {
   const group = []
@@ -946,7 +941,12 @@ export default {
     AppBar,
     Dialog
   },
-  created() {
+  async created() {
+    this.yDoc = await new Y.Doc()
+    this.sentenceMap = await this.yDoc.getMap('sentence');
+    this.wordMap = await this.yDoc.getMap('word');
+    this.paragraphMap = await this.yDoc.getMap('paragraph');
+    console.log(this.yDoc)
     getProjectList(this);
     window.onkeydown = (e) => {
       if ((e.keyCode === 70 && (e.ctrlKey || e.metaKey ))) {
@@ -959,13 +959,6 @@ export default {
         }
       }
     }
-    // const streamKey = localStorage.getItem("streamKey")
-    // if (streamKey !== null) {
-    //   this.stepperIdx = 2
-    //   initLogSSE(this, streamKey)
-    // }
-    //
-    // initSocket(this)
   },
   methods: {
     checkDataTag(tags) {

@@ -5,6 +5,8 @@ export const getDataList = async (context, id, page) => {
     context.loadingDialogTitle = '데이터 로딩'
     context.loadingDialogSubTitle = "텍스트 데이터를 가져오는 중 입니다."
     context.showLoadingDialog = true
+
+    context.sentenceMap.clear()
     try {
         const result = await axios.get(`${context.$baseURL}api/v1/project/${id}/data?size=100&page=${page}`)
         context.lineData = result.data._embedded.dataResponseControllerDtoList;
@@ -13,9 +15,11 @@ export const getDataList = async (context, id, page) => {
 
         for (let d of context.lineData) {
             d.search = true
+            context.sentenceMap.set(d.id, d.data_tags)
         }
 
         console.log(result.data);
+        console.log(context.sentenceMap);
     } catch (error) {
         context.lineData = []
         context.dataPage = 0
