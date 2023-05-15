@@ -69,7 +69,7 @@ export const getParagraphDataList = async (context, projectId, startIndex, endIn
     }
 }
 
-export const addTagInData = async (context, projectId, targetTag, targetDataIdx) => {
+export const addTagInData = async (context, projectId, targetTag, targetDataIdx, dataId) => {
     context.showLoadingDialog = true
     context.loadingDialogTitle = '태그 할당'
     context.loadingDialogSubTitle = '데이터에 태그 할당 중...'
@@ -99,11 +99,10 @@ export const addTagInData = async (context, projectId, targetTag, targetDataIdx)
     console.log(newTags)
 
     try {
-        const result = await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data`, [{
-            "id": targetData.id,
-            "text": targetData.text,
+        const result = await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data/${dataId}`,
+            {
             "data_tags": newTags
-        }])
+        })
         targetData.data_tags = result.data[0].data_tags
         console.log(result.data[0].data_tags);
     } catch (error) {

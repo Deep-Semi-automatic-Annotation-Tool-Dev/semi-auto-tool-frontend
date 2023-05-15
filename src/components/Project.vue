@@ -1058,12 +1058,14 @@ export default {
     },
     async onDrop(event, colNum) {
       const draggedTagValue = Number(event.dataTransfer.getData("selectedItem"))
-      console.log(event.dataTransfer.getData("selectedItem"))
+      console.log(event.dataTransfer.getData("selectedItem"), this.lineData[colNum].id)
       let targetTag = this.tags[draggedTagValue]
       await addTagInData(this,
           this.selectedProjectId,
           targetTag,
-          colNum)
+          colNum,
+          this.lineData[colNum].id
+      )
     },
     async projectCreateDialogClicked(data) {
       this.showMakeProjectDialog = false
