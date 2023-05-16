@@ -742,7 +742,7 @@ import {
   renameProject, getRecentTrainResult
 } from '@/js/api/project.js'
 import {
-  addTagInData, createWord, deleteTagInData,
+  addTagInData, createWord, deleteTagInData, deleteTagInWord, deleteWord,
   getDataList, getParagraphDataList, getWordDataList, postData
 } from '@/js/api/data.js'
 import {
@@ -1248,7 +1248,35 @@ export default {
     },
 
     async onPageChange(page) {
-      await getDataList(this, this.selectedProjectId, page - 1)
+      switch (this.tagMod) {
+        case 'word': {
+          this.lineData = []
+          await getDataList(this, this.selectedProjectId, page - 1)
+
+          this.wordTagData = {}
+          if (this.lineData.length > 0) {
+            let startIdx = this.lineData[this.lineData.length - 1].id
+            let endIdx = this.lineData[0].id
+            await getWordDataList(this, this.selectedProjectId, startIdx, endIdx)
+          }
+          break
+        }
+        case 'sentence': {
+          this.lineData = []
+          await getDataList(this, this.selectedProjectId, page - 1)
+          break
+        }
+        case 'paragraph': {
+          this.lineData = []
+          await getDataList(this, this.selectedProjectId, page - 1)
+
+          this.paragraphData = []
+          let startIdx = this.lineData[this.lineData.length - 1].id
+          let endIdx = this.lineData[0].id
+          await getParagraphDataList(this, this.selectedProjectId, startIdx, endIdx)
+          break
+        }
+      }
     },
 
     searchClose() {
@@ -1282,6 +1310,9 @@ export default {
       this.selectedTag = 0
       switch (d) {
         case 'word': {
+          this.lineData = []
+          await getDataList(this, this.selectedProjectId, this.dataPage - 1)
+
           this.wordTagData = {}
           if (this.lineData.length > 0) {
             let startIdx = this.lineData[this.lineData.length - 1].id
@@ -1296,6 +1327,9 @@ export default {
           break
         }
         case 'paragraph': {
+          this.lineData = []
+          await getDataList(this, this.selectedProjectId, this.dataPage - 1)
+
           this.paragraphData = []
           let startIdx = this.lineData[this.lineData.length - 1].id
           let endIdx = this.lineData[0].id
@@ -1331,14 +1365,14 @@ export default {
           }
         }
 
-        if (tag.start_index > 0) result += `<span parent-idx="${sentenceIdx}" start-idx="${lastEndIdx}">` + word.text.slice(lastEndIdx, tag.start_index) + `</span>`
+        if (tag.start_index > 0) result += `<span not-alloc="0" parent-idx="${sentenceIdx}" start-idx="${lastEndIdx}">` + word.text.slice(lastEndIdx, tag.start_index) + `</span>`
         if (nowTagInfo !== null) {
-          result += `<span parent-idx="${sentenceIdx}" start-idx="${tag.start_index}" style="background-color: #${nowTagInfo.tagColor};
+          result += `<span not-alloc="0" parent-idx="${sentenceIdx}" start-idx="${tag.start_index}" style="background-color: #${nowTagInfo.tagColor};
             color: ${setTextColorToBackground(nowTagInfo.tagColor)}; cursor: pointer;"
             class="word-tag">`
               + word.text.slice(tag.start_index, tag.end_index + 1) + '</span>'
         } else {
-          result += `<span not-alloc parent-idx="${sentenceIdx}" start-idx="${tag.start_index}" style="background-color: rgba(0,0,0,0.08);
+          result += `<span not-alloc="1" parent-idx="${sentenceIdx}" start-idx="${tag.start_index}" style="background-color: rgba(0,0,0,0.08);
             cursor: pointer;"
             class="word-tag">`
               + word.text.slice(tag.start_index, tag.end_index + 1) + '</span>'
@@ -1347,52 +1381,59 @@ export default {
         lastEndIdx = tag.end_index + 1
       }
       if (lastEndIdx !== word.text.length) {
-        result += `<span parent-idx="${sentenceIdx}" start-idx="${lastEndIdx}">` + word.text.slice(lastEndIdx, word.text.length) + `</span>`
+        result += `<span not-alloc="0" parent-idx="${sentenceIdx}" start-idx="${lastEndIdx}">` + word.text.slice(lastEndIdx, word.text.length) + `</span>`
       }
 
       return result
     },
     onWordSelection() {
       const selection = window.getSelection()
-      const startIdx = Number(selection.anchorNode.parentElement.attributes['start-idx'].nodeValue)
-      const parentIdx = Number(selection.anchorNode.parentElement.attributes['parent-idx'].nodeValue)
-      console.log(startIdx, parentIdx)
+      const attributes = selection.anchorNode.parentElement.attributes
+      const startIdx = Number(attributes['start-idx'].nodeValue)
+      const parentIdx = Number(attributes['parent-idx'].nodeValue)
+      // console.log(startIdx, parentIdx)
 
       const idxStart = startIdx + selection.anchorOffset
       const idxEnd = startIdx + selection.anchorOffset + selection.toString().length
-      console.log(idxStart, idxEnd)
-      console.log(this.wordTagData[parentIdx])
-      let tagExist = false
+      // console.log(idxStart, idxEnd)
+      // console.log(this.wordTagData[parentIdx])
+      console.log(selection)
       for (let item of this.wordTagData[parentIdx]) {
-        // let nowTagInfo = null
-        // for (let t of item.data_target_tags) {
-        //   if (t.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
-        //     nowTagInfo = t
-        //     break
-        //   }
-        // }
-        // if (nowTagInfo === null) continue
+        if (item.start_index === idxStart && item.end_index === idxEnd - 1 && attributes['not-alloc'].nodeValue === '1') {
+          console.log("add tag same")
+          return;
+        }
         if ((item.start_index <= idxStart && idxStart <= item.end_index) ||
             (item.start_index <= idxEnd - 1 && idxEnd - 1 <= item.end_index)) {
-          tagExist = item
-          break
+          for (let tag of item.data_target_tags) {
+            if (tag.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
+              if (confirm(`'${item.text}'에서 '${this.tags[this.selectedTag].tag_name}'태그를 삭제하시겠습니까?`)) {
+                console.log("remove tag", item)
+                if (item.data_target_tags.length === 1) {
+                  deleteWord(this, this.selectedProjectId, item.id)
+                } else {
+                  deleteTagInWord()
+                }
+              }
+              return;
+            }
+          }
+
+          alert("다른 태그 그룹에서 태그가 지정된 단어는 삭제가 불가능합니다.")
+          return;
         }
       }
-      if (tagExist) {
-        console.log("remove tag")
-      } else {
-        if (idxStart === idxEnd) return
-        console.log("add tag")
-        createWord(
-            this,
-            this.selectedProjectId,
-            parentIdx,
-            idxStart,
-            idxEnd,
-            this.tagGroups[this.selectedTagGroupId].tag_group_id,
-            this.tags[this.selectedTag].tag_id
-        )
-      }
+      if (idxStart === idxEnd) return
+      console.log("add tag")
+      createWord(
+          this,
+          this.selectedProjectId,
+          parentIdx,
+          idxStart,
+          idxEnd,
+          this.tagGroups[this.selectedTagGroupId].tag_group_id,
+          this.tags[this.selectedTag].tag_id
+      )
       console.log(selection.toString())
     },
 

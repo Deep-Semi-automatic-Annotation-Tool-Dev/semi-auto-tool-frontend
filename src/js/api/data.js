@@ -155,7 +155,7 @@ export const createWord = async (context, projectId, parentId, startIdx, endIdx,
             {
                 "parent_data_id": parentId,
                 "start_index": startIdx,
-                "end_index": endIdx,
+                "end_index": endIdx - 1,
                 "data_tags": [
                     {
                         "tag_group_id": tagGroupId,
@@ -164,6 +164,11 @@ export const createWord = async (context, projectId, parentId, startIdx, endIdx,
                 ]
             })
         console.log(result.data);
+        try {
+            context.wordTagData[result.data.parent_id].push(result.data)
+        } catch (e) {
+            context.wordTagData[result.data.parent_id] = [result.data]
+        }
         // targetData.data_tags = result.data.data_tags
     } catch (error) {
         console.error('post word error', error);
@@ -172,7 +177,7 @@ export const createWord = async (context, projectId, parentId, startIdx, endIdx,
     }
 }
 
-// export const deleteTagInWord = async (context) => {
+export const deleteTagInWord = async () => {
 //     context.showLoadingDialog = true
 //     context.loadingDialogTitle = '단어 태그 삭제'
 //     context.loadingDialogSubTitle = '단어에 할당된 태그 제거 중...'
@@ -204,7 +209,29 @@ export const createWord = async (context, projectId, parentId, startIdx, endIdx,
 //     } finally {
 //         context.showLoadingDialog = false
 //     }
-// }
+}
+
+export const deleteWord = async (context, projectId, dataId) => {
+    context.showLoadingDialog = true
+    context.loadingDialogTitle = '단어 삭제'
+    context.loadingDialogSubTitle = '단어 삭제 중...'
+
+    try {
+        await axios.delete(`${context.$baseURL}api/v1/project/${projectId}/data/${dataId}`)
+
+        context.wordTagData = {}
+        if (context.lineData.length > 0) {
+            let startIdx = context.lineData[context.lineData.length - 1].id
+            let endIdx = context.lineData[0].id
+
+            context.showLoadingDialog = false
+            await getWordDataList(context, context.selectedProjectId, startIdx, endIdx)
+        }
+    } catch (error) {
+        console.error('word data delete error', error);
+        context.showLoadingDialog = false
+    }
+}
 
 export const postData = async (context, projectId, file, colName) => {
     context.showLoadingDialog = true
