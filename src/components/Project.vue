@@ -130,20 +130,21 @@
               </div>
               <div v-else-if="tagMod === 'word'" id="editor-words">
                 <div
-                    v-for="(l, idx) in lineData"
+                    v-for="(l) in lineData"
                     :key="l"
                 >
                   <p
                       class="text-line"
                       v-html="setWordHighlight(l, wordTagData)"
-                  ></p>
-                  <p
-                      class="text-line-selection"
-                      :data-tooltip="idx"
                       @mouseup="onWordSelection"
-                  >
-                    {{ l.text }}
-                  </p>
+                  ></p>
+<!--                  <p-->
+<!--                      class="text-line-selection"-->
+<!--                      :data-tooltip="idx"-->
+<!--                      @mouseup="onWordSelection"-->
+<!--                  >-->
+<!--                    {{ l.text }}-->
+<!--                  </p>-->
                 </div>
               </div>
               <div v-else-if="tagMod === 'paragraph'" id="editor-paragraphs">
@@ -832,13 +833,6 @@ const setTextColorToBackground = (hex) => {
   return (brightness > 125) ? 'black' : 'white'
 }
 
-
-const setTextStroke = (hex) => {
-  const color = setTextColorToBackground(hex)
-  if (color === 'black') return 'none'
-  return `-1px 0px ${color}, 0px 1px ${color}, 1px 0px ${color}, 0px -1px ${color}`
-}
-
 export default {
   name: "ProjectComponent",
   data() {
@@ -1315,6 +1309,9 @@ export default {
       console.log(d)
     },
 
+    onWordTagClicked() {
+      console.log('dddd')
+    },
     setWordHighlight(word, wordTag) {
       const sentenceIdx = word.id
       const targetInfo = wordTag[sentenceIdx]
@@ -1334,22 +1331,52 @@ export default {
           }
         }
         if (nowTagInfo === null) {
-          result += word.text.slice(lastEndIdx, tag.end_index + 1)
+          result += `<span parent-idx="${sentenceIdx}" start-idx="${lastEndIdx}">` + word.text.slice(lastEndIdx, tag.end_index + 1) + `</span>`
         } else {
-          result += word.text.slice(lastEndIdx, tag.start_index)
-          result += `<span style="background-color: #${nowTagInfo.tagColor}; text-shadow: ${setTextStroke(nowTagInfo.tagColor)}">`
+          if (tag.start_index > 0) result += `<span parent-idx="${sentenceIdx}" start-idx="${lastEndIdx}">` + word.text.slice(lastEndIdx, tag.start_index) + `</span>`
+          result += `<span parent-idx="${sentenceIdx}" start-idx="${tag.start_index}" style="background-color: #${nowTagInfo.tagColor};
+              color: ${setTextColorToBackground(nowTagInfo.tagColor)}; cursor: pointer;"
+              class="word-tag">`
               + word.text.slice(tag.start_index, tag.end_index + 1) + '</span>'
         }
         lastEndIdx = tag.end_index + 1
       }
-      if (lastEndIdx !== word.text.length) result += word.text.slice(lastEndIdx, word.text.length)
+      if (lastEndIdx !== word.text.length) {
+        result += `<span parent-idx="${sentenceIdx}" start-idx="${lastEndIdx}">` + word.text.slice(lastEndIdx, word.text.length) + `</span>`
+      }
 
       return result
     },
     onWordSelection() {
       const selection = window.getSelection()
-      console.log(selection)
-      console.log(selection.anchorOffset, selection.anchorOffset + selection.toString().length)
+      const startIdx = Number(selection.anchorNode.parentElement.attributes['start-idx'].nodeValue)
+      const parnetIdx = Number(selection.anchorNode.parentElement.attributes['parent-idx'].nodeValue)
+      console.log(startIdx, parnetIdx)
+
+      const idxStart = startIdx + selection.anchorOffset
+      const idxEnd = startIdx + selection.anchorOffset + selection.toString().length
+      console.log(idxStart, idxEnd)
+      let tagExist = false
+      for (let item of this.wordTagData[parnetIdx]) {
+        // let nowTagInfo = null
+        // for (let t of item.data_target_tags) {
+        //   if (t.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
+        //     nowTagInfo = t
+        //     break
+        //   }
+        // }
+        // if (nowTagInfo === null) continue
+        if ((item.start_index <= idxStart && idxStart <= item.end_index) ||
+            (item.start_index <= idxEnd - 1 && idxEnd - 1 <= item.end_index)) {
+          tagExist = true
+          break
+        }
+      }
+      if (tagExist) {
+        console.log("remove tag")
+      } else {
+        console.log("add tag")
+      }
       console.log(selection.toString())
     },
 
