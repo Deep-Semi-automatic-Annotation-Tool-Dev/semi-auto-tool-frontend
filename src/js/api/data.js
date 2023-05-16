@@ -103,8 +103,8 @@ export const addTagInData = async (context, projectId, targetTag, targetDataIdx,
             {
             "data_tags": newTags
         })
-        targetData.data_tags = result.data[0].data_tags
-        console.log(result.data[0].data_tags);
+        targetData.data_tags = result.data.data_tags
+        console.log(result.data.data_tags);
     } catch (error) {
         console.error('put tag in data error', error);
     } finally {
@@ -136,8 +136,8 @@ export const deleteTagInData = async (context, projectId, targetTag, targetDataI
             {
             "data_tags": newTags
         })
-        console.log(result.data[0].data_tags);
-        targetData.data_tags = result.data[0].data_tags
+        console.log(result.data.data_tags);
+        targetData.data_tags = result.data.data_tags
     } catch (error) {
         console.error('put tag delete in data error', error);
     } finally {
