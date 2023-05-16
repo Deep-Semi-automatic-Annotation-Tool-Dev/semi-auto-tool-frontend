@@ -742,7 +742,7 @@ import {
   renameProject, getRecentTrainResult
 } from '@/js/api/project.js'
 import {
-  addTagInData, deleteTagInData,
+  addTagInData, createWord, deleteTagInData,
   getDataList, getParagraphDataList, getWordDataList, postData
 } from '@/js/api/data.js'
 import {
@@ -755,7 +755,7 @@ import {startTrain} from "@/js/api/train";
 
 import {disconnectLoggingSSE, disconnectStatusSSE, initLogSSE} from "@/js/sse/train";
 
-import * as Y from 'yjs'
+// import * as Y from 'yjs'
 
 const generateModels = () => {
   const group = []
@@ -936,10 +936,10 @@ export default {
     Dialog
   },
   async created() {
-    this.yDoc = await new Y.Doc()
-    this.sentenceMap = await this.yDoc.getMap('sentence');
-    this.wordMap = await this.yDoc.getMap('word');
-    this.paragraphMap = await this.yDoc.getMap('paragraph');
+    // this.yDoc = await new Y.Doc()
+    // this.sentenceMap = await this.yDoc.getMap('sentence');
+    // this.wordMap = await this.yDoc.getMap('word');
+    // this.paragraphMap = await this.yDoc.getMap('paragraph');
     console.log(this.yDoc)
     getProjectList(this);
     window.onkeydown = (e) => {
@@ -1330,15 +1330,20 @@ export default {
             break
           }
         }
-        if (nowTagInfo === null) {
-          result += `<span parent-idx="${sentenceIdx}" start-idx="${lastEndIdx}">` + word.text.slice(lastEndIdx, tag.end_index + 1) + `</span>`
-        } else {
-          if (tag.start_index > 0) result += `<span parent-idx="${sentenceIdx}" start-idx="${lastEndIdx}">` + word.text.slice(lastEndIdx, tag.start_index) + `</span>`
+
+        if (tag.start_index > 0) result += `<span parent-idx="${sentenceIdx}" start-idx="${lastEndIdx}">` + word.text.slice(lastEndIdx, tag.start_index) + `</span>`
+        if (nowTagInfo !== null) {
           result += `<span parent-idx="${sentenceIdx}" start-idx="${tag.start_index}" style="background-color: #${nowTagInfo.tagColor};
-              color: ${setTextColorToBackground(nowTagInfo.tagColor)}; cursor: pointer;"
-              class="word-tag">`
+            color: ${setTextColorToBackground(nowTagInfo.tagColor)}; cursor: pointer;"
+            class="word-tag">`
+              + word.text.slice(tag.start_index, tag.end_index + 1) + '</span>'
+        } else {
+          result += `<span not-alloc parent-idx="${sentenceIdx}" start-idx="${tag.start_index}" style="background-color: rgba(0,0,0,0.08);
+            cursor: pointer;"
+            class="word-tag">`
               + word.text.slice(tag.start_index, tag.end_index + 1) + '</span>'
         }
+
         lastEndIdx = tag.end_index + 1
       }
       if (lastEndIdx !== word.text.length) {
@@ -1350,14 +1355,15 @@ export default {
     onWordSelection() {
       const selection = window.getSelection()
       const startIdx = Number(selection.anchorNode.parentElement.attributes['start-idx'].nodeValue)
-      const parnetIdx = Number(selection.anchorNode.parentElement.attributes['parent-idx'].nodeValue)
-      console.log(startIdx, parnetIdx)
+      const parentIdx = Number(selection.anchorNode.parentElement.attributes['parent-idx'].nodeValue)
+      console.log(startIdx, parentIdx)
 
       const idxStart = startIdx + selection.anchorOffset
       const idxEnd = startIdx + selection.anchorOffset + selection.toString().length
       console.log(idxStart, idxEnd)
+      console.log(this.wordTagData[parentIdx])
       let tagExist = false
-      for (let item of this.wordTagData[parnetIdx]) {
+      for (let item of this.wordTagData[parentIdx]) {
         // let nowTagInfo = null
         // for (let t of item.data_target_tags) {
         //   if (t.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
@@ -1368,14 +1374,24 @@ export default {
         // if (nowTagInfo === null) continue
         if ((item.start_index <= idxStart && idxStart <= item.end_index) ||
             (item.start_index <= idxEnd - 1 && idxEnd - 1 <= item.end_index)) {
-          tagExist = true
+          tagExist = item
           break
         }
       }
       if (tagExist) {
         console.log("remove tag")
       } else {
+        if (idxStart === idxEnd) return
         console.log("add tag")
+        createWord(
+            this,
+            this.selectedProjectId,
+            parentIdx,
+            idxStart,
+            idxEnd,
+            this.tagGroups[this.selectedTagGroupId].tag_group_id,
+            this.tags[this.selectedTag].tag_id
+        )
       }
       console.log(selection.toString())
     },

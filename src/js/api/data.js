@@ -6,7 +6,7 @@ export const getDataList = async (context, id, page) => {
     context.loadingDialogSubTitle = "텍스트 데이터를 가져오는 중 입니다."
     context.showLoadingDialog = true
 
-    context.sentenceMap.clear()
+    // context.sentenceMap.clear()
     try {
         const result = await axios.get(`${context.$baseURL}api/v1/project/${id}/data?size=100&page=${page}`)
         context.lineData = result.data._embedded.dataResponseControllerDtoList;
@@ -15,11 +15,11 @@ export const getDataList = async (context, id, page) => {
 
         for (let d of context.lineData) {
             d.search = true
-            context.sentenceMap.set(d.id, d.data_tags)
+            // context.sentenceMap.set(d.id, d.data_tags)
         }
 
         console.log(result.data);
-        console.log(context.sentenceMap);
+        // console.log(context.sentenceMap);
     } catch (error) {
         context.lineData = []
         context.dataPage = 0
@@ -140,6 +140,33 @@ export const deleteTagInData = async (context, projectId, targetTag, targetDataI
         targetData.data_tags = result.data.data_tags
     } catch (error) {
         console.error('put tag delete in data error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
+}
+
+export const createWord = async (context, projectId, parentId, startIdx, endIdx, tagGroupId, tagId) => {
+    context.showLoadingDialog = true
+    context.loadingDialogTitle = '단어 태그 추가'
+    context.loadingDialogSubTitle = '단어 데이터 추가 중...'
+
+    try {
+        const result = await axios.post(`${context.$baseURL}api/v1/project/${projectId}/data/word`,
+            {
+                "parent_data_id": parentId,
+                "start_index": startIdx,
+                "end_index": endIdx,
+                "data_tags": [
+                    {
+                        "tag_group_id": tagGroupId,
+                        "tag_id": tagId
+                    }
+                ]
+            })
+        console.log(result.data);
+        // targetData.data_tags = result.data.data_tags
+    } catch (error) {
+        console.error('post word error', error);
     } finally {
         context.showLoadingDialog = false
     }

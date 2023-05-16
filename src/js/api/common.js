@@ -23,8 +23,8 @@ export const initVariables = (context) => {
 }
 
 export const loadProject = async (context, id, page) => {
-    context.wordMap.clear()
-    context.paragraphMap.clear()
+    // context.wordMap.clear()
+    // context.paragraphMap.clear()
 
     initVariables(context)
     initStatusSSE(context, id)
