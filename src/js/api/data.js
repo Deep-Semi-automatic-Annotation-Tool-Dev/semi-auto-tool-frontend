@@ -384,12 +384,7 @@ export const createParagraph = async (context, projectId, childDatas, tagGroupId
                 ]
             })
         console.log(result.data);
-        try {
-            context.wordTagData[result.data.parent_id].push(result.data)
-        } catch (e) {
-            context.wordTagData[result.data.parent_id] = [result.data]
-        }
-        // targetData.data_tags = result.data.data_tags
+        context.paragraphData[result.data.id] = result.data
     } catch (error) {
         console.error('post word error', error);
     } finally {

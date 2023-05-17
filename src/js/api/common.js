@@ -22,7 +22,8 @@ export const initVariables = (context) => {
     context.paragraphData = {}
     context.selectionRank = 'sumRank'
     context.trainResultData = null
-    context.firstParagraph = 0
+    context.firstParagraph = -1
+    context.childData = []
     context.makeParagraphStatus = ''
 }
 

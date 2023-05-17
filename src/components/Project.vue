@@ -961,7 +961,7 @@ export default {
       selectionRank: 'sumRank',
 
       makeParagraphStatus: '',
-      firstParagraph: 0,
+      firstParagraph: -1,
 
       childData: []
     }
@@ -992,6 +992,7 @@ export default {
   methods: {
     clearSelectedParagraph() {
       this.firstParagraph = -1
+      this.childData = []
       this.makeParagraphStatus = '문단을 지정할 문장을 선택해 주세요'
     },
 
@@ -1292,9 +1293,38 @@ export default {
           }
           if (this.dataPageSave < page) {
             console.log('next')
+            if (this.firstParagraph !== -1) {
+              if (this.firstParagraph.page >= page) {
+                for (let i = 0;i < 100;i++) {
+                  this.childData.pop()
+                  if (this.childData.length === 0) break
+                }
+              } else {
+                let start = 0
+                if (this.firstParagraph.page + 1 === page) start = this.firstParagraph.idx
+                for (;start < this.lineData.length;start++) {
+                  this.childData.push(this.lineData[start].id)
+                }
+              }
+            }
           } else if (this.dataPageSave > page) {
             console.log('prev')
+            if (this.firstParagraph !== -1) {
+              if (this.firstParagraph.page > page) {
+                let end = 99
+                if (this.firstParagraph.page - 1 === page) end = this.firstParagraph.idx
+                for (;end >= 0;end--) {
+                  this.childData.push(this.lineData[end].id)
+                }
+              } else {
+                for (let i = 0;i < 100;i++) {
+                  this.childData.pop()
+                  if (this.childData.length === 0) break
+                }
+              }
+            }
           }
+          console.log(this.childData.length)
 
           this.lineData = []
           await getDataList(this, this.selectedProjectId, page - 1)
@@ -1359,6 +1389,7 @@ export default {
         case 'paragraph': {
           this.lineData = []
           this.firstParagraph = -1
+          this.childData = []
           this.makeParagraphStatus = '문단을 지정할 문장을 선택해 주세요'
           await getDataList(this, this.selectedProjectId, this.dataPage - 1)
 
@@ -1594,16 +1625,24 @@ export default {
         console.log("문단 추가")
         if (this.firstParagraph === -1) {
           const nowData = this.lineData[idx]
-          this.firstParagraph = nowData.id
+          this.firstParagraph = {id: nowData.id, idx: idx, page: this.dataPage}
           this.makeParagraphStatus = `${this.dataPage}페이지 ${idx}번 문장(문장번호 ${nowData.id}) 선택. 문단의 시작이나 끝을 선택해주세요.`
         } else {
-          const nowData = this.lineData[idx]
-          let startIdx = this.firstParagraph
-          let endIdx = nowData.id
-          if (endIdx < startIdx) {
-            const tmp = endIdx
-            endIdx = startIdx
-            startIdx = tmp
+          if (this.childData.length === 0 && this.firstParagraph.page === this.dataPage) {
+            let startIdx = this.firstParagraph.idx;
+            let endIdx = idx
+            if (endIdx < startIdx) {
+              const tmp = startIdx
+              startIdx = endIdx
+              endIdx = tmp
+            }
+            for (;startIdx <= endIdx;startIdx++) this.childData.push(this.lineData[startIdx].id)
+          } else if (this.firstParagraph.page !== this.dataPage) {
+            if (this.firstParagraph.page < this.dataPage) {
+              for (let startIdx = 0;startIdx <= idx;startIdx++) this.childData.push(this.lineData[startIdx].id)
+            } else {
+              for (let startIdx = 99;startIdx >= idx;startIdx--) this.childData.push(this.lineData[startIdx].id)
+            }
           }
 
           await createParagraph(
@@ -1615,6 +1654,7 @@ export default {
           )
 
           this.firstParagraph = -1
+          this.childData = []
           this.makeParagraphStatus = '문단을 지정할 문장을 선택해 주세요'
         }
       }
