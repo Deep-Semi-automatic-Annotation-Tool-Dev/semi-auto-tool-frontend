@@ -49,7 +49,7 @@ export const getWordDataList = async (context, projectId, startIndex, endIndex) 
             if (context.wordTagData[parentId] === undefined) context.wordTagData[parentId] = []
             context.wordTagData[parentId].push(word)
         }
-        console.log(result.data);
+        // console.log(result.data);
     } catch (error) {
         console.error('get word data error', error);
     } finally {

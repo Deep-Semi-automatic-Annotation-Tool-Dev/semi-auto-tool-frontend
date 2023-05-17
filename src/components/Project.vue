@@ -940,7 +940,7 @@ export default {
     // this.sentenceMap = await this.yDoc.getMap('sentence');
     // this.wordMap = await this.yDoc.getMap('word');
     // this.paragraphMap = await this.yDoc.getMap('paragraph');
-    console.log(this.yDoc)
+    // console.log(this.yDoc)
     getProjectList(this);
     window.onkeydown = (e) => {
       if ((e.keyCode === 70 && (e.ctrlKey || e.metaKey ))) {
