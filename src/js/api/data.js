@@ -68,7 +68,10 @@ export const getParagraphDataList = async (context, projectId, startIndex, endIn
             return b.start_index - a.start_index
         })
         console.log(result.data);
-        context.paragraphData = result.data
+        context.paragraphData = {}
+        for (let data of result.data.paragraph_indexes) {
+            context.paragraphData[data.id] = data
+        }
     } catch (error) {
         console.error('get word data error', error);
     } finally {
@@ -275,6 +278,61 @@ export const deleteWord = async (context, projectId, dataId) => {
 
             context.showLoadingDialog = false
             await getWordDataList(context, context.selectedProjectId, startIdx, endIdx)
+        }
+    } catch (error) {
+        console.error('word data delete error', error);
+        context.showLoadingDialog = false
+    }
+}
+
+export const deleteTagInParagraph = async (context, projectId, itemIdx, parentIdx, targetTag) => {
+    context.showLoadingDialog = true
+    context.loadingDialogTitle = '문단 태그 삭제'
+    context.loadingDialogSubTitle = '문단에 할당된 태그 제거 중...'
+
+    const targetData = context.paragraphData[itemIdx]
+    const newTags = []
+    for (let tIdx in targetData.data_target_tags) {
+        const target = targetData.data_target_tags[tIdx]
+        const insertData = {}
+        if (target.tagId === targetTag.tagId) {
+            continue
+        }
+        insertData.tag_group_id = target.tagGroupId
+        insertData.tag_id = target.tagId
+        newTags.push(insertData)
+    }
+    console.log(newTags)
+
+    try {
+        const result = await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data/${targetData.id}`,
+            {
+                "data_tags": newTags
+            })
+        console.log(result.data.data_tags);
+        targetData.data_target_tags = result.data.data_tags
+    } catch (error) {
+        console.error('put tag delete in word error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
+}
+
+export const deleteParagraph = async (context, projectId, dataId) => {
+    context.showLoadingDialog = true
+    context.loadingDialogTitle = '문단 삭제'
+    context.loadingDialogSubTitle = '문단 삭제 중...'
+
+    try {
+        await axios.delete(`${context.$baseURL}api/v1/project/${projectId}/data/${dataId}`)
+
+        context.paragraphData = []
+        if (context.lineData.length > 0) {
+            let startIdx = context.lineData[context.lineData.length - 1].id
+            let endIdx = context.lineData[0].id
+
+            context.showLoadingDialog = false
+            await getParagraphDataList(context, context.selectedProjectId, startIdx, endIdx)
         }
     } catch (error) {
         console.error('word data delete error', error);

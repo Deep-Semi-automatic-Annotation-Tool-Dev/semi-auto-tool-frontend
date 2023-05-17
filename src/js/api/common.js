@@ -18,6 +18,7 @@ export const initVariables = (context) => {
     context.selectedTag = 0
     context.tagMod = 'sentence'
     context.wordTagData = {}
+    context.paragraphData = {}
     context.selectionRank = 'sumRank'
     context.trainResultData = null
 }

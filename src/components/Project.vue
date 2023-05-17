@@ -155,8 +155,10 @@
                   <p
                       class="text-line"
                       :data-tooltip="idx"
+                      v-html="setParagraphHighlight(l, paragraphData)"
                       :style="[setParagraphBackground(l)]"
-                  > {{l.text}} </p>
+                      @mouseup="onParagraphSelection(idx)"
+                  ></p>
                 </div>
               </div>
             </div>
@@ -971,29 +973,6 @@ export default {
         'background': color
       }
     },
-    setParagraphBackground(nowData) {
-      let color = null;
-      if (this.paragraphData.paragraph_indexes === undefined || this.paragraphData.paragraph_indexes.length === 0) return {}
-      // console.log(this.paragraphData.paragraph_indexes)
-      for (let d of this.paragraphData.paragraph_indexes) {
-        // if (d.end_index < nowData.id) continue
-        // if (d.start_index > nowData.id) break
-        if (d.start_index <= nowData.id && nowData.id <= d.end_index) {
-          let nowTagInfo = null
-          for (let t of d.data_target_tags) {
-            if (t.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
-              nowTagInfo = t
-              break
-            }
-          }
-          if (nowTagInfo === null) return
-          color = `#${nowTagInfo.tagColor}`
-          break
-        }
-      }
-      if (color === null) return {}
-      return {'background': color, 'color': setTextColorToBackground(color)}
-    },
 
     async changeGroup(v) {
       // console.log(this.tagGroups[v])
@@ -1270,7 +1249,7 @@ export default {
           this.lineData = []
           await getDataList(this, this.selectedProjectId, page - 1)
 
-          this.paragraphData = []
+          this.paragraphData = {}
           let startIdx = this.lineData[this.lineData.length - 1].id
           let endIdx = this.lineData[0].id
           await getParagraphDataList(this, this.selectedProjectId, startIdx, endIdx)
@@ -1330,7 +1309,7 @@ export default {
           this.lineData = []
           await getDataList(this, this.selectedProjectId, this.dataPage - 1)
 
-          this.paragraphData = []
+          this.paragraphData = {}
           let startIdx = this.lineData[this.lineData.length - 1].id
           let endIdx = this.lineData[0].id
           await getParagraphDataList(this, this.selectedProjectId, startIdx, endIdx)
@@ -1442,6 +1421,70 @@ export default {
           this.tags[this.selectedTag].tag_id
       )
       console.log(selection.toString())
+    },
+    setParagraphHighlight(nowData, paragraphData) {
+      let color = null;
+      let paragraphIdx = null;
+      if (paragraphData === undefined ||
+          paragraphData.length === 0) return `<span>` + nowData.text + `</span>`
+      // console.log(this.paragraphData.paragraph_indexes)
+      for (let dKey in paragraphData) {
+        const d = paragraphData[dKey]
+        // if (d.end_index < nowData.id) continue
+        // if (d.start_index > nowData.id) break
+        if (d.start_index <= nowData.id && nowData.id <= d.end_index) {
+          let nowTagInfo = null
+          for (let t of d.data_target_tags) {
+            if (t.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
+              nowTagInfo = t
+              break
+            }
+          }
+          if (nowTagInfo === null) return `<span>` + nowData.text + `</span>`
+          color = nowTagInfo.tagColor
+          paragraphIdx = d.id
+          break
+        }
+      }
+      if (color === null) return `<span not-alloc="1" parent-idx="${paragraphIdx}" style="background-color: rgba(0,0,0,0.08);
+            cursor: pointer;">` + nowData.text + `</span>`
+      return `<span not-alloc="0" parent-idx="${paragraphIdx}" style="background-color: #${color};
+            color: ${setTextColorToBackground(color)}; cursor: pointer;">` + nowData.text + `</span>`
+    },
+    setParagraphBackground(nowData) {
+      let color = null;
+      if (this.paragraphData === undefined ||
+          this.paragraphData.length === 0) return
+      // console.log(this.paragraphData.paragraph_indexes)
+      for (let dKey in this.paragraphData) {
+        const d = this.paragraphData[dKey]
+        // if (d.end_index < nowData.id) continue
+        // if (d.start_index > nowData.id) break
+        if (d.start_index <= nowData.id && nowData.id <= d.end_index) {
+          let nowTagInfo = null
+          for (let t of d.data_target_tags) {
+            if (t.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
+              nowTagInfo = t
+              break
+            }
+          }
+          if (nowTagInfo === null) return
+          color = `#${nowTagInfo.tagColor}`
+          break
+        }
+      }
+      if (color === null) return {}
+      return {'background': color, 'color': setTextColorToBackground(color)}
+    },
+    onParagraphSelection() {
+      const selection = window.getSelection()
+      const attributes = selection.anchorNode.parentElement.attributes
+      try {
+        const parentIdx = Number(attributes['parent-idx'].nodeValue)
+        console.log(parentIdx, selection)
+      } catch (e) {
+        console.log("문단 추가")
+      }
     },
 
     handleMessage(message, lastEventId) {
