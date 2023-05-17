@@ -285,15 +285,14 @@ export const deleteWord = async (context, projectId, dataId) => {
     }
 }
 
-export const deleteTagInParagraph = async (context, projectId, itemIdx, parentIdx, targetTag) => {
+export const deleteTagInParagraph = async (context, projectId, itemId, targetTag) => {
     context.showLoadingDialog = true
     context.loadingDialogTitle = '문단 태그 삭제'
     context.loadingDialogSubTitle = '문단에 할당된 태그 제거 중...'
 
-    const targetData = context.paragraphData[itemIdx]
+    const targetData = context.paragraphData[itemId]
     const newTags = []
-    for (let tIdx in targetData.data_target_tags) {
-        const target = targetData.data_target_tags[tIdx]
+    for (let target of targetData.data_target_tags) {
         const insertData = {}
         if (target.tagId === targetTag.tagId) {
             continue
@@ -312,7 +311,7 @@ export const deleteTagInParagraph = async (context, projectId, itemIdx, parentId
         console.log(result.data.data_tags);
         targetData.data_target_tags = result.data.data_tags
     } catch (error) {
-        console.error('put tag delete in word error', error);
+        console.error('put tag delete in paragraph error', error);
     } finally {
         context.showLoadingDialog = false
     }
@@ -335,7 +334,7 @@ export const deleteParagraph = async (context, projectId, dataId) => {
             await getParagraphDataList(context, context.selectedProjectId, startIdx, endIdx)
         }
     } catch (error) {
-        console.error('word data delete error', error);
+        console.error('paragraph data delete error', error);
         context.showLoadingDialog = false
     }
 }

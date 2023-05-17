@@ -152,13 +152,18 @@
                     v-for="(l, idx) in lineData"
                     :key="l"
                 >
-                  <p
-                      class="text-line"
+                  <div
+                      class="text-line-paragraph"
                       :data-tooltip="idx"
-                      v-html="setParagraphHighlight(l, paragraphData)"
-                      :style="[setParagraphBackground(l)]"
-                      @mouseup="onParagraphSelection(idx)"
-                  ></p>
+                  >
+                    <div>{{ idx }}</div>
+                    <p
+                        class="text-line"
+                        v-html="setParagraphHighlight(l, paragraphData)"
+                        :style="[setParagraphBackground(l)]"
+                        @mouseup="onParagraphSelection(idx)"
+                    ></p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -744,8 +749,18 @@ import {
   renameProject, getRecentTrainResult
 } from '@/js/api/project.js'
 import {
-  addTagInData, addTagInWord, createWord, deleteTagInData, deleteTagInWord, deleteWord,
-  getDataList, getParagraphDataList, getWordDataList, postData
+  addTagInData,
+  addTagInWord,
+  createWord,
+  deleteParagraph,
+  deleteTagInData,
+  deleteTagInParagraph,
+  deleteTagInWord,
+  deleteWord,
+  getDataList,
+  getParagraphDataList,
+  getWordDataList,
+  postData
 } from '@/js/api/data.js'
 import {
   getTagList,
@@ -1423,16 +1438,15 @@ export default {
       console.log(selection.toString())
     },
     setParagraphHighlight(nowData, paragraphData) {
-      let color = null;
       let paragraphIdx = null;
       if (paragraphData === undefined ||
           paragraphData.length === 0) return `<span>` + nowData.text + `</span>`
-      // console.log(this.paragraphData.paragraph_indexes)
+
+      let isExist = false;
       for (let dKey in paragraphData) {
         const d = paragraphData[dKey]
-        // if (d.end_index < nowData.id) continue
-        // if (d.start_index > nowData.id) break
         if (d.start_index <= nowData.id && nowData.id <= d.end_index) {
+          isExist = true;
           let nowTagInfo = null
           for (let t of d.data_target_tags) {
             if (t.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
@@ -1440,27 +1454,29 @@ export default {
               break
             }
           }
-          if (nowTagInfo === null) return `<span>` + nowData.text + `</span>`
-          color = nowTagInfo.tagColor
           paragraphIdx = d.id
-          break
+          if (nowTagInfo !== null) {
+            return `<span not-alloc="0" parent-idx="${paragraphIdx}" style="background-color: #${nowTagInfo.tagColor};
+            color: ${setTextColorToBackground(nowTagInfo.tagColor)}; cursor: pointer;">` + nowData.text + `</span>`
+          }
         }
       }
-      if (color === null) return `<span not-alloc="1" parent-idx="${paragraphIdx}" style="background-color: rgba(0,0,0,0.08);
-            cursor: pointer;">` + nowData.text + `</span>`
-      return `<span not-alloc="0" parent-idx="${paragraphIdx}" style="background-color: #${color};
-            color: ${setTextColorToBackground(color)}; cursor: pointer;">` + nowData.text + `</span>`
+
+      if (isExist) {
+        return `<span not-alloc="1" parent-idx="${paragraphIdx}" style="cursor: pointer;">` + nowData.text + `</span>`
+      } else {
+        return `<span not-alloc="0" parent-idx="${paragraphIdx}">` + nowData.text + `</span>`
+      }
     },
     setParagraphBackground(nowData) {
-      let color = null;
       if (this.paragraphData === undefined ||
           this.paragraphData.length === 0) return
-      // console.log(this.paragraphData.paragraph_indexes)
+
+      let isExist = false;
       for (let dKey in this.paragraphData) {
         const d = this.paragraphData[dKey]
-        // if (d.end_index < nowData.id) continue
-        // if (d.start_index > nowData.id) break
         if (d.start_index <= nowData.id && nowData.id <= d.end_index) {
+          isExist = true;
           let nowTagInfo = null
           for (let t of d.data_target_tags) {
             if (t.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
@@ -1468,19 +1484,51 @@ export default {
               break
             }
           }
-          if (nowTagInfo === null) return
-          color = `#${nowTagInfo.tagColor}`
-          break
+          if (nowTagInfo !== null) {
+            return {'background': `#${nowTagInfo.tagColor}`}
+          }
         }
       }
-      if (color === null) return {}
-      return {'background': color, 'color': setTextColorToBackground(color)}
+
+      if (isExist) {
+        return {'background': 'rgba(0,0,0,0.08)'}
+      } else {
+        return {}
+      }
     },
     onParagraphSelection() {
       const selection = window.getSelection()
       const attributes = selection.anchorNode.parentElement.attributes
       try {
         const parentIdx = Number(attributes['parent-idx'].nodeValue)
+        const target = this.paragraphData[parentIdx]
+        for (let tag of target.data_target_tags) {
+          if (tag.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
+            const startSentenceIdx = target.child_data[target.child_data.length - 1].id
+            let startDataIdx = 0
+            for (let d in this.lineData) {
+              if (this.lineData[d].id === startSentenceIdx) {
+                startDataIdx = d
+                break
+              }
+            }
+            if (confirm(`${startDataIdx}번 문장에서 시작하는 문단의 '${tag.tagName}'태그를 삭제하시겠습니까?`)) {
+              // console.log("remove tag", item)
+              if (target.data_target_tags.length === 1) {
+                deleteParagraph(this, this.selectedProjectId, parentIdx)
+              } else {
+                deleteTagInParagraph(
+                    this,
+                    this.selectedProjectId,
+                    parentIdx,
+                    tag
+                )
+              }
+            }
+            return
+          }
+        }
+        alert("다른 태그 그룹에서 태그가 지정된 문단은 삭제가 불가능합니다.")
         console.log(parentIdx, selection)
       } catch (e) {
         console.log("문단 추가")
