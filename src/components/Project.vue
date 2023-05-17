@@ -1473,9 +1473,11 @@ export default {
           this.paragraphData.length === 0) return
 
       let isExist = false;
+      const returnStyle = {}
       for (let dKey in this.paragraphData) {
         const d = this.paragraphData[dKey]
         if (d.start_index <= nowData.id && nowData.id <= d.end_index) {
+          if (d.end_index === nowData.id) returnStyle['margin-top'] = '5px'
           isExist = true;
           let nowTagInfo = null
           for (let t of d.data_target_tags) {
@@ -1485,13 +1487,15 @@ export default {
             }
           }
           if (nowTagInfo !== null) {
-            return {'background': `#${nowTagInfo.tagColor}`}
+            returnStyle['background'] = `#${nowTagInfo.tagColor}`
+            return returnStyle
           }
         }
       }
 
       if (isExist) {
-        return {'background': 'rgba(0,0,0,0.08)'}
+        returnStyle['background'] = `rgba(0,0,0,0.08)`
+        return returnStyle
       } else {
         return {}
       }
