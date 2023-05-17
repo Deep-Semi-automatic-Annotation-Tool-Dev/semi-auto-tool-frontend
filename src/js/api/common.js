@@ -1,13 +1,14 @@
 import {getTagGroupList, getTagList} from "@/js/api/tag";
 import {getDataList} from "@/js/api/data";
-import {initStatusSSE} from "@/js/sse/train";
+import {disconnectLoggingSSE, initStatusSSE} from "@/js/sse/train";
 // import {getProjectStatus} from "@/js/api/train";
 
 export const initVariables = (context) => {
     context.initStatus = true
 
     context.dataPage = 0
-    context.dataTotalPage = 0
+    context.dataPageSave = 1
+    context.dataTotalPage = 1
     context.selectedTagGroupId = 0
     context.stepperIdx = 0
     context.projectRightClickedId = 0
@@ -28,6 +29,7 @@ export const initVariables = (context) => {
 export const loadProject = async (context, id, page) => {
     // context.wordMap.clear()
     // context.paragraphMap.clear()
+    disconnectLoggingSSE()
 
     initVariables(context)
     initStatusSSE(context, id)

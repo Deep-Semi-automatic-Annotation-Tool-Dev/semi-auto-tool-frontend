@@ -88,7 +88,14 @@
               </div>
             </div>
             <div v-if="tagMod === 'paragraph'" id="area-set-paragraph">
-              {{ makeParagraphStatus }}
+              <div>{{ makeParagraphStatus }}</div>
+              <v-btn
+                  v-if="firstParagraph !== -1"
+                  icon="mdi-close"
+                  size="x-small"
+                  variant="text"
+                  @click="clearSelectedParagraph"
+              ></v-btn>
             </div>
             <div
                 id="editor-main-lines"
@@ -518,17 +525,6 @@
       <div v-else>프로젝트를 선택하거나 생성해 주세요.</div>
     </div>
 
-    <!--  context menu - 프로젝트 리스트 우클릭  -->
-    <context-menu
-        v-model:show="showProjectListMenu"
-        :options="optionsComponent"
-    >
-      <context-menu-item label="이름 변경" @click="projectContextMenuClick(this.CONTEXTMENU_PROJECT_RENAME)"/>
-      <context-menu-item
-          label="삭제"
-          @click="projectContextMenuClick(this.CONTEXTMENU_PROJECT_DELETE)">
-      </context-menu-item>
-    </context-menu>
     <!--  dialog - 프로젝트 삭제 확인  -->
     <v-dialog
         v-model="showDeleteProjectDialog"
@@ -634,22 +630,6 @@
           text-deny="취소"
       ></Dialog>
     </v-dialog>
-    <!--  context menu - 태그 칩 컨택스트 매뉴  -->
-    <context-menu
-        v-model:show="showTagMenu"
-        :options="tagMenuOptionsComponent"
-    >
-      <context-menu-item
-          label="이름 변경"
-          @click="tagContextMenuClick(this.CONTEXTMENU_TAG_RENAME)"/>
-      <context-menu-item
-          label="색상 변경"
-          @click="tagContextMenuClick(this.CONTEXTMENU_TAG_COLOR)"/>
-      <context-menu-item
-          label="삭제"
-          @click="tagContextMenuClick(this.CONTEXTMENU_TAG_DELETE)">
-      </context-menu-item>
-    </context-menu>
     <!--  dialog - 태그 삭제 확인  -->
     <v-dialog
         v-model="showDeleteTagDialog"
@@ -740,6 +720,35 @@
       ></Dialog>
     </v-dialog>
   </v-app>
+
+
+  <!--  context menu - 프로젝트 리스트 우클릭  -->
+  <context-menu
+      v-model:show="showProjectListMenu"
+      :options="optionsComponent"
+  >
+    <context-menu-item label="이름 변경" @click="projectContextMenuClick(this.CONTEXTMENU_PROJECT_RENAME)"/>
+    <context-menu-item
+        label="삭제"
+        @click="projectContextMenuClick(this.CONTEXTMENU_PROJECT_DELETE)">
+    </context-menu-item>
+  </context-menu>
+  <!--  context menu - 태그 칩 컨택스트 매뉴  -->
+  <context-menu
+      v-model:show="showTagMenu"
+      :options="tagMenuOptionsComponent"
+  >
+    <context-menu-item
+        label="이름 변경"
+        @click="tagContextMenuClick(this.CONTEXTMENU_TAG_RENAME)"/>
+    <context-menu-item
+        label="색상 변경"
+        @click="tagContextMenuClick(this.CONTEXTMENU_TAG_COLOR)"/>
+    <context-menu-item
+        label="삭제"
+        @click="tagContextMenuClick(this.CONTEXTMENU_TAG_DELETE)">
+    </context-menu-item>
+  </context-menu>
 </template>
 
 <script>
@@ -752,8 +761,8 @@ import {
   renameProject, getRecentTrainResult
 } from '@/js/api/project.js'
 import {
-  addTagInData,
-  addTagInWord,
+  addTagInData, addTagInParagraph,
+  addTagInWord, createParagraph,
   createWord,
   deleteParagraph,
   deleteTagInData,
@@ -881,7 +890,7 @@ export default {
 
       showProjectListMenu: false,
       optionsComponent: {
-        zIndex: 3,
+        zIndex: 1000,
         minWidth: 230,
         x: 500,
         y: 200
@@ -904,7 +913,7 @@ export default {
 
       showTagMenu: false,
       tagMenuOptionsComponent: {
-        zIndex: 3,
+        zIndex: 1000,
         minWidth: 230,
         x: 500,
         y: 200
@@ -922,7 +931,8 @@ export default {
       fileData: undefined,
       selectedFile: undefined,
 
-      dataPage: 0,
+      dataPage: 1,
+      dataPageSave: 1,
       dataTotalPage: 0,
 
       dataFind: false,
@@ -951,7 +961,9 @@ export default {
       selectionRank: 'sumRank',
 
       makeParagraphStatus: '',
-      firstParagraph: 0
+      firstParagraph: 0,
+
+      childData: []
     }
   },
   components: {
@@ -978,6 +990,11 @@ export default {
     }
   },
   methods: {
+    clearSelectedParagraph() {
+      this.firstParagraph = -1
+      this.makeParagraphStatus = '문단을 지정할 문장을 선택해 주세요'
+    },
+
     checkDataTag(tags) {
       for (let t of tags) {
         if (t.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
@@ -1076,7 +1093,7 @@ export default {
       this.optionsComponent.y = e.y;
       this.projectRightClickedId = id
       this.projectRightClickedName = name
-      // console.log(id)
+      console.log(e)
     },
     projectContextMenuClick(type) {
       if (type === this.CONTEXTMENU_PROJECT_RENAME) {
@@ -1267,6 +1284,18 @@ export default {
           break
         }
         case 'paragraph': {
+          console.log(page, this.dataPageSave)
+          if (Math.abs(page - this.dataPageSave) > 1) {
+            alert('문단 태깅 모드에서는 한 페이지씩만 변경 가능합니다.')
+            this.dataPage = this.dataPageSave
+            return
+          }
+          if (this.dataPageSave < page) {
+            console.log('next')
+          } else if (this.dataPageSave > page) {
+            console.log('prev')
+          }
+
           this.lineData = []
           await getDataList(this, this.selectedProjectId, page - 1)
 
@@ -1277,6 +1306,7 @@ export default {
           break
         }
       }
+      this.dataPageSave = this.dataPage
     },
 
     searchClose() {
@@ -1351,7 +1381,7 @@ export default {
     setWordHighlight(word, wordTag) {
       const sentenceIdx = word.id
       const targetInfo = wordTag[sentenceIdx]
-      if (targetInfo === undefined) return word.text
+      if (targetInfo === undefined) return `<span not-alloc="0" parent-idx="${sentenceIdx}" start-idx="0">` + word.text + `</span>`
       targetInfo.sort((a, b) => {
         return a.start_index - b.start_index
       })
@@ -1393,6 +1423,11 @@ export default {
       console.log(selection)
       const attributes = selection.anchorNode.parentElement.attributes
       const parentIdx = Number(attributes['parent-idx'].nodeValue)
+      const parentFocusIdx = Number(selection.focusNode.parentElement.attributes['parent-idx'].nodeValue)
+      if (parentIdx !== parentFocusIdx) {
+        alert('단어는 같은 문장 안에서만 생성 가능합니다.')
+        return;
+      }
       // console.log(startIdx, parentIdx)
 
       let idxStart = Number(selection.anchorNode.parentElement.attributes['start-idx'].nodeValue) + selection.anchorOffset
@@ -1508,7 +1543,7 @@ export default {
         return {}
       }
     },
-    onParagraphSelection() {
+    async onParagraphSelection(idx) {
       const selection = window.getSelection()
       const attributes = selection.anchorNode.parentElement.attributes
       try {
@@ -1524,7 +1559,7 @@ export default {
         }
 
         for (let tag of target.data_target_tags) {
-          if (tag.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
+          if (tag.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id && this.firstParagraph === -1) {
             if (confirm(`${startDataIdx}번 문장에서 시작하는 문단의 '${tag.tagName}'태그를 삭제하시겠습니까?`)) {
               // console.log("remove tag", item)
               if (target.data_target_tags.length === 1) {
@@ -1547,12 +1582,38 @@ export default {
         }
         if (confirm(`${startDataIdx}번 문장에서 시작하는 문단에 '${this.tags[this.selectedTag].tag_name}'태그를 추가하시겠습니까?`)) {
           console.log("추가")
+          addTagInParagraph(
+              this,
+              this.selectedProjectId,
+              parentIdx,
+              this.tags[this.selectedTag]
+          )
         }
         // console.log(parentIdx, selection)
       } catch (e) {
         console.log("문단 추가")
-      } finally {
         if (this.firstParagraph === -1) {
+          const nowData = this.lineData[idx]
+          this.firstParagraph = nowData.id
+          this.makeParagraphStatus = `${this.dataPage}페이지 ${idx}번 문장(문장번호 ${nowData.id}) 선택. 문단의 시작이나 끝을 선택해주세요.`
+        } else {
+          const nowData = this.lineData[idx]
+          let startIdx = this.firstParagraph
+          let endIdx = nowData.id
+          if (endIdx < startIdx) {
+            const tmp = endIdx
+            endIdx = startIdx
+            startIdx = tmp
+          }
+
+          await createParagraph(
+              this,
+              this.selectedProjectId,
+              this.childData,
+              this.tags[this.selectedTag].tag_group_id,
+              this.tags[this.selectedTag].tag_id
+          )
+
           this.firstParagraph = -1
           this.makeParagraphStatus = '문단을 지정할 문장을 선택해 주세요'
         }

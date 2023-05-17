@@ -155,6 +155,9 @@ export const deleteTagInData = async (context, projectId, targetTag, targetDataI
     }
 }
 
+
+
+
 export const createWord = async (context, projectId, parentId, startIdx, endIdx, tagGroupId, tagId) => {
     context.showLoadingDialog = true
     context.loadingDialogTitle = '단어 태그 추가'
@@ -285,6 +288,53 @@ export const deleteWord = async (context, projectId, dataId) => {
     }
 }
 
+
+
+
+
+export const addTagInParagraph = async (context, projectId, parentIdx, targetTag) => {
+    context.showLoadingDialog = true
+    context.loadingDialogTitle = '문단 태그 추가'
+    context.loadingDialogSubTitle = '문단에 할당된 태그 추가 중...'
+
+    const targetData = context.paragraphData[parentIdx]
+    const newTags = []
+    let found = 0
+    for (let tIdx in targetData.data_target_tags) {
+        const target = targetData.data_target_tags[tIdx]
+        const insertData = {}
+        if (target.tagGroupId === targetTag.tag_group_id) {
+            insertData.tag_group_id = targetTag.tag_group_id
+            insertData.tag_id = targetTag.tag_id
+            found = 1
+        } else {
+            insertData.tag_group_id = target.tagGroupId
+            insertData.tag_id = target.tagId
+        }
+        newTags.push(insertData)
+    }
+    if (!found) {
+        newTags.push({
+            "tag_group_id": targetTag.tag_group_id,
+            "tag_id": targetTag.tag_id
+        })
+    }
+    console.log(newTags)
+
+    try {
+        const result = await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data/${targetData.id}`,
+            {
+                "data_tags": newTags
+            })
+        console.log(result.data.data_tags);
+        targetData.data_target_tags = result.data.data_tags
+    } catch (error) {
+        console.error('put tag in paragraph error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
+}
+
 export const deleteTagInParagraph = async (context, projectId, itemId, targetTag) => {
     context.showLoadingDialog = true
     context.loadingDialogTitle = '문단 태그 삭제'
@@ -317,6 +367,36 @@ export const deleteTagInParagraph = async (context, projectId, itemId, targetTag
     }
 }
 
+export const createParagraph = async (context, projectId, childDatas, tagGroupId, tagId) => {
+    context.showLoadingDialog = true
+    context.loadingDialogTitle = '문단 태그 추가'
+    context.loadingDialogSubTitle = '문단 데이터 추가 중...'
+
+    try {
+        const result = await axios.post(`${context.$baseURL}api/v1/project/${projectId}/data/paragraph`,
+            {
+                "child_data_ids": childDatas,
+                "data_tags": [
+                    {
+                        "tag_group_id": tagGroupId,
+                        "tag_id": tagId
+                    }
+                ]
+            })
+        console.log(result.data);
+        try {
+            context.wordTagData[result.data.parent_id].push(result.data)
+        } catch (e) {
+            context.wordTagData[result.data.parent_id] = [result.data]
+        }
+        // targetData.data_tags = result.data.data_tags
+    } catch (error) {
+        console.error('post word error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
+}
+
 export const deleteParagraph = async (context, projectId, dataId) => {
     context.showLoadingDialog = true
     context.loadingDialogTitle = '문단 삭제'
@@ -338,6 +418,9 @@ export const deleteParagraph = async (context, projectId, dataId) => {
         context.showLoadingDialog = false
     }
 }
+
+
+
 
 export const postData = async (context, projectId, file, colName) => {
     context.showLoadingDialog = true
