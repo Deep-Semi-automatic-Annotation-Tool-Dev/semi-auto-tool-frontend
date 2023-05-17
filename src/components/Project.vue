@@ -742,7 +742,7 @@ import {
   renameProject, getRecentTrainResult
 } from '@/js/api/project.js'
 import {
-  addTagInData, createWord, deleteTagInData, deleteTagInWord, deleteWord,
+  addTagInData, addTagInWord, createWord, deleteTagInData, deleteTagInWord, deleteWord,
   getDataList, getParagraphDataList, getWordDataList, postData
 } from '@/js/api/data.js'
 import {
@@ -1388,20 +1388,25 @@ export default {
     },
     onWordSelection() {
       const selection = window.getSelection()
+      console.log(selection)
       const attributes = selection.anchorNode.parentElement.attributes
-      const startIdx = Number(attributes['start-idx'].nodeValue)
       const parentIdx = Number(attributes['parent-idx'].nodeValue)
       // console.log(startIdx, parentIdx)
 
-      const idxStart = startIdx + selection.anchorOffset
-      const idxEnd = startIdx + selection.anchorOffset + selection.toString().length
+      let idxStart = Number(selection.anchorNode.parentElement.attributes['start-idx'].nodeValue) + selection.anchorOffset
+      let idxEnd = Number(selection.focusNode.parentElement.attributes['start-idx'].nodeValue) + selection.focusOffset
+      if (idxEnd < idxStart) {
+        const tmp = idxStart;
+        idxStart = idxEnd
+        idxEnd = tmp
+      }
       console.log(idxStart, idxEnd)
       // console.log(this.wordTagData[parentIdx])
-      console.log(selection)
       for (let itemIdx in this.wordTagData[parentIdx]) {
         const item = this.wordTagData[parentIdx][itemIdx]
         if (item.start_index === idxStart && item.end_index === idxEnd - 1 && attributes['not-alloc'].nodeValue === '1') {
           console.log("add tag same")
+          addTagInWord(this, this.selectedProjectId, itemIdx, parentIdx, this.tags[this.selectedTag])
           return;
         }
         if ((item.start_index <= idxStart && idxStart <= item.end_index) ||

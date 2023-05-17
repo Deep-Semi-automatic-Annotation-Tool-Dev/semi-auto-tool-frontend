@@ -184,6 +184,49 @@ export const createWord = async (context, projectId, parentId, startIdx, endIdx,
     }
 }
 
+export const addTagInWord = async (context, projectId, itemIdx, parentIdx, targetTag) => {
+    context.showLoadingDialog = true
+    context.loadingDialogTitle = '단어 태그 추가'
+    context.loadingDialogSubTitle = '단어에 할당된 태그 추가 중...'
+
+    const targetData = context.wordTagData[parentIdx][itemIdx]
+    const newTags = []
+    let found = 0
+    for (let tIdx in targetData.data_target_tags) {
+        const target = targetData.data_target_tags[tIdx]
+        const insertData = {}
+        if (target.tagGroupId === targetTag.tag_group_id) {
+            insertData.tag_group_id = targetTag.tag_group_id
+            insertData.tag_id = targetTag.tag_id
+            found = 1
+        } else {
+            insertData.tag_group_id = target.tagGroupId
+            insertData.tag_id = target.tagId
+        }
+        newTags.push(insertData)
+    }
+    if (!found) {
+        newTags.push({
+            "tag_group_id": targetTag.tag_group_id,
+            "tag_id": targetTag.tag_id
+        })
+    }
+    console.log(newTags)
+
+    try {
+        const result = await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data/${targetData.id}`,
+            {
+                "data_tags": newTags
+            })
+        console.log(result.data.data_tags);
+        targetData.data_target_tags = result.data.data_tags
+    } catch (error) {
+        console.error('put tag delete in word error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
+}
+
 export const deleteTagInWord = async (context, projectId, itemIdx, parentIdx, targetTag) => {
     context.showLoadingDialog = true
     context.loadingDialogTitle = '단어 태그 삭제'
