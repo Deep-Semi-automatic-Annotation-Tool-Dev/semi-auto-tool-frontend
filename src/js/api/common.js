@@ -21,6 +21,8 @@ export const initVariables = (context) => {
     context.paragraphData = {}
     context.selectionRank = 'sumRank'
     context.trainResultData = null
+    context.firstParagraph = 0
+    context.makeParagraphStatus = ''
 }
 
 export const loadProject = async (context, id, page) => {

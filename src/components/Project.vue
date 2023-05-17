@@ -87,6 +87,9 @@
                 </ul>
               </div>
             </div>
+            <div v-if="tagMod === 'paragraph'" id="area-set-paragraph">
+              {{ makeParagraphStatus }}
+            </div>
             <div
                 id="editor-main-lines"
                 class="list-vuetify-light"
@@ -946,6 +949,9 @@ export default {
 
       trainResultData: null,
       selectionRank: 'sumRank',
+
+      makeParagraphStatus: '',
+      firstParagraph: 0
     }
   },
   components: {
@@ -1322,6 +1328,8 @@ export default {
         }
         case 'paragraph': {
           this.lineData = []
+          this.firstParagraph = -1
+          this.makeParagraphStatus = '문단을 지정할 문장을 선택해 주세요'
           await getDataList(this, this.selectedProjectId, this.dataPage - 1)
 
           this.paragraphData = {}
@@ -1506,16 +1514,17 @@ export default {
       try {
         const parentIdx = Number(attributes['parent-idx'].nodeValue)
         const target = this.paragraphData[parentIdx]
+        const startSentenceIdx = target.child_data[target.child_data.length - 1].id
+        let startDataIdx = 0
+        for (let d in this.lineData) {
+          if (this.lineData[d].id === startSentenceIdx) {
+            startDataIdx = d
+            break
+          }
+        }
+
         for (let tag of target.data_target_tags) {
           if (tag.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
-            const startSentenceIdx = target.child_data[target.child_data.length - 1].id
-            let startDataIdx = 0
-            for (let d in this.lineData) {
-              if (this.lineData[d].id === startSentenceIdx) {
-                startDataIdx = d
-                break
-              }
-            }
             if (confirm(`${startDataIdx}번 문장에서 시작하는 문단의 '${tag.tagName}'태그를 삭제하시겠습니까?`)) {
               // console.log("remove tag", item)
               if (target.data_target_tags.length === 1) {
@@ -1532,10 +1541,21 @@ export default {
             return
           }
         }
-        alert("다른 태그 그룹에서 태그가 지정된 문단은 삭제가 불가능합니다.")
-        console.log(parentIdx, selection)
+        if (this.firstParagraph !== -1) {
+          alert("다른 태그 그룹에서 태그가 지정된 문단은 추가가 불가능합니다.")
+          return;
+        }
+        if (confirm(`${startDataIdx}번 문장에서 시작하는 문단에 '${this.tags[this.selectedTag].tag_name}'태그를 추가하시겠습니까?`)) {
+          console.log("추가")
+        }
+        // console.log(parentIdx, selection)
       } catch (e) {
         console.log("문단 추가")
+      } finally {
+        if (this.firstParagraph === -1) {
+          this.firstParagraph = -1
+          this.makeParagraphStatus = '문단을 지정할 문장을 선택해 주세요'
+        }
       }
     },
 
