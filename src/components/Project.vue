@@ -1395,24 +1395,26 @@ export default {
 
       const idxStart = startIdx + selection.anchorOffset
       const idxEnd = startIdx + selection.anchorOffset + selection.toString().length
-      // console.log(idxStart, idxEnd)
+      console.log(idxStart, idxEnd)
       // console.log(this.wordTagData[parentIdx])
       console.log(selection)
-      for (let item of this.wordTagData[parentIdx]) {
+      for (let itemIdx in this.wordTagData[parentIdx]) {
+        const item = this.wordTagData[parentIdx][itemIdx]
         if (item.start_index === idxStart && item.end_index === idxEnd - 1 && attributes['not-alloc'].nodeValue === '1') {
           console.log("add tag same")
           return;
         }
         if ((item.start_index <= idxStart && idxStart <= item.end_index) ||
             (item.start_index <= idxEnd - 1 && idxEnd - 1 <= item.end_index)) {
-          for (let tag of item.data_target_tags) {
+          for (let tagIdx in item.data_target_tags) {
+            const tag = item.data_target_tags[tagIdx]
             if (tag.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
-              if (confirm(`'${item.text}'에서 '${this.tags[this.selectedTag].tag_name}'태그를 삭제하시겠습니까?`)) {
+              if (confirm(`'${item.text}'에서 '${tag.tagName}'태그를 삭제하시겠습니까?`)) {
                 console.log("remove tag", item)
                 if (item.data_target_tags.length === 1) {
                   deleteWord(this, this.selectedProjectId, item.id)
                 } else {
-                  deleteTagInWord()
+                  deleteTagInWord(this, this.selectedProjectId, itemIdx, parentIdx, tag)
                 }
               }
               return;
