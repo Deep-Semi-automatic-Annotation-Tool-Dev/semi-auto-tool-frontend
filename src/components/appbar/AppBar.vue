@@ -2,7 +2,7 @@
   <div id="appbar-root">
     <div id="appbar-title">TAG ANNOTATOR</div>
     <div id="appbar-nav-area">
-      <div class="appbar-nav-btn" @click="gotoPage('index')">HOME</div>
+<!--      <div class="appbar-nav-btn" @click="gotoPage('index')">HOME</div>-->
       <div class="appbar-nav-btn" @click="gotoPage('project')">PROJECT</div>
       <div class="appbar-nav-btn" @click="gotoPage('dashboard')">DASHBOARD</div>
     </div>

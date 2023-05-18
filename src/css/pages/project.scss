@@ -13,6 +13,8 @@
   order: 1;
   align-self: center;
   flex-grow: 0;
+
+  background-color: rgba(255, 255, 255, 0);
 }
 
 #layout-project-sidebar {
@@ -157,6 +159,7 @@
   gap: 10px;
 
   width: 100%;
+  height: 30px;
 
   flex: none;
   order: 0;
@@ -378,6 +381,18 @@
   margin: 6px 0px 6px 0;
 }
 
+.text-line-paragraph {
+  display: flex;
+  flex-direction: row;
+}
+
+.text-line-paragraph div {
+  height: 100%;
+  width: 30px;
+  margin-right: 5px;
+  padding-top: 3px;
+}
+
 .text-word {
   width: 100%;
   display: inline;
@@ -483,7 +498,7 @@
 }
 
 .stepper-item.selected {
-  height: calc(100% - (162px + 24px + 40px));
+  height: calc(100% - (94px + 24px + 40px));
 }
 
 .stepper-item-top {
@@ -621,6 +636,7 @@
   //height: 29px;
 
   flex: none;
+  flex-wrap: wrap;
   order: 2;
   flex-grow: 0;
 }
@@ -642,4 +658,68 @@
 
   padding: 0px 4px 4px 4px;
   color: $text-white;
+}
+
+#editor-words div {
+  position: relative;
+  display: block;
+}
+
+#editor-words div .text-line-selection {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+#editor-paragraphs div {
+  box-sizing: border-box;
+}
+
+#editor-paragraphs div p {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 3px 0;
+}
+
+.parameter-set-items {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+#show-train-log {
+  //background-color: #6fd5d5;
+  overflow-y: scroll;
+
+  font-size: 14px;
+
+  padding: 10px;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  border-color: black;
+  border-width: 1px;
+  border-style: solid;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.table-result {
+  width: 100%;
+}
+
+#area-set-paragraph {
+  width: 100%;
+  color: white;
+  font-size: 14px;
+  background: #232323;
+  padding: 5px;
+
+  display: flex;
+}
+
+#area-set-paragraph div {
+  padding-top: 3px;
+  width: 100%;
 }

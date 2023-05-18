@@ -1,58 +1,85 @@
 import axios from "axios";
-import {getTagGroupList, getTagList} from "@/js/api/tag";
+import {loadProject} from "@/js/api/common";
 
-const loadProject = async (context, id, page) => {
-
-    context.dataPage = 0
-    context.dataTotalPage = 0
-    context.selectedTagGroupId = 0
-    context.stepperIdx = 0
-    context.projectRightClickedId = 0
-    context.lineData = []
-    context.tags = []
-    context.tagGroups = []
-    context.tagGroupSelectionModel = 0
-    context.selectedTag = 0
-    context.sentence = 'sentence'
-    context.documentDatas = []
-
-    await getTagGroupList(context, id)
-    if (context.tagGroups.length > 0) {
-        console.log(context.tagGroups)
-        await getTagList(context, id, context.tagGroups[context.selectedTagGroup].tag_group_id)
-    }
-    await getDataList(context, id, page)
-}
-
-export const getDataList = (context, id, page) => {
+export const getDataList = async (context, id, page) => {
     context.loadingDialogTitle = '데이터 로딩'
     context.loadingDialogSubTitle = "텍스트 데이터를 가져오는 중 입니다."
     context.showLoadingDialog = true
-    axios.get(`${context.$baseURL}api/v1/project/${id}/data?size=150&page=${page}`)
-        .then(response => {
-            try {
-                context.lineData = response.data._embedded.dataResponseControllerDtoList;
-                context.dataPage = response.data.page.number + 1
-                context.dataTotalPage = response.data.page.totalPages
 
-                for (let d of context.lineData) {
-                    d.search = true
-                }
-            } catch {
-                context.lineData = []
-                context.dataPage = 0
-                context.dataTotalPage = 0
-            }
-            context.showLoadingDialog = false
-            console.log(response.data);
-        })
-        .catch(error => {
-            context.showLoadingDialog = false
-            console.log('get data error', error);
-        });
+    // context.sentenceMap.clear()
+    try {
+        const result = await axios.get(`${context.$baseURL}api/v1/project/${id}/data?size=100&page=${page}`)
+        context.lineData = result.data._embedded.dataResponseControllerDtoList;
+        context.dataPage = result.data.page.number + 1
+        context.dataTotalPage = result.data.page.totalPages
+
+        for (let d of context.lineData) {
+            d.search = true
+            d.text = d.text
+                .replaceAll('\n', ' ')
+                .replaceAll('\t', ' ')
+                .replaceAll('\r', ' ')
+                .replaceAll('\b', ' ')
+                .replaceAll('\v', ' ')
+                .replaceAll('\f', ' ')
+            // context.sentenceMap.set(d.id, d.data_tags)
+        }
+
+        console.log(result.data);
+        // console.log(context.sentenceMap);
+    } catch (error) {
+        context.lineData = []
+        context.dataPage = 0
+        context.dataTotalPage = 0
+        console.error('get data error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
 }
 
-export const addTagInData = async (context, projectId, targetTag, targetDataIdx) => {
+export const getWordDataList = async (context, projectId, startIndex, endIndex) => {
+    context.loadingDialogTitle = '단어 데이터 로딩'
+    context.loadingDialogSubTitle = "단어 태깅 데이터를 가져오는 중 입니다."
+    context.showLoadingDialog = true
+    try {
+        const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/data/word?startIndex=${startIndex}&endIndex=${endIndex}`)
+
+        for (let word of result.data) {
+            let parentId = word.parent_id
+            if (context.wordTagData[parentId] === undefined) context.wordTagData[parentId] = []
+            context.wordTagData[parentId].push(word)
+        }
+        // console.log(result.data);
+    } catch (error) {
+        console.error('get word data error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
+}
+
+export const getParagraphDataList = async (context, projectId, startIndex, endIndex) => {
+    context.loadingDialogTitle = '문단 데이터 로딩'
+    context.loadingDialogSubTitle = "문단 태깅 데이터를 가져오는 중 입니다."
+    context.showLoadingDialog = true
+    try {
+        const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/data/paragraph?startIndex=${startIndex}&endIndex=${endIndex}`)
+
+        result.data.paragraph_indexes.sort((a, b) => {
+            return b.start_index - a.start_index
+        })
+        console.log(result.data);
+        context.paragraphData = {}
+        for (let data of result.data.paragraph_indexes) {
+            context.paragraphData[data.id] = data
+        }
+    } catch (error) {
+        console.error('get word data error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
+}
+
+export const addTagInData = async (context, projectId, targetTag, targetDataIdx, dataId) => {
     context.showLoadingDialog = true
     context.loadingDialogTitle = '태그 할당'
     context.loadingDialogSubTitle = '데이터에 태그 할당 중...'
@@ -80,20 +107,19 @@ export const addTagInData = async (context, projectId, targetTag, targetDataIdx)
         })
     }
     console.log(newTags)
-    await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data`, [{
-        "id": targetData.id,
-        "text": targetData.text,
-        "data_tags": newTags
-    }])
-        .then((response) => {
-            targetData.data_tags = response.data[0].data_tags
-            console.log(response.data[0].data_tags);
-            context.showLoadingDialog = false
+
+    try {
+        const result = await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data/${dataId}`,
+            {
+            "data_tags": newTags
         })
-        .catch(error => {
-            context.showLoadingDialog = false
-            console.log('put tag in data error', error);
-        });
+        targetData.data_tags = result.data.data_tags
+        console.log(result.data.data_tags);
+    } catch (error) {
+        console.error('put tag in data error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
 }
 
 export const deleteTagInData = async (context, projectId, targetTag, targetDataIdx) => {
@@ -114,23 +140,284 @@ export const deleteTagInData = async (context, projectId, targetTag, targetDataI
         newTags.push(insertData)
     }
     console.log(newTags)
-    await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data`, [{
-        "id": targetData.id,
-        "text": targetData.text,
-        "data_tags": newTags
-    }])
-        .then((response) => {
-            console.log(response.data[0].data_tags);
-            targetData.data_tags = response.data[0].data_tags
-            context.showLoadingDialog = false
+
+    try {
+        const result = await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data/${targetData.id}`,
+            {
+            "data_tags": newTags
         })
-        .catch(error => {
-            context.showLoadingDialog = false
-            console.log('put tag delete in data error', error);
-        });
+        console.log(result.data.data_tags);
+        targetData.data_tags = result.data.data_tags
+    } catch (error) {
+        console.error('put tag delete in data error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
 }
 
-export const postData = (context, projectId, file, colName) => {
+
+
+
+export const createWord = async (context, projectId, parentId, startIdx, endIdx, tagGroupId, tagId) => {
+    context.showLoadingDialog = true
+    context.loadingDialogTitle = '단어 태그 추가'
+    context.loadingDialogSubTitle = '단어 데이터 추가 중...'
+
+    try {
+        const result = await axios.post(`${context.$baseURL}api/v1/project/${projectId}/data/word`,
+            {
+                "parent_data_id": parentId,
+                "start_index": startIdx,
+                "end_index": endIdx - 1,
+                "data_tags": [
+                    {
+                        "tag_group_id": tagGroupId,
+                        "tag_id": tagId
+                    }
+                ]
+            })
+        console.log(result.data);
+        try {
+            context.wordTagData[result.data.parent_id].push(result.data)
+        } catch (e) {
+            context.wordTagData[result.data.parent_id] = [result.data]
+        }
+        // targetData.data_tags = result.data.data_tags
+    } catch (error) {
+        console.error('post word error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
+}
+
+export const addTagInWord = async (context, projectId, itemIdx, parentIdx, targetTag) => {
+    context.showLoadingDialog = true
+    context.loadingDialogTitle = '단어 태그 추가'
+    context.loadingDialogSubTitle = '단어에 할당된 태그 추가 중...'
+
+    const targetData = context.wordTagData[parentIdx][itemIdx]
+    const newTags = []
+    let found = 0
+    for (let tIdx in targetData.data_target_tags) {
+        const target = targetData.data_target_tags[tIdx]
+        const insertData = {}
+        if (target.tagGroupId === targetTag.tag_group_id) {
+            insertData.tag_group_id = targetTag.tag_group_id
+            insertData.tag_id = targetTag.tag_id
+            found = 1
+        } else {
+            insertData.tag_group_id = target.tagGroupId
+            insertData.tag_id = target.tagId
+        }
+        newTags.push(insertData)
+    }
+    if (!found) {
+        newTags.push({
+            "tag_group_id": targetTag.tag_group_id,
+            "tag_id": targetTag.tag_id
+        })
+    }
+    console.log(newTags)
+
+    try {
+        const result = await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data/${targetData.id}`,
+            {
+                "data_tags": newTags
+            })
+        console.log(result.data.data_tags);
+        targetData.data_target_tags = result.data.data_tags
+    } catch (error) {
+        console.error('put tag delete in word error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
+}
+
+export const deleteTagInWord = async (context, projectId, itemIdx, parentIdx, targetTag) => {
+    context.showLoadingDialog = true
+    context.loadingDialogTitle = '단어 태그 삭제'
+    context.loadingDialogSubTitle = '단어에 할당된 태그 제거 중...'
+
+    const targetData = context.wordTagData[parentIdx][itemIdx]
+    const newTags = []
+    for (let tIdx in targetData.data_target_tags) {
+        const target = targetData.data_target_tags[tIdx]
+        const insertData = {}
+        if (target.tagId === targetTag.tagId) {
+            continue
+        }
+        insertData.tag_group_id = target.tagGroupId
+        insertData.tag_id = target.tagId
+        newTags.push(insertData)
+    }
+    console.log(newTags)
+
+    try {
+        const result = await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data/${targetData.id}`,
+            {
+                "data_tags": newTags
+            })
+        console.log(result.data.data_tags);
+        targetData.data_target_tags = result.data.data_tags
+    } catch (error) {
+        console.error('put tag delete in word error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
+}
+
+export const deleteWord = async (context, projectId, dataId) => {
+    context.showLoadingDialog = true
+    context.loadingDialogTitle = '단어 삭제'
+    context.loadingDialogSubTitle = '단어 삭제 중...'
+
+    try {
+        await axios.delete(`${context.$baseURL}api/v1/project/${projectId}/data/${dataId}`)
+
+        context.wordTagData = {}
+        if (context.lineData.length > 0) {
+            let startIdx = context.lineData[context.lineData.length - 1].id
+            let endIdx = context.lineData[0].id
+
+            context.showLoadingDialog = false
+            await getWordDataList(context, context.selectedProjectId, startIdx, endIdx)
+        }
+    } catch (error) {
+        console.error('word data delete error', error);
+        context.showLoadingDialog = false
+    }
+}
+
+
+
+
+
+export const addTagInParagraph = async (context, projectId, parentIdx, targetTag) => {
+    context.showLoadingDialog = true
+    context.loadingDialogTitle = '문단 태그 추가'
+    context.loadingDialogSubTitle = '문단에 할당된 태그 추가 중...'
+
+    const targetData = context.paragraphData[parentIdx]
+    const newTags = []
+    let found = 0
+    for (let tIdx in targetData.data_target_tags) {
+        const target = targetData.data_target_tags[tIdx]
+        const insertData = {}
+        if (target.tagGroupId === targetTag.tag_group_id) {
+            insertData.tag_group_id = targetTag.tag_group_id
+            insertData.tag_id = targetTag.tag_id
+            found = 1
+        } else {
+            insertData.tag_group_id = target.tagGroupId
+            insertData.tag_id = target.tagId
+        }
+        newTags.push(insertData)
+    }
+    if (!found) {
+        newTags.push({
+            "tag_group_id": targetTag.tag_group_id,
+            "tag_id": targetTag.tag_id
+        })
+    }
+    console.log(newTags)
+
+    try {
+        const result = await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data/${targetData.id}`,
+            {
+                "data_tags": newTags
+            })
+        console.log(result.data.data_tags);
+        targetData.data_target_tags = result.data.data_tags
+    } catch (error) {
+        console.error('put tag in paragraph error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
+}
+
+export const deleteTagInParagraph = async (context, projectId, itemId, targetTag) => {
+    context.showLoadingDialog = true
+    context.loadingDialogTitle = '문단 태그 삭제'
+    context.loadingDialogSubTitle = '문단에 할당된 태그 제거 중...'
+
+    const targetData = context.paragraphData[itemId]
+    const newTags = []
+    for (let target of targetData.data_target_tags) {
+        const insertData = {}
+        if (target.tagId === targetTag.tagId) {
+            continue
+        }
+        insertData.tag_group_id = target.tagGroupId
+        insertData.tag_id = target.tagId
+        newTags.push(insertData)
+    }
+    console.log(newTags)
+
+    try {
+        const result = await axios.put(`${context.$baseURL}api/v1/project/${projectId}/data/${targetData.id}`,
+            {
+                "data_tags": newTags
+            })
+        console.log(result.data.data_tags);
+        targetData.data_target_tags = result.data.data_tags
+    } catch (error) {
+        console.error('put tag delete in paragraph error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
+}
+
+export const createParagraph = async (context, projectId, childDatas, tagGroupId, tagId) => {
+    context.showLoadingDialog = true
+    context.loadingDialogTitle = '문단 태그 추가'
+    context.loadingDialogSubTitle = '문단 데이터 추가 중...'
+
+    try {
+        const result = await axios.post(`${context.$baseURL}api/v1/project/${projectId}/data/paragraph`,
+            {
+                "child_data_ids": childDatas,
+                "data_tags": [
+                    {
+                        "tag_group_id": tagGroupId,
+                        "tag_id": tagId
+                    }
+                ]
+            })
+        console.log(result.data);
+        context.paragraphData[result.data.id] = result.data
+    } catch (error) {
+        console.error('post word error', error);
+    } finally {
+        context.showLoadingDialog = false
+    }
+}
+
+export const deleteParagraph = async (context, projectId, dataId) => {
+    context.showLoadingDialog = true
+    context.loadingDialogTitle = '문단 삭제'
+    context.loadingDialogSubTitle = '문단 삭제 중...'
+
+    try {
+        await axios.delete(`${context.$baseURL}api/v1/project/${projectId}/data/${dataId}`)
+
+        context.paragraphData = []
+        if (context.lineData.length > 0) {
+            let startIdx = context.lineData[context.lineData.length - 1].id
+            let endIdx = context.lineData[0].id
+
+            context.showLoadingDialog = false
+            await getParagraphDataList(context, context.selectedProjectId, startIdx, endIdx)
+        }
+    } catch (error) {
+        console.error('paragraph data delete error', error);
+        context.showLoadingDialog = false
+    }
+}
+
+
+
+
+export const postData = async (context, projectId, file, colName) => {
     context.showLoadingDialog = true
     context.loadingDialogTitle = '데이터 업로드'
     context.loadingDialogSubTitle = '데이터에 업로드 중...'
@@ -138,19 +425,63 @@ export const postData = (context, projectId, file, colName) => {
     let dataFile = new FormData()
     dataFile.append("file", file)
 
-    axios.post(`${context.$baseURL}api/v1/project/${projectId}/data?colName=${colName}`, dataFile,
-        {
-            headers: {
-                'Content-Type': 'multipart/form-data'
+    try {
+        const result = await axios.post(`${context.$baseURL}api/v1/project/${projectId}/data?colName=${colName}`, dataFile,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
+        console.log(result);
+        context.showLoadingDialog = false
+        loadProject(context, projectId, 0)
+    } catch (error) {
+        console.error('post data error', error);
+        context.showLoadingDialog = false
+    }
+}
+
+export const resultDownload = async (context, projectId) => {
+    context.showLoadingProgressDialog = true
+    context.loadingProgressDialogTitle = '데이터 다운로드'
+    context.loadingProgressDialogSubTitle = '데이터 태깅 결과 다운로드 중...'
+
+    try {
+        const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/data/download`, {
+            responseType: 'blob',
+            onDownloadProgress: (progressEvent) => {
+                // console.log(progressEvent)
+                context.showLoadingProgressDialogMax = progressEvent.total
+                context.showLoadingProgressDialogNow = progressEvent.loaded
+                const progressRate = Math.round(progressEvent.loaded / progressEvent.total * 10000) / 100
+                context.loadingProgressDialogSubTitle = `데이터 태깅 결과 다운로드 중 (${progressRate}%)...`
             }
         })
-        .then(response => {
-            context.showLoadingDialog = false
-            loadProject(context, projectId, 0)
-            console.log(response);
-        })
-        .catch(error => {
-            context.showLoadingDialog = false
-            console.log('post data error', error);
-        });
+        console.log(result);
+
+        const blob = new Blob([result.data], { type: 'text/csv' })
+        const link = document.createElement('a')
+        link.href = URL.createObjectURL(blob)
+        link.download = `${context.selectedProjectName}_result`
+        link.click()
+        URL.revokeObjectURL(link.href)
+    } catch (error) {
+        console.error('download result error', error);
+    } finally {
+        context.showLoadingProgressDialog = false
+    }
 }
+
+// export const dataReloadByRank = async (context, projectId, dataId) => {
+//     context.showLoadingDialog = true
+//     context.loadingDialogTitle = '데이터 리로딩'
+//     context.loadingDialogSubTitle = '데이터 리로드 중...'
+//
+//     try {
+//         await axios.delete(`${context.$baseURL}api/v1/project/${projectId}/data/${dataId}`)
+//
+//     } catch (error) {
+//         console.error('data reload error', error);
+//         context.showLoadingDialog = false
+//     }
+// }

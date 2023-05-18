@@ -1,5 +1,5 @@
 <template>
-  <div id="layout-root">
+  <v-app id="layout-root">
     <AppBar></AppBar>
     <div id="layout-project-root">
       <div id="layout-project-sidebar">
@@ -49,20 +49,23 @@
       </div>
       <div v-if="selectedProjectId !== -1" id="layout-project-editor">
         <!--   문장/태그 편집 영역   -->
-        <div id="layout-project-text-area">
+        <div v-if="!(trainStatus !== -1 || (trainStatus === -1 && stepperIdx === 3))" id="layout-project-text-area">
           <div id="layout-project-editor-top">
             <div id="editor-top-title">{{ this.selectedProjectName }}</div>
 <!--            <v-btn color="light_magenta" height="30">-->
 <!--              저장-->
 <!--            </v-btn>-->
             <v-btn
-                color="light_brown"
-                height="30"
                 :loading="isFileSelecting"
                 @click="handleFileImport"
-            >
-              텍스트 로드
-            </v-btn>
+                icon="mdi-file-upload"
+                variant="text"
+            ></v-btn>
+            <v-btn
+                @click="handleDownloadResult"
+                icon="mdi-file-download"
+                variant="text"
+            ></v-btn>
             <input
                 :value="fileData"
                 ref="uploader"
@@ -76,16 +79,29 @@
             <div id="layout-project-editor-main-title">
 <!--              <div id="editor-main-title">-선택된 태그구성-</div>-->
               <div class="select-container">
-                <button class="btn-select" @click="selectBoxClick">document</button>
-                <ul class="list-member" @click="selectBoxChange">
-                  <li
-                      v-for="i in 10"
-                      :key="i"
-                  >
-                    <button type="button">doc {{i}}</button>
-                  </li>
-                </ul>
+<!--                <button class="btn-select" @click="selectBoxClick">document</button>-->
+<!--                <ul class="list-member" @click="selectBoxChange">-->
+<!--                  <li-->
+<!--                      v-for="i in 10"-->
+<!--                      :key="i"-->
+<!--                  >-->
+<!--                    <button type="button">doc {{i}}</button>-->
+<!--                  </li>-->
+<!--                </ul>-->
+                <div v-if="tagMod === 'sentence'">-문장태그 편집모드-</div>
+                <div v-else-if="tagMod === 'paragraph'">-문단태그 편집모드-</div>
+                <div v-if="tagMod === 'word'">-단어태그 편집모드-</div>
               </div>
+            </div>
+            <div v-if="tagMod === 'paragraph'" id="area-set-paragraph">
+              <div>{{ makeParagraphStatus }}</div>
+              <v-btn
+                  v-if="firstParagraph !== -1"
+                  icon="mdi-close"
+                  size="x-small"
+                  variant="text"
+                  @click="clearSelectedParagraph"
+              ></v-btn>
             </div>
             <div
                 id="editor-main-lines"
@@ -106,26 +122,66 @@
                     @update:modelValue="search"
                 ></v-text-field>
               </div>
-              <p
-                v-for="(l, idx) in lineData"
-                :key="l"
-                class="text-line"
-                :data-tooltip="idx"
-                @dragenter.prevent
-                @dragover.prevent
-                @drop.prevent="onDrop($event, idx)"
-              >
-                <span v-if="l.search" class="text-word">{{ l.text }}</span>
-                <v-chip
+              <div v-if="tagMod === 'sentence'">
+                <p
+                    v-for="(l, idx) in lineData"
+                    :key="l"
+                    class="text-line"
+                    :data-tooltip="idx"
+                    @dragenter.prevent
+                    @dragover.prevent
+                    @drop.prevent="onDrop($event, idx)"
+                >
+                  <span v-if="l.search" class="text-word">{{ l.text }}</span>
+                  <v-chip
                       v-if="l.search && checkDataTag(l.data_tags) !== undefined"
                       size="small"
                       :style="[chipBackground(`#${checkDataTag(l.data_tags).tagColor}`),
                       setChipBackgroundColor(`#${checkDataTag(l.data_tags).tagColor}`)]"
                       @click="onDataTagClicked($event, checkDataTag(l.data_tags), idx)"
-                    >
-                  {{ checkDataTag(l.data_tags).tagName }}
-                </v-chip>
-              </p>
+                  >
+                    {{ checkDataTag(l.data_tags).tagName }}
+                  </v-chip>
+                </p>
+              </div>
+              <div v-else-if="tagMod === 'word'" id="editor-words">
+                <div
+                    v-for="(l) in lineData"
+                    :key="l"
+                >
+                  <p
+                      class="text-line"
+                      v-html="setWordHighlight(l, wordTagData)"
+                      @mouseup="onWordSelection"
+                  ></p>
+<!--                  <p-->
+<!--                      class="text-line-selection"-->
+<!--                      :data-tooltip="idx"-->
+<!--                      @mouseup="onWordSelection"-->
+<!--                  >-->
+<!--                    {{ l.text }}-->
+<!--                  </p>-->
+                </div>
+              </div>
+              <div v-else-if="tagMod === 'paragraph'" id="editor-paragraphs">
+                <div
+                    v-for="(l, idx) in lineData"
+                    :key="l"
+                >
+                  <div
+                      class="text-line-paragraph"
+                      :data-tooltip="idx"
+                  >
+                    <div>{{ idx }}</div>
+                    <p
+                        class="text-line"
+                        v-html="setParagraphHighlight(l, paragraphData)"
+                        :style="[setParagraphBackground(l)]"
+                        @mouseup="onParagraphSelection(idx)"
+                    ></p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <v-pagination
@@ -198,6 +254,7 @@
                         color="deep-purple-accent-3"
                         variant="outlined"
                         @update:modelValue="changeTagMod"
+                        mandatory
                     >
                       <v-btn value="paragraph" width="85">
                         문단
@@ -246,8 +303,8 @@
                 </div>
 
                 <div class="stepper-item-buttons">
-                  <v-btn color="color_accept" size="small" @click="stepperNext">
-                    모델선택
+                  <v-btn color="color_accept" size="small" @click="startTrain">
+                    파라미터 설정
                   </v-btn>
 <!--                  <v-btn color="color_deny" size="small" @click="stepperPrev">-->
 <!--                    이전-->
@@ -257,36 +314,108 @@
             </div>
           </div>
 
+<!--          <div class="stepper-item" :class="stepperIdx === 1 ? 'selected' : ''">-->
+<!--            <div class="stepper-item-top">-->
+<!--              <div class="stepper-item-top-circle" :class="stepperIdx === 1 ? 'selected' : ''">-->
+<!--                <div class="stepper-item-top-circle-num">2</div>-->
+<!--              </div>-->
+<!--              <div class="stepper-item-top-circle-title" :class="stepperIdx === 1 ? 'stepper-item-top-circle-title-selected' : ''">-->
+<!--                모델 - {{ modelLists[selectedModel].name }}-->
+<!--              </div>-->
+<!--            </div>-->
+
+<!--            <div class="stepper-item-content">-->
+<!--              <v-divider class="stepper-item-divider" vertical></v-divider>-->
+<!--              <div class="stepper-item-content-area" :class="stepperIdx !== 1 ? 'unselected' : ''">-->
+<!--                <div id="layout-project-model-area">-->
+<!--                  <div class="model-summary">Active Learning을 진행할 모델을 선택해주세요.</div>-->
+<!--                  <v-container class="pa-0 ma-0">-->
+<!--                    <v-select-->
+<!--                        label="모델 목록"-->
+<!--                        density="comfortable"-->
+<!--                        :items="modelLists"-->
+<!--                        item-title="name"-->
+<!--                        item-value="value"-->
+<!--                        :hide-details="true"-->
+<!--                        @update:model-value="changeModel"-->
+<!--                    ></v-select>-->
+<!--                  </v-container>-->
+<!--                </div>-->
+<!--                <div class="stepper-item-buttons">-->
+<!--                  <v-btn color="color_accept" size="small" @click="stepperNext">-->
+<!--                    학습-->
+<!--                  </v-btn>-->
+<!--                  <v-btn color="color_deny" size="small" @click="stepperPrev">-->
+<!--                    태깅 다시하기-->
+<!--                  </v-btn>-->
+<!--                </div>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
+
           <div class="stepper-item" :class="stepperIdx === 1 ? 'selected' : ''">
             <div class="stepper-item-top">
               <div class="stepper-item-top-circle" :class="stepperIdx === 1 ? 'selected' : ''">
                 <div class="stepper-item-top-circle-num">2</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 1 ? 'stepper-item-top-circle-title-selected' : ''">
-                모델 - {{ modelLists[selectedModel].name }}
+                Set Parameters
               </div>
             </div>
 
             <div class="stepper-item-content">
               <v-divider class="stepper-item-divider" vertical></v-divider>
               <div class="stepper-item-content-area" :class="stepperIdx !== 1 ? 'unselected' : ''">
-                <div id="layout-project-model-area">
-                  <div class="model-summary">Active Learning을 진행할 모델을 선택해주세요.</div>
-                  <v-container class="pa-0 ma-0">
-                    <v-select
-                        label="모델 목록"
-                        density="comfortable"
-                        :items="modelLists"
-                        item-title="name"
-                        item-value="value"
-                        :hide-details="true"
-                        @update:model-value="changeModel"
-                    ></v-select>
-                  </v-container>
-                </div>
+                <v-container class="parameter-set-items">
+                  <v-text-field
+                      v-model="trainName"
+                      label="학습이름"
+                      variant="outlined"
+                      density="compact"
+                      :hide-details="true"
+                  ></v-text-field>
+                </v-container>
+                <v-container class="parameter-set-items">
+                  <v-select
+                      label="학습할 태그 그룹"
+                      :items="tagGroups"
+                      item-title="tag_group_name"
+                      item-value="value"
+                      :hide-details="true"
+                      @update:model-value="changeGroup"
+                      v-model="tagGroupSelectionModel"
+                      variant="outlined"
+                      density="compact"
+                  ></v-select>
+                </v-container>
+<!--                <v-container class="parameter-set-items pr-4">-->
+<!--                  <div>{{ `epoch ${trainEpoch}` }}</div>-->
+<!--                  <v-slider-->
+<!--                      v-model="trainEpoch"-->
+<!--                      :max="500"-->
+<!--                      :min="1"-->
+<!--                      :step="1"-->
+<!--                      thumb-label-->
+<!--                  >-->
+<!--                  </v-slider>-->
+<!--                </v-container>-->
+                <v-container class="parameter-set-items pr-4">
+                  <div>{{ `lr ${trainLearningRate}` }}</div>
+                  <v-slider
+                      v-model="trainLearningRate"
+                      :max="1"
+                      :min="0.00001"
+                      :step="0.00001"
+                      thumb-label
+                  >
+                  </v-slider>
+                </v-container>
                 <div class="stepper-item-buttons">
-                  <v-btn color="color_accept" size="small" @click="stepperNext">
-                    학습
+                  <v-btn color="color_accept" size="small" @click="checkTrainStart">
+                    학습시작
+                  </v-btn>
+                  <v-btn color="light_magenta" size="small" @click="skipTrain">
+                    학습 건너뛰기
                   </v-btn>
                   <v-btn color="color_deny" size="small" @click="stepperPrev">
                     태깅 다시하기
@@ -309,17 +438,28 @@
             <div class="stepper-item-content">
               <v-divider class="stepper-item-divider" vertical></v-divider>
               <div class="stepper-item-content-area" :class="stepperIdx !== 2 ? 'unselected' : ''">
-
-                <div class="model-summary">학습이 완료되면 자동으로 다음 단계로 넘어갑니다.</div>
-                <v-progress-linear indeterminate></v-progress-linear>
-                <div class="stepper-item-buttons">
-                  <v-btn color="color_accept" size="small" @click="stepperNext">
-                    다음
-                  </v-btn>
-                  <v-btn color="color_deny" size="small" @click="stepperPrev">
-                    이전
-                  </v-btn>
+                <div class="model-summary">{{ selectedProjectName }} 프로젝트 - 학습이 완료되면 자동으로 다음 단계로 넘어갑니다.</div>
+                <div class="model-summary">{{ logMsg }}</div>
+                <v-progress-linear
+                    :indeterminate="isIndeterminate"
+                    :min="0"
+                    :max="logProgressMax"
+                    v-model="logProgressNow"
+                ></v-progress-linear>
+                <div id="show-train-log">
+                  <div
+                      v-for="log in logDatas"
+                      :key="log"
+                  >{{ log }}</div>
                 </div>
+<!--                <div class="stepper-item-buttons">-->
+<!--                  <v-btn color="color_accept" size="small" @click="stepperNext">-->
+<!--                    다음-->
+<!--                  </v-btn>-->
+<!--                  <v-btn color="color_deny" size="small" @click="stepperPrev">-->
+<!--                    이전-->
+<!--                  </v-btn>-->
+<!--                </div>-->
               </div>
             </div>
           </div>
@@ -330,55 +470,56 @@
                 <div class="stepper-item-top-circle-num">4</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 3 ? 'stepper-item-top-circle-title-selected' : ''">
-                Auto Annotation
-              </div>
-            </div>
-
-            <div class="stepper-item-content">
-              <v-divider class="stepper-item-divider" vertical></v-divider>
-              <div class="stepper-item-content-area" :class="stepperIdx !== 3 ? 'unselected' : ''">
-
-
-                <div class="model-summary">학습이 완료되면 자동으로 다음 단계로 넘어갑니다.</div>
-                <v-progress-linear indeterminate></v-progress-linear>
-                <div class="stepper-item-buttons">
-                  <v-btn color="color_accept" size="small" @click="stepperNext">
-                    다음
-                  </v-btn>
-                  <v-btn color="color_deny" size="small" @click="stepperPrev">
-                    이전
-                  </v-btn>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="stepper-item" :class="stepperIdx === 4 ? 'selected' : ''">
-            <div class="stepper-item-top">
-              <div class="stepper-item-top-circle" :class="stepperIdx === 4 ? 'selected' : ''">
-                <div class="stepper-item-top-circle-num">5</div>
-              </div>
-              <div class="stepper-item-top-circle-title" :class="stepperIdx === 4 ? 'stepper-item-top-circle-title-selected' : ''">
                 Data Reload
               </div>
             </div>
 
             <div class="stepper-item-content stepper-item-content-last">
 <!--              <v-divider vertical></v-divider>-->
-              <div class="stepper-item-content-area" :class="stepperIdx !== 4 ? 'unselected' : ''">
-
-                <div>
-
-                  <div class="model-summary">정답 데이터: n개</div>
-                  <div class="model-summary">오답 데이터: n개</div>
-                  <div class="model-summary">data reload를 진행할 시 정답 데이터를 제외하고 태깅 단계로 되돌아 갑니다.</div>
+              <div class="stepper-item-content-area" :class="stepperIdx !== 3 ? 'unselected' : ''">
+                <div v-if=" tagGroups.length > 0" style="width: 100%">
+                  <div class="model-summary">{{ tagGroups[selectedTagGroupId].tag_group_name }} - 최근 학습 결과</div>
+                  <v-table v-if="trainResultData !== null" class="table-result">
+                    <thead>
+                    <tr>
+                      <th></th>
+                      <th>GPT</th>
+                      <th>Bert</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                      <td>train</td>
+                      <td>{{ trainResultData[tagGroups[selectedTagGroupId].tag_group_name].current_train_tag_group_gpt_train_acc }}</td>
+                      <td>{{ trainResultData[tagGroups[selectedTagGroupId].tag_group_name].current_train_tag_group_bert_train_acc }}</td>
+                    </tr>
+                    <tr>
+                      <td>test</td>
+                      <td>{{ trainResultData[tagGroups[selectedTagGroupId].tag_group_name].current_train_tag_group_gpt_test_acc }}</td>
+                      <td>{{ trainResultData[tagGroups[selectedTagGroupId].tag_group_name].current_train_tag_group_bert_test_acc }}</td>
+                    </tr>
+                    </tbody>
+                  </v-table>
+                  <v-select
+                      label="리로드할 Rank 선택"
+                      :items="['sumRank', 'bertRank', 'gptRank']"
+                      item-title="tag_group_name"
+                      item-value="value"
+                      :hide-details="true"
+                      v-model="selectionRank"
+                      variant="outlined"
+                      density="compact"
+                  ></v-select>
                 </div>
                 <div class="stepper-item-buttons">
 <!--                  <v-btn color="color_accept" size="small" @click="stepperNext">-->
 <!--                    다음-->
 <!--                  </v-btn>-->
                   <v-btn color="color_deny" size="small" @click="dataReloading">
-                    data reload
+                    데이터 리로드
+                  </v-btn>
+                  <v-btn color="light_magenta" size="small" @click="gotoTag">
+                    태깅으로 돌아가기
                   </v-btn>
                 </div>
               </div>
@@ -390,17 +531,6 @@
       <div v-else>프로젝트를 선택하거나 생성해 주세요.</div>
     </div>
 
-    <!--  context menu - 프로젝트 리스트 우클릭  -->
-    <context-menu
-        v-model:show="showProjectListMenu"
-        :options="optionsComponent"
-    >
-      <context-menu-item label="이름 변경" @click="projectContextMenuClick(this.CONTEXTMENU_PROJECT_RENAME)"/>
-      <context-menu-item
-          label="삭제"
-          @click="projectContextMenuClick(this.CONTEXTMENU_PROJECT_DELETE)">
-      </context-menu-item>
-    </context-menu>
     <!--  dialog - 프로젝트 삭제 확인  -->
     <v-dialog
         v-model="showDeleteProjectDialog"
@@ -506,22 +636,6 @@
           text-deny="취소"
       ></Dialog>
     </v-dialog>
-    <!--  context menu - 태그 칩 컨택스트 매뉴  -->
-    <context-menu
-        v-model:show="showTagMenu"
-        :options="tagMenuOptionsComponent"
-    >
-      <context-menu-item
-          label="이름 변경"
-          @click="tagContextMenuClick(this.CONTEXTMENU_TAG_RENAME)"/>
-      <context-menu-item
-          label="색상 변경"
-          @click="tagContextMenuClick(this.CONTEXTMENU_TAG_COLOR)"/>
-      <context-menu-item
-          label="삭제"
-          @click="tagContextMenuClick(this.CONTEXTMENU_TAG_DELETE)">
-      </context-menu-item>
-    </context-menu>
     <!--  dialog - 태그 삭제 확인  -->
     <v-dialog
         v-model="showDeleteTagDialog"
@@ -580,6 +694,22 @@
       >
       </Dialog>
     </v-dialog>
+    <!--  dialog 로딩중 프로그래스바 화면  -->
+    <v-dialog
+        v-model="showLoadingProgressDialog"
+        width="auto"
+        :close-on-back="false"
+        :persistent="true"
+    >
+      <Dialog
+          :dialog-type="this.DIALOG_TYPE_PROGRESS_LINEAR"
+          :title="this.loadingProgressDialogTitle"
+          :subtitle="this.loadingProgressDialogSubTitle"
+          :progress-max="showLoadingProgressDialogMax"
+          :progress="showLoadingProgressDialogNow"
+      >
+      </Dialog>
+    </v-dialog>
 
     <!--  dialog 컬럼이름  -->
     <v-dialog
@@ -596,7 +726,51 @@
       >
       </Dialog>
     </v-dialog>
-  </div>
+
+    <!--  dialog 학습 시작 확인  -->
+    <v-dialog
+        v-model="showTrainStart"
+        width="auto"
+    >
+      <Dialog
+          v-on:dialog-click="startTrainCheck"
+          :dialog-type="this.DIALOG_TYPE_SUBTITLE"
+          title="학습 시작"
+          :subtitle="`'${tagGroups[selectedTagGroupId].tag_group_name}' 태그 그룹을 '${trainName}'으로 학습을 시작하시겠습니까?`"
+          text-accept="시작"
+          text-deny="취소"
+      ></Dialog>
+    </v-dialog>
+  </v-app>
+
+
+  <!--  context menu - 프로젝트 리스트 우클릭  -->
+  <context-menu
+      v-model:show="showProjectListMenu"
+      :options="optionsComponent"
+  >
+    <context-menu-item label="이름 변경" @click="projectContextMenuClick(this.CONTEXTMENU_PROJECT_RENAME)"/>
+    <context-menu-item
+        label="삭제"
+        @click="projectContextMenuClick(this.CONTEXTMENU_PROJECT_DELETE)">
+    </context-menu-item>
+  </context-menu>
+  <!--  context menu - 태그 칩 컨택스트 매뉴  -->
+  <context-menu
+      v-model:show="showTagMenu"
+      :options="tagMenuOptionsComponent"
+  >
+    <context-menu-item
+        label="이름 변경"
+        @click="tagContextMenuClick(this.CONTEXTMENU_TAG_RENAME)"/>
+    <context-menu-item
+        label="색상 변경"
+        @click="tagContextMenuClick(this.CONTEXTMENU_TAG_COLOR)"/>
+    <context-menu-item
+        label="삭제"
+        @click="tagContextMenuClick(this.CONTEXTMENU_TAG_DELETE)">
+    </context-menu-item>
+  </context-menu>
 </template>
 
 <script>
@@ -606,18 +780,33 @@ import {
   createProject,
   getProjectList,
   deleteProject,
-  renameProject
-} from'@/js/api/project.js'
+  renameProject, getRecentTrainResult
+} from '@/js/api/project.js'
 import {
-  addTagInData, deleteTagInData,
-  getDataList, postData
+  addTagInData, addTagInParagraph,
+  addTagInWord, createParagraph,
+  createWord,
+  deleteParagraph,
+  deleteTagInData,
+  deleteTagInParagraph,
+  deleteTagInWord,
+  deleteWord,
+  getDataList,
+  getParagraphDataList,
+  getWordDataList,
+  postData, resultDownload
 } from '@/js/api/data.js'
 import {
-  getTagGroupList,
   getTagList,
   addTagGroup,
   deleteTagGroup, deleteTag, changeTagInform, addTag
 } from "@/js/api/tag";
+import {initVariables, loadProject} from "@/js/api/common";
+import {startTrain} from "@/js/api/train";
+
+import {disconnectLoggingSSE, disconnectStatusSSE, initLogSSE} from "@/js/sse/train";
+
+// import * as Y from 'yjs'
 
 const generateModels = () => {
   const group = []
@@ -661,32 +850,21 @@ const checkTagGroupName = (context, title) => {
   }
 }
 
-const initVariables = (context) => {
-  context.dataPage = 0
-  context.dataTotalPage = 0
-  context.selectedTagGroupId = 0
-  context.stepperIdx = 0
-  context.projectRightClickedId = 0
-  context.lineData = []
-  context.tags = []
-  context.tagGroups = []
-  context.tagGroupSelectionModel = 0
-  context.selectedTag = 0
-  context.sentence = 'sentence'
-  context.documentDatas = []
-}
-
-const loadProject = async (context, id) => {
-  initVariables(context)
-
-  await getTagGroupList(context, id)
-  if (context.tagGroups.length > 0) {
-    console.log(context.tagGroups)
-    await getTagList(context,
-        id,
-        context.tagGroups[context.selectedTagGroupId].tag_group_id)
+const checkTrainName = (context, title) => {
+  const titleRegEx = /^[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9| ]+$/;
+  if (title.length > 20) {
+    context.snackbarMakeProjectTitleWarn = false
+    context.snackbarMakeProjectTitleWarnMsg = "학습 이름은 20자 이하만 가능합니다."
+    context.snackbarMakeProjectTitleWarn = true
+    return false
+  } else if (titleRegEx.test(title)) {
+    return true
+  } else {
+    context.snackbarMakeProjectTitleWarn = false
+    context.snackbarMakeProjectTitleWarnMsg = "학습 이름은 영어, 한글, 숫자만 입력 가능합니다."
+    context.snackbarMakeProjectTitleWarn = true
+    return false
   }
-  await getDataList(context, id, 0)
 }
 
 const hexToRgb = (hex) => {
@@ -698,6 +876,14 @@ const hexToRgb = (hex) => {
   } : null;
 }
 
+const setTextColorToBackground = (hex) => {
+  const rgb = hexToRgb(hex)
+  const brightness = Math.round(((parseInt(rgb.r) * 299) +
+      (parseInt(rgb.g) * 587) +
+      (parseInt(rgb.b) * 114)) / 1000)
+  return (brightness > 125) ? 'black' : 'white'
+}
+
 export default {
   name: "ProjectComponent",
   data() {
@@ -705,6 +891,12 @@ export default {
       showLoadingDialog: false,
       loadingDialogTitle: "",
       loadingDialogSubTitle: "",
+
+      showLoadingProgressDialog: false,
+      loadingProgressDialogTitle: "",
+      loadingProgressDialogSubTitle: "",
+      showLoadingProgressDialogMax: 0,
+      showLoadingProgressDialogNow: 0,
 
       lineData: [],
       tagGroups: [],
@@ -715,8 +907,10 @@ export default {
       selectedModel: 0,
       tags: [],
       stepperIdx: 0,
-      stepperMax: 4,
+      stepperMax: 3,
       projectList: [],
+
+      initStatus: true,
 
       showMakeProjectDialog: false,
       snackbarMakeProjectTitleWarn: false,
@@ -724,7 +918,7 @@ export default {
 
       showProjectListMenu: false,
       optionsComponent: {
-        zIndex: 3,
+        zIndex: 1000,
         minWidth: 230,
         x: 500,
         y: 200
@@ -747,7 +941,7 @@ export default {
 
       showTagMenu: false,
       tagMenuOptionsComponent: {
-        zIndex: 3,
+        zIndex: 1000,
         minWidth: 230,
         x: 500,
         y: 200
@@ -765,41 +959,71 @@ export default {
       fileData: undefined,
       selectedFile: undefined,
 
-      dataPage: 0,
+      dataPage: 1,
+      dataPageSave: 1,
       dataTotalPage: 0,
 
       dataFind: false,
       searchValue: '',
 
-      documentDatas: [
-        {'title': 'title1'},
-        {'title': 'title2'},
-        {'title': 'title3'},
-        {'title': 'title4'},
-      ],
       tagMod: 'sentence',
-      selectedTag: 0
+      selectedTag: 0,
+
+      wordTagData: [],
+      paragraphData: [],
+
+      showTrainStart: false,
+      trainName: '',
+
+      trainEpoch: 1,
+      trainLearningRate: 0.00001,
+
+      trainStatus: -1,
+      logDatas: [],
+      logMsg: "",
+      isIndeterminate: true,
+      logProgressMax: 0,
+      logProgressNow: 0,
+
+      trainResultData: null,
+      selectionRank: 'sumRank',
+
+      makeParagraphStatus: '',
+      firstParagraph: -1,
+
+      childData: []
     }
   },
   components: {
     AppBar,
     Dialog
   },
-  created() {
-    getProjectList(this);
-    window.onkeydown = (e) => {
-      if ((e.keyCode === 70 && (e.ctrlKey || e.metaKey ))) {
-        e.preventDefault();
-        if (this.lineData.length > 0) {
-          this.dataFind = !this.dataFind
-          if (!this.dataFind) this.searchClose()
-        } else {
-          console.log("undefind")
+  async created() {
+    // this.yDoc = await new Y.Doc()
+    // this.sentenceMap = await this.yDoc.getMap('sentence');
+    // this.wordMap = await this.yDoc.getMap('word');
+    // this.paragraphMap = await this.yDoc.getMap('paragraph');
+    // console.log(this.yDoc)
+    await getProjectList(this);
+      window.onkeydown = (e) => {
+        if ((e.keyCode === 70 && (e.ctrlKey || e.metaKey ))) {
+          e.preventDefault();
+          if (this.lineData.length > 0) {
+            this.dataFind = !this.dataFind
+            if (!this.dataFind) this.searchClose()
+          } else {
+            console.log("undefind")
+          }
         }
       }
-    }
   },
   methods: {
+    clearSelectedParagraph() {
+      this.firstParagraph = -1
+      this.childData = []
+      this.makeParagraphStatus = '문단을 지정할 문장을 선택해 주세요'
+    },
+
     checkDataTag(tags) {
       for (let t of tags) {
         if (t.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
@@ -809,12 +1033,7 @@ export default {
       return undefined
     },
     setChipBackgroundColor(hex) {
-      const rgb = hexToRgb(hex)
-
-      const brightness = Math.round(((parseInt(rgb.r) * 299) +
-          (parseInt(rgb.g) * 587) +
-          (parseInt(rgb.b) * 114)) / 1000);
-      return {'color': (brightness > 125) ? 'black' : 'white'};
+      return {'color': setTextColorToBackground(hex)};
     },
     chipBackground (color) {
       return {
@@ -850,6 +1069,9 @@ export default {
     dataReloading() {
       this.stepperIdx = 0;
     },
+    gotoTag() {
+      this.stepperIdx = 0;
+    },
 
     startDrag(event, item) {
       if (this.tagMod !== "sentence") return
@@ -876,12 +1098,14 @@ export default {
     },
     async onDrop(event, colNum) {
       const draggedTagValue = Number(event.dataTransfer.getData("selectedItem"))
-      console.log(event.dataTransfer.getData("selectedItem"))
+      console.log(event.dataTransfer.getData("selectedItem"), this.lineData[colNum].id)
       let targetTag = this.tags[draggedTagValue]
       await addTagInData(this,
           this.selectedProjectId,
           targetTag,
-          colNum)
+          colNum,
+          this.lineData[colNum].id
+      )
     },
     async projectCreateDialogClicked(data) {
       this.showMakeProjectDialog = false
@@ -898,7 +1122,7 @@ export default {
       this.optionsComponent.y = e.y;
       this.projectRightClickedId = id
       this.projectRightClickedName = name
-      // console.log(id)
+      console.log(e)
     },
     projectContextMenuClick(type) {
       if (type === this.CONTEXTMENU_PROJECT_RENAME) {
@@ -928,7 +1152,7 @@ export default {
       if (this.selectedProjectId === -1) {
         this.selectedProjectId = id
         this.selectedProjectName = name
-        loadProject(this, this.selectedProjectId)
+        loadProject(this, this.selectedProjectId, 0)
       } else {
         // 이전에 선택한 화면이 있다면 저장 여부 물어보기
         this.moveProjectId = id
@@ -942,7 +1166,7 @@ export default {
       if (data.type === this.DIALOG_CLICK_YES) {
         this.selectedProjectId = this.moveProjectId
         this.selectedProjectName = this.moveProjectName
-        loadProject(this, this.selectedProjectId)
+        loadProject(this, this.selectedProjectId, 0)
       } // move cancel
     },
 
@@ -1044,6 +1268,11 @@ export default {
           dataIdx)
     },
 
+    handleDownloadResult() {
+      if (confirm(`${this.selectedProjectName}의 결과 파일을 다운받겠습니까?`)) {
+        resultDownload(this, this.selectedProjectId)
+      }
+    },
     handleFileImport() {
       this.isFileSelecting = true;
       window.addEventListener('focus', () => {
@@ -1070,7 +1299,77 @@ export default {
     },
 
     async onPageChange(page) {
-      await getDataList(this, this.selectedProjectId, page - 1)
+      switch (this.tagMod) {
+        case 'word': {
+          this.lineData = []
+          await getDataList(this, this.selectedProjectId, page - 1)
+
+          this.wordTagData = {}
+          if (this.lineData.length > 0) {
+            let startIdx = this.lineData[this.lineData.length - 1].id
+            let endIdx = this.lineData[0].id
+            await getWordDataList(this, this.selectedProjectId, startIdx, endIdx)
+          }
+          break
+        }
+        case 'sentence': {
+          this.lineData = []
+          await getDataList(this, this.selectedProjectId, page - 1)
+          break
+        }
+        case 'paragraph': {
+          console.log(page, this.dataPageSave)
+          if (Math.abs(page - this.dataPageSave) > 1) {
+            alert('문단 태깅 모드에서는 한 페이지씩만 변경 가능합니다.')
+            this.dataPage = this.dataPageSave
+            return
+          }
+          if (this.dataPageSave < page) {
+            console.log('next')
+            if (this.firstParagraph !== -1) {
+              if (this.firstParagraph.page >= page) {
+                for (let i = 0;i < 100;i++) {
+                  this.childData.pop()
+                  if (this.childData.length === 0) break
+                }
+              } else {
+                let start = 0
+                if (this.firstParagraph.page + 1 === page) start = this.firstParagraph.idx
+                for (;start < this.lineData.length;start++) {
+                  this.childData.push(this.lineData[start].id)
+                }
+              }
+            }
+          } else if (this.dataPageSave > page) {
+            console.log('prev')
+            if (this.firstParagraph !== -1) {
+              if (this.firstParagraph.page > page) {
+                let end = 99
+                if (this.firstParagraph.page - 1 === page) end = this.firstParagraph.idx
+                for (;end >= 0;end--) {
+                  this.childData.push(this.lineData[end].id)
+                }
+              } else {
+                for (let i = 0;i < 100;i++) {
+                  this.childData.pop()
+                  if (this.childData.length === 0) break
+                }
+              }
+            }
+          }
+          console.log(this.childData.length)
+
+          this.lineData = []
+          await getDataList(this, this.selectedProjectId, page - 1)
+
+          this.paragraphData = {}
+          let startIdx = this.lineData[this.lineData.length - 1].id
+          let endIdx = this.lineData[0].id
+          await getParagraphDataList(this, this.selectedProjectId, startIdx, endIdx)
+          break
+        }
+      }
+      this.dataPageSave = this.dataPage
     },
 
     searchClose() {
@@ -1100,11 +1399,37 @@ export default {
       }
     },
 
-    changeTagMod(d) {
+    async changeTagMod(d) {
       this.selectedTag = 0
       switch (d) {
         case 'word': {
-          console.log("word!")
+          this.lineData = []
+          await getDataList(this, this.selectedProjectId, this.dataPage - 1)
+
+          this.wordTagData = {}
+          if (this.lineData.length > 0) {
+            let startIdx = this.lineData[this.lineData.length - 1].id
+            let endIdx = this.lineData[0].id
+            await getWordDataList(this, this.selectedProjectId, startIdx, endIdx)
+          }
+          break
+        }
+        case 'sentence': {
+          this.lineData = []
+          await getDataList(this, this.selectedProjectId, this.dataPage - 1)
+          break
+        }
+        case 'paragraph': {
+          this.lineData = []
+          this.firstParagraph = -1
+          this.childData = []
+          this.makeParagraphStatus = '문단을 지정할 문장을 선택해 주세요'
+          await getDataList(this, this.selectedProjectId, this.dataPage - 1)
+
+          this.paragraphData = {}
+          let startIdx = this.lineData[this.lineData.length - 1].id
+          let endIdx = this.lineData[0].id
+          await getParagraphDataList(this, this.selectedProjectId, startIdx, endIdx)
           break
         }
       }
@@ -1112,7 +1437,352 @@ export default {
     changeTagSelection(d) {
       this.selectedTag = d
       console.log(d)
+    },
+
+    onWordTagClicked() {
+      console.log('dddd')
+    },
+    setWordHighlight(word, wordTag) {
+      const sentenceIdx = word.id
+      const targetInfo = wordTag[sentenceIdx]
+      if (targetInfo === undefined) return `<span not-alloc="0" parent-idx="${sentenceIdx}" start-idx="0">` + word.text + `</span>`
+      targetInfo.sort((a, b) => {
+        return a.start_index - b.start_index
+      })
+
+      let lastEndIdx = 0
+      let result = ""
+      for (let tag of targetInfo) {
+        let nowTagInfo = null
+        for (let t of tag.data_target_tags) {
+          if (t.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
+            nowTagInfo = t
+            break
+          }
+        }
+
+        if (tag.start_index > 0) result += `<span not-alloc="0" parent-idx="${sentenceIdx}" start-idx="${lastEndIdx}">` + word.text.slice(lastEndIdx, tag.start_index) + `</span>`
+        if (nowTagInfo !== null) {
+          result += `<span not-alloc="0" parent-idx="${sentenceIdx}" start-idx="${tag.start_index}" style="background-color: #${nowTagInfo.tagColor};
+            color: ${setTextColorToBackground(nowTagInfo.tagColor)}; cursor: pointer;"
+            class="word-tag">`
+              + word.text.slice(tag.start_index, tag.end_index + 1) + '</span>'
+        } else {
+          result += `<span not-alloc="1" parent-idx="${sentenceIdx}" start-idx="${tag.start_index}" style="background-color: rgba(0,0,0,0.08);
+            cursor: pointer;"
+            class="word-tag">`
+              + word.text.slice(tag.start_index, tag.end_index + 1) + '</span>'
+        }
+
+        lastEndIdx = tag.end_index + 1
+      }
+      if (lastEndIdx !== word.text.length) {
+        result += `<span not-alloc="0" parent-idx="${sentenceIdx}" start-idx="${lastEndIdx}">` + word.text.slice(lastEndIdx, word.text.length) + `</span>`
+      }
+
+      return result
+    },
+    onWordSelection() {
+      const selection = window.getSelection()
+      console.log(selection)
+      const attributes = selection.anchorNode.parentElement.attributes
+      const parentIdx = Number(attributes['parent-idx'].nodeValue)
+      const parentFocusIdx = Number(selection.focusNode.parentElement.attributes['parent-idx'].nodeValue)
+      if (parentIdx !== parentFocusIdx) {
+        alert('단어는 같은 문장 안에서만 생성 가능합니다.')
+        return;
+      }
+      // console.log(startIdx, parentIdx)
+
+      let idxStart = Number(selection.anchorNode.parentElement.attributes['start-idx'].nodeValue) + selection.anchorOffset
+      let idxEnd = Number(selection.focusNode.parentElement.attributes['start-idx'].nodeValue) + selection.focusOffset
+      if (idxEnd < idxStart) {
+        const tmp = idxStart;
+        idxStart = idxEnd
+        idxEnd = tmp
+      }
+      console.log(idxStart, idxEnd)
+      // console.log(this.wordTagData[parentIdx])
+      for (let itemIdx in this.wordTagData[parentIdx]) {
+        const item = this.wordTagData[parentIdx][itemIdx]
+        if (item.start_index === idxStart && item.end_index === idxEnd - 1 && attributes['not-alloc'].nodeValue === '1') {
+          console.log("add tag same")
+          addTagInWord(this, this.selectedProjectId, itemIdx, parentIdx, this.tags[this.selectedTag])
+          return;
+        }
+        if ((item.start_index <= idxStart && idxStart <= item.end_index) ||
+            (item.start_index <= idxEnd - 1 && idxEnd - 1 <= item.end_index)) {
+          for (let tagIdx in item.data_target_tags) {
+            const tag = item.data_target_tags[tagIdx]
+            if (tag.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
+              if (confirm(`'${item.text}'에서 '${tag.tagName}'태그를 삭제하시겠습니까?`)) {
+                console.log("remove tag", item)
+                if (item.data_target_tags.length === 1) {
+                  deleteWord(this, this.selectedProjectId, item.id)
+                } else {
+                  deleteTagInWord(this, this.selectedProjectId, itemIdx, parentIdx, tag)
+                }
+              }
+              return;
+            }
+          }
+
+          alert("다른 태그 그룹에서 태그가 지정된 단어는 삭제가 불가능합니다.")
+          return;
+        }
+      }
+      if (idxStart === idxEnd) return
+      console.log("add tag")
+      createWord(
+          this,
+          this.selectedProjectId,
+          parentIdx,
+          idxStart,
+          idxEnd,
+          this.tagGroups[this.selectedTagGroupId].tag_group_id,
+          this.tags[this.selectedTag].tag_id
+      )
+      console.log(selection.toString())
+    },
+    setParagraphHighlight(nowData, paragraphData) {
+      let paragraphIdx = null;
+      if (paragraphData === undefined ||
+          paragraphData.length === 0) return `<span>` + nowData.text + `</span>`
+
+      let isExist = false;
+      for (let dKey in paragraphData) {
+        const d = paragraphData[dKey]
+        if (d.start_index <= nowData.id && nowData.id <= d.end_index) {
+          isExist = true;
+          let nowTagInfo = null
+          for (let t of d.data_target_tags) {
+            if (t.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
+              nowTagInfo = t
+              break
+            }
+          }
+          paragraphIdx = d.id
+          if (nowTagInfo !== null) {
+            return `<span not-alloc="0" parent-idx="${paragraphIdx}" style="background-color: #${nowTagInfo.tagColor};
+            color: ${setTextColorToBackground(nowTagInfo.tagColor)}; cursor: pointer;">` + nowData.text + `</span>`
+          }
+        }
+      }
+
+      if (isExist) {
+        return `<span not-alloc="1" parent-idx="${paragraphIdx}" style="cursor: pointer;">` + nowData.text + `</span>`
+      } else {
+        return `<span not-alloc="0" parent-idx="${paragraphIdx}">` + nowData.text + `</span>`
+      }
+    },
+    setParagraphBackground(nowData) {
+      if (this.paragraphData === undefined ||
+          this.paragraphData.length === 0) return
+
+      let isExist = false;
+      const returnStyle = {}
+      for (let dKey in this.paragraphData) {
+        const d = this.paragraphData[dKey]
+        if (d.start_index <= nowData.id && nowData.id <= d.end_index) {
+          if (d.end_index === nowData.id) returnStyle['margin-top'] = '5px'
+          isExist = true;
+          let nowTagInfo = null
+          for (let t of d.data_target_tags) {
+            if (t.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
+              nowTagInfo = t
+              break
+            }
+          }
+          if (nowTagInfo !== null) {
+            returnStyle['background'] = `#${nowTagInfo.tagColor}`
+            return returnStyle
+          }
+        }
+      }
+
+      if (isExist) {
+        returnStyle['background'] = `rgba(0,0,0,0.08)`
+        return returnStyle
+      } else {
+        return {}
+      }
+    },
+    async onParagraphSelection(idx) {
+      const selection = window.getSelection()
+      const attributes = selection.anchorNode.parentElement.attributes
+      try {
+        const parentIdx = Number(attributes['parent-idx'].nodeValue)
+        const target = this.paragraphData[parentIdx]
+        const startSentenceIdx = target.child_data[target.child_data.length - 1].id
+        let startDataIdx = 0
+        for (let d in this.lineData) {
+          if (this.lineData[d].id === startSentenceIdx) {
+            startDataIdx = d
+            break
+          }
+        }
+
+        for (let tag of target.data_target_tags) {
+          if (tag.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id && this.firstParagraph === -1) {
+            if (confirm(`${startDataIdx}번 문장에서 시작하는 문단의 '${tag.tagName}'태그를 삭제하시겠습니까?`)) {
+              // console.log("remove tag", item)
+              if (target.data_target_tags.length === 1) {
+                deleteParagraph(this, this.selectedProjectId, parentIdx)
+              } else {
+                deleteTagInParagraph(
+                    this,
+                    this.selectedProjectId,
+                    parentIdx,
+                    tag
+                )
+              }
+            }
+            return
+          }
+        }
+        if (this.firstParagraph !== -1) {
+          alert("다른 태그 그룹에서 태그가 지정된 문단은 추가가 불가능합니다.")
+          return;
+        }
+        if (confirm(`${startDataIdx}번 문장에서 시작하는 문단에 '${this.tags[this.selectedTag].tag_name}'태그를 추가하시겠습니까?`)) {
+          console.log("추가")
+          addTagInParagraph(
+              this,
+              this.selectedProjectId,
+              parentIdx,
+              this.tags[this.selectedTag]
+          )
+        }
+        // console.log(parentIdx, selection)
+      } catch (e) {
+        console.log("문단 추가")
+        if (this.firstParagraph === -1) {
+          const nowData = this.lineData[idx]
+          this.firstParagraph = {id: nowData.id, idx: idx, page: this.dataPage}
+          this.makeParagraphStatus = `${this.dataPage}페이지 ${idx}번 문장(문장번호 ${nowData.id}) 선택. 문단의 시작이나 끝을 선택해주세요.`
+        } else {
+          if (this.childData.length === 0 && this.firstParagraph.page === this.dataPage) {
+            let startIdx = this.firstParagraph.idx;
+            let endIdx = idx
+            if (endIdx < startIdx) {
+              const tmp = startIdx
+              startIdx = endIdx
+              endIdx = tmp
+            }
+            for (;startIdx <= endIdx;startIdx++) this.childData.push(this.lineData[startIdx].id)
+          } else if (this.firstParagraph.page !== this.dataPage) {
+            if (this.firstParagraph.page < this.dataPage) {
+              for (let startIdx = 0;startIdx <= idx;startIdx++) this.childData.push(this.lineData[startIdx].id)
+            } else {
+              for (let startIdx = 99;startIdx >= idx;startIdx--) this.childData.push(this.lineData[startIdx].id)
+            }
+          }
+
+          await createParagraph(
+              this,
+              this.selectedProjectId,
+              this.childData,
+              this.tags[this.selectedTag].tag_group_id,
+              this.tags[this.selectedTag].tag_id
+          )
+
+          this.firstParagraph = -1
+          this.childData = []
+          this.makeParagraphStatus = '문단을 지정할 문장을 선택해 주세요'
+        }
+      }
+    },
+
+    handleMessage(message, lastEventId) {
+      message = JSON.parse(message
+          .replace("'{", "{").replace("}'", "}")
+          .replace('"{', "{").replace('}"', "}")
+          .replaceAll("'", '"'))
+      console.warn('Received a message w/o an event!', message, lastEventId);
+
+      if (message.step === "Gpt_Progress" || message.step === "Bert_Progress") {
+        if (message.step === "Gpt_Progress") this.logMsg = "Gpt 학습 중..."
+        else this.logMsg = "Bert 학습 중..."
+        this.isIndeterminate = false
+        this.logProgressMax = message.message.total_batch
+        this.logProgressNow = message.message.batch
+        this.logMsg += ` ${Math.round(message.message.batch / message.message.total_batch * 10000) / 100}%`
+        this.logDatas.unshift(
+            `epoch: ${message.message.epoch}\tloss: ${message.message.loss}
+          \taccuracy: ${message.message.accuracy}\tbatch: ${message.message.batch}
+          \ttotal batch: ${message.message.total_batch}`
+        )
+      } else {
+        this.isIndeterminate = true
+        if (message.step === "Gpt") this.logMsg = "GPT 학습"
+        else if (message.step === "Bert") this.logMsg = "Bert 학습"
+
+        this.logDatas.unshift(message.message)
+      }
+      if (this.logDatas.length > 100) this.logDatas.pop()
+    },
+    handleError(message, lastEventId) {
+      console.warn('Received a error w/o an event!', message, lastEventId);
+      disconnectLoggingSSE()
+      this.logMsg = "학습 오류"
+      this.isIndeterminate = true
+    },
+    handleSuccess(message, lastEventId) {
+      console.warn('Received a success w/o an event!', message, lastEventId);
+      disconnectLoggingSSE()
+      this.logMsg = "학습 성공"
+      this.isIndeterminate = true
+    },
+
+    async startTrainCheck(data) {
+      this.showTrainStart = false
+      // 프로젝트 이동 시 저장 여부 다이얼로그 버튼 클릭
+      if (data.type === this.DIALOG_CLICK_YES) {
+        await startTrain(this,
+            this.selectedProjectId,
+            this.tagGroups[this.selectedTagGroupId].tag_group_id,
+            this.trainName,
+            this.trainEpoch,
+            this.trainLearningRate
+        )
+      }
+    },
+    startTrain() {
+      this.stepperNext()
+    },
+    checkTrainStart() {
+      if (checkTrainName(this, this.trainName)) {
+        this.showTrainStart = true
+      }
+    },
+    skipTrain() {
+      this.stepperIdx = 3
+      getRecentTrainResult(this, this.selectedProjectId)
+    },
+
+
+    receiveStatus(message, lastEventId) {
+      const data = JSON.parse(message.replaceAll("'", '"'))
+      console.log('Received status', data, lastEventId);
+      if (data.stream_key !== '-1') {
+        this.trainStatus = data.stream_key
+        this.stepperIdx = 2
+        initLogSSE(this, this.trainStatus)
+      } else {
+        this.trainStatus = -1
+        if (this.initStatus) {
+          this.stepperIdx = 0
+        } else {
+          this.stepperIdx = 3
+          getRecentTrainResult(this, this.selectedProjectId)
+        }
+      }
+      this.initStatus = false
     }
+  },
+  beforeUnmount() {
+    disconnectLoggingSSE()
+    disconnectStatusSSE()
   },
 }
 </script>

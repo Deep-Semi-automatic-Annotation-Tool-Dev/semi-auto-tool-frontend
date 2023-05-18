@@ -89,6 +89,7 @@ body {
   position: relative;
   width: 140px;
   height: 30px;
+  color: white;
 }
 
 .btn-select {
@@ -170,4 +171,8 @@ body {
 .list-member li button:hover,
 .list-member li button:focus {
   background-color: #F8E4FF;
+}
+
+.v-application__wrap {
+  width: 100% !important;
 }
