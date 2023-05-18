@@ -56,13 +56,16 @@
 <!--              저장-->
 <!--            </v-btn>-->
             <v-btn
-                color="light_brown"
-                height="30"
                 :loading="isFileSelecting"
                 @click="handleFileImport"
-            >
-              텍스트 로드
-            </v-btn>
+                icon="mdi-file-upload"
+                variant="text"
+            ></v-btn>
+            <v-btn
+                @click="handleDownloadResult"
+                icon="mdi-file-download"
+                variant="text"
+            ></v-btn>
             <input
                 :value="fileData"
                 ref="uploader"
@@ -691,6 +694,22 @@
       >
       </Dialog>
     </v-dialog>
+    <!--  dialog 로딩중 프로그래스바 화면  -->
+    <v-dialog
+        v-model="showLoadingProgressDialog"
+        width="auto"
+        :close-on-back="false"
+        :persistent="true"
+    >
+      <Dialog
+          :dialog-type="this.DIALOG_TYPE_PROGRESS_LINEAR"
+          :title="this.loadingProgressDialogTitle"
+          :subtitle="this.loadingProgressDialogSubTitle"
+          :progress-max="showLoadingProgressDialogMax"
+          :progress="showLoadingProgressDialogNow"
+      >
+      </Dialog>
+    </v-dialog>
 
     <!--  dialog 컬럼이름  -->
     <v-dialog
@@ -775,7 +794,7 @@ import {
   getDataList,
   getParagraphDataList,
   getWordDataList,
-  postData
+  postData, resultDownload
 } from '@/js/api/data.js'
 import {
   getTagList,
@@ -872,6 +891,12 @@ export default {
       showLoadingDialog: false,
       loadingDialogTitle: "",
       loadingDialogSubTitle: "",
+
+      showLoadingProgressDialog: false,
+      loadingProgressDialogTitle: "",
+      loadingProgressDialogSubTitle: "",
+      showLoadingProgressDialogMax: 0,
+      showLoadingProgressDialogNow: 0,
 
       lineData: [],
       tagGroups: [],
@@ -979,18 +1004,18 @@ export default {
     // this.wordMap = await this.yDoc.getMap('word');
     // this.paragraphMap = await this.yDoc.getMap('paragraph');
     // console.log(this.yDoc)
-    getProjectList(this);
-    window.onkeydown = (e) => {
-      if ((e.keyCode === 70 && (e.ctrlKey || e.metaKey ))) {
-        e.preventDefault();
-        if (this.lineData.length > 0) {
-          this.dataFind = !this.dataFind
-          if (!this.dataFind) this.searchClose()
-        } else {
-          console.log("undefind")
+    await getProjectList(this);
+      window.onkeydown = (e) => {
+        if ((e.keyCode === 70 && (e.ctrlKey || e.metaKey ))) {
+          e.preventDefault();
+          if (this.lineData.length > 0) {
+            this.dataFind = !this.dataFind
+            if (!this.dataFind) this.searchClose()
+          } else {
+            console.log("undefind")
+          }
         }
       }
-    }
   },
   methods: {
     clearSelectedParagraph() {
@@ -1243,6 +1268,11 @@ export default {
           dataIdx)
     },
 
+    handleDownloadResult() {
+      if (confirm(`${this.selectedProjectName}의 결과 파일을 다운받겠습니까?`)) {
+        resultDownload(this, this.selectedProjectId)
+      }
+    },
     handleFileImport() {
       this.isFileSelecting = true;
       window.addEventListener('focus', () => {

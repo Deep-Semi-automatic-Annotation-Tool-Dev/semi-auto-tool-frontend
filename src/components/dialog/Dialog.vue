@@ -21,7 +21,15 @@
       <div>{{ subtitle }}</div>
       <v-progress-linear indeterminate></v-progress-linear>
     </div>
-    <div v-if="dialogType !== this.DIALOG_TYPE_PROGRESS_LINEAR_INFINITY" id="dialog-buttons">
+    <div v-else-if="dialogType === this.DIALOG_TYPE_PROGRESS_LINEAR"  id="dialog-progressbar">
+      <div>{{ subtitle }}</div>
+      <v-progress-linear
+          :max="progressMax"
+          v-model="progressNow"
+      ></v-progress-linear>
+    </div>
+    <div v-if="dialogType !== this.DIALOG_TYPE_PROGRESS_LINEAR_INFINITY
+      && dialogType !== this.DIALOG_TYPE_PROGRESS_LINEAR" id="dialog-buttons">
       <div class="dialog-button" id="dialog-button-yes" @click="onClickButton(this.DIALOG_CLICK_YES)">
         <div class="dialog-button-text">{{ textAccept }}</div>
       </div>
@@ -71,12 +79,19 @@ export default {
     colorInit: {
       type: String,
       default: '#FFFFFF'
+    },
+    progress: {
+      default: 0
+    },
+    progressMax: {
+      default: 100
     }
   },
   data() {
     return {
       fieldText: this.fieldTextInit,
-      colorText: this.colorInit
+      colorText: this.colorInit,
+      progressNow: this.progress
     }
   },
   methods: {
@@ -88,6 +103,11 @@ export default {
         returnData.color = this.colorText
       }
       this.$emit('dialog-click', returnData)
+    }
+  },
+  watch: {
+    progress() {
+      this.progressNow = this.progress
     }
   }
 }

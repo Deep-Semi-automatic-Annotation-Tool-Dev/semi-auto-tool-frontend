@@ -440,3 +440,48 @@ export const postData = async (context, projectId, file, colName) => {
         context.showLoadingDialog = false
     }
 }
+
+export const resultDownload = async (context, projectId) => {
+    context.showLoadingProgressDialog = true
+    context.loadingProgressDialogTitle = '데이터 다운로드'
+    context.loadingProgressDialogSubTitle = '데이터 태깅 결과 다운로드 중...'
+
+    try {
+        const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/data/download`, {
+            responseType: 'blob',
+            onDownloadProgress: (progressEvent) => {
+                // console.log(progressEvent)
+                context.showLoadingProgressDialogMax = progressEvent.total
+                context.showLoadingProgressDialogNow = progressEvent.loaded
+                const progressRate = Math.round(progressEvent.loaded / progressEvent.total * 10000) / 100
+                context.loadingProgressDialogSubTitle = `데이터 태깅 결과 다운로드 중 (${progressRate}%)...`
+            }
+        })
+        console.log(result);
+
+        const blob = new Blob([result.data], { type: 'text/csv' })
+        const link = document.createElement('a')
+        link.href = URL.createObjectURL(blob)
+        link.download = `${context.selectedProjectName}_result`
+        link.click()
+        URL.revokeObjectURL(link.href)
+    } catch (error) {
+        console.error('download result error', error);
+    } finally {
+        context.showLoadingProgressDialog = false
+    }
+}
+
+// export const dataReloadByRank = async (context, projectId, dataId) => {
+//     context.showLoadingDialog = true
+//     context.loadingDialogTitle = '데이터 리로딩'
+//     context.loadingDialogSubTitle = '데이터 리로드 중...'
+//
+//     try {
+//         await axios.delete(`${context.$baseURL}api/v1/project/${projectId}/data/${dataId}`)
+//
+//     } catch (error) {
+//         console.error('data reload error', error);
+//         context.showLoadingDialog = false
+//     }
+// }
