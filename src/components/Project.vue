@@ -431,7 +431,7 @@
                 <div class="stepper-item-top-circle-num">3</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 2 ? 'stepper-item-top-circle-title-selected' : ''">
-                Trainingㅅ
+                Training
               </div>
             </div>
 
@@ -1320,45 +1320,47 @@ export default {
         }
         case 'paragraph': {
           console.log(page, this.dataPageSave)
-          if (Math.abs(page - this.dataPageSave) > 1) {
-            alert('문단 태깅 모드에서는 한 페이지씩만 변경 가능합니다.')
-            this.dataPage = this.dataPageSave
-            return
-          }
-          if (this.dataPageSave < page) {
-            console.log('next')
-            if (this.firstParagraph !== -1) {
-              if (this.firstParagraph.page >= page) {
-                for (let i = 0;i < 100;i++) {
-                  this.childData.pop()
-                  if (this.childData.length === 0) break
+          if (this.firstParagraph !== -1) {
+            if (Math.abs(page - this.dataPageSave) > 1) {
+              alert('문단 태깅 모드에서는 한 페이지씩만 변경 가능합니다.')
+              this.dataPage = this.dataPageSave
+              return
+            }
+            if (this.dataPageSave < page) {
+              console.log('next')
+              if (this.firstParagraph !== -1) {
+                if (this.firstParagraph.page >= page) {
+                  for (let i = 0;i < 100;i++) {
+                    this.childData.pop()
+                    if (this.childData.length === 0) break
+                  }
+                } else {
+                  let start = 0
+                  if (this.firstParagraph.page + 1 === page) start = this.firstParagraph.idx
+                  for (;start < this.lineData.length;start++) {
+                    this.childData.push(this.lineData[start].id)
+                  }
                 }
-              } else {
-                let start = 0
-                if (this.firstParagraph.page + 1 === page) start = this.firstParagraph.idx
-                for (;start < this.lineData.length;start++) {
-                  this.childData.push(this.lineData[start].id)
+              }
+            } else if (this.dataPageSave > page) {
+              console.log('prev')
+              if (this.firstParagraph !== -1) {
+                if (this.firstParagraph.page > page) {
+                  let end = 99
+                  if (this.firstParagraph.page - 1 === page) end = this.firstParagraph.idx
+                  for (;end >= 0;end--) {
+                    this.childData.push(this.lineData[end].id)
+                  }
+                } else {
+                  for (let i = 0;i < 100;i++) {
+                    this.childData.pop()
+                    if (this.childData.length === 0) break
+                  }
                 }
               }
             }
-          } else if (this.dataPageSave > page) {
-            console.log('prev')
-            if (this.firstParagraph !== -1) {
-              if (this.firstParagraph.page > page) {
-                let end = 99
-                if (this.firstParagraph.page - 1 === page) end = this.firstParagraph.idx
-                for (;end >= 0;end--) {
-                  this.childData.push(this.lineData[end].id)
-                }
-              } else {
-                for (let i = 0;i < 100;i++) {
-                  this.childData.pop()
-                  if (this.childData.length === 0) break
-                }
-              }
-            }
+            console.log(this.childData.length)
           }
-          console.log(this.childData.length)
 
           this.lineData = []
           await getDataList(this, this.selectedProjectId, page - 1)
