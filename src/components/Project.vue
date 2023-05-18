@@ -431,7 +431,7 @@
                 <div class="stepper-item-top-circle-num">3</div>
               </div>
               <div class="stepper-item-top-circle-title" :class="stepperIdx === 2 ? 'stepper-item-top-circle-title-selected' : ''">
-                Training
+                Trainingㅅ
               </div>
             </div>
 
@@ -1136,6 +1136,7 @@ export default {
       if (data.type === this.DIALOG_CLICK_YES) {
         await deleteProject(this, this.projectRightClickedId)
         initVariables(this)
+        this.selectedProjectId = -1
       }
     },
     async projectRenameDialogClicked(data) {

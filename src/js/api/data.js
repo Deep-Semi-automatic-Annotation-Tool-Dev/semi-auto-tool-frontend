@@ -426,7 +426,7 @@ export const postData = async (context, projectId, file, colName) => {
     dataFile.append("file", file)
 
     try {
-        const result = await axios.post(`${context.$baseURL}api/v1/project/${projectId}/data?colName=${colName}`, dataFile,
+        const result = await axios.post(`${context.$baseURL}api/v1/project/${projectId}/data/upload?colName=${colName}`, dataFile,
             {
                 headers: {
                     'Content-Type': 'multipart/form-data'
