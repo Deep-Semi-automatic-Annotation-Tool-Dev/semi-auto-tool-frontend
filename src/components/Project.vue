@@ -76,15 +76,18 @@
             <div id="layout-project-editor-main-title">
 <!--              <div id="editor-main-title">-선택된 태그구성-</div>-->
               <div class="select-container">
-                <button class="btn-select" @click="selectBoxClick">document</button>
-                <ul class="list-member" @click="selectBoxChange">
-                  <li
-                      v-for="i in 10"
-                      :key="i"
-                  >
-                    <button type="button">doc {{i}}</button>
-                  </li>
-                </ul>
+<!--                <button class="btn-select" @click="selectBoxClick">document</button>-->
+<!--                <ul class="list-member" @click="selectBoxChange">-->
+<!--                  <li-->
+<!--                      v-for="i in 10"-->
+<!--                      :key="i"-->
+<!--                  >-->
+<!--                    <button type="button">doc {{i}}</button>-->
+<!--                  </li>-->
+<!--                </ul>-->
+                <div v-if="tagMod === 'sentence'">-문장태그 편집모드-</div>
+                <div v-else-if="tagMod === 'paragraph'">-문단태그 편집모드-</div>
+                <div v-if="tagMod === 'word'">-단어태그 편집모드-</div>
               </div>
             </div>
             <div v-if="tagMod === 'paragraph'" id="area-set-paragraph">
