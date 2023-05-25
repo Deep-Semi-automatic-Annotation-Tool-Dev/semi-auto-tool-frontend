@@ -1008,17 +1008,17 @@ export default {
     // this.paragraphMap = await this.yDoc.getMap('paragraph');
     // console.log(this.yDoc)
     await getProjectList(this);
-      window.onkeydown = (e) => {
-        if ((e.keyCode === 70 && (e.ctrlKey || e.metaKey ))) {
-          e.preventDefault();
-          if (this.lineData.length > 0) {
-            this.dataFind = !this.dataFind
-            if (!this.dataFind) this.searchClose()
-          } else {
-            console.log("undefind")
-          }
-        }
-      }
+    // window.onkeydown = (e) => {
+    //   if ((e.keyCode === 70 && (e.ctrlKey || e.metaKey ))) {
+    //     e.preventDefault();
+    //     if (this.lineData.length > 0) {
+    //       this.dataFind = !this.dataFind
+    //       if (!this.dataFind) this.searchClose()
+    //     } else {
+    //       console.log("undefind")
+    //     }
+    //   }
+    // }
   },
   methods: {
     clearSelectedParagraph() {
@@ -1046,11 +1046,59 @@ export default {
 
     async changeGroup(v) {
       // console.log(this.tagGroups[v])
-      this.selectedTagGroupId = v
-      console.log(this.tagGroupSelectionModel)
-      await getTagList(this,
-          this.selectedProjectId,
-          this.tagGroups[this.selectedTagGroupId].tag_group_id)
+      if (this.reloadCount === 0) {
+        this.selectedTagGroupId = v
+        console.log(this.tagGroupSelectionModel)
+        await getTagList(this,
+            this.selectedProjectId,
+            this.tagGroups[this.selectedTagGroupId].tag_group_id)
+      } else {
+        switch (this.tagMod) {
+          case 'word': {
+            this.lineData = []
+            this.wordTagData = {}
+            await getWordDataList(
+                this,
+                this.selectedProjectId,
+                0, 0,
+                this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                this.dataPage - 1,
+                this.selectionRank
+            )
+            break
+          }
+          case 'sentence': {
+            this.lineData = []
+            await getDataList(
+                this,
+                this.selectedProjectId,
+                this.dataPage - 1,
+                this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                this.selectionRank
+            )
+            break
+          }
+          case 'paragraph': {
+            this.lineData = []
+            this.firstParagraph = -1
+            this.childData = []
+            this.makeParagraphStatus = '문단을 지정할 문장을 선택해 주세요'
+            await getDataList(
+                this,
+                this.selectedProjectId,
+                this.dataPage - 1,
+                this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                this.selectionRank
+            )
+
+            this.paragraphData = {}
+            let startIdx = this.lineData[this.lineData.length - 1].id
+            let endIdx = this.lineData[0].id
+            await getParagraphDataList(this, this.selectedProjectId, startIdx, endIdx)
+            break
+          }
+        }
+      }
     },
     changeModel(v) {
       console.log(v)
@@ -1322,28 +1370,40 @@ export default {
       switch (this.tagMod) {
         case 'word': {
           this.lineData = []
-          await getDataList(
-              this,
-              this.selectedProjectId,
-              page - 1,
-              this.tagGroups[this.selectedTagGroupId].tag_group_id,
-              this.selectionRank
-          )
-
           this.wordTagData = {}
-          if (this.lineData.length > 0) {
-            let startIdx = this.lineData[this.lineData.length - 1].id
-            let endIdx = this.lineData[0].id
+          if (this.reloadCount === 0) {
+            await getDataList(
+                this,
+                this.selectedProjectId,
+                page - 1,
+                this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                this.selectionRank
+            )
+
+            if (this.lineData.length > 0) {
+              let startIdx = this.lineData[this.lineData.length - 1].id
+              let endIdx = this.lineData[0].id
+              await getWordDataList(
+                  this,
+                  this.selectedProjectId,
+                  startIdx,
+                  endIdx,
+                  this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                  page - 1,
+                  this.selectionRank
+              )
+            }
+          } else {
             await getWordDataList(
                 this,
                 this.selectedProjectId,
-                startIdx,
-                endIdx,
+                0, 0,
                 this.tagGroups[this.selectedTagGroupId].tag_group_id,
                 page - 1,
                 this.selectionRank
             )
           }
+
           break
         }
         case 'sentence': {
@@ -1452,28 +1512,40 @@ export default {
       switch (d) {
         case 'word': {
           this.lineData = []
-          await getDataList(
-              this,
-              this.selectedProjectId,
-              this.dataPage - 1,
-              this.tagGroups[this.selectedTagGroupId].tag_group_id,
-              this.selectionRank
-          )
-
           this.wordTagData = {}
-          if (this.lineData.length > 0) {
-            let startIdx = this.lineData[this.lineData.length - 1].id
-            let endIdx = this.lineData[0].id
+          if (this.reloadCount === 0) {
+            await getDataList(
+                this,
+                this.selectedProjectId,
+                this.dataPage - 1,
+                this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                this.selectionRank
+            )
+
+            if (this.lineData.length > 0) {
+              let startIdx = this.lineData[this.lineData.length - 1].id
+              let endIdx = this.lineData[0].id
+              await getWordDataList(
+                  this,
+                  this.selectedProjectId,
+                  startIdx,
+                  endIdx,
+                  this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                  this.dataPage - 1,
+                  this.selectionRank
+              )
+            }
+          } else {
             await getWordDataList(
                 this,
                 this.selectedProjectId,
-                startIdx,
-                endIdx,
+                0, 0,
                 this.tagGroups[this.selectedTagGroupId].tag_group_id,
                 this.dataPage - 1,
                 this.selectionRank
             )
           }
+
           break
         }
         case 'sentence': {
@@ -1589,7 +1661,11 @@ export default {
               if (confirm(`'${item.text}'에서 '${tag.tagName}'태그를 삭제하시겠습니까?`)) {
                 console.log("remove tag", item)
                 if (item.data_target_tags.length === 1) {
-                  deleteWord(this, this.selectedProjectId, item.id)
+                  if (this.reloadCount === 0) {
+                    deleteWord(this, this.selectedProjectId, item.id)
+                  } else {
+                    alert("데이터 reload 이후에는 단어 추가/삭제가 제한됩니다.")
+                  }
                 } else {
                   deleteTagInWord(this, this.selectedProjectId, itemIdx, parentIdx, tag)
                 }
@@ -1597,23 +1673,26 @@ export default {
               return;
             }
           }
-
           alert("다른 태그 그룹에서 태그가 지정된 단어는 삭제가 불가능합니다.")
           return;
         }
       }
       if (idxStart === idxEnd) return
-      console.log("add tag")
-      createWord(
-          this,
-          this.selectedProjectId,
-          parentIdx,
-          idxStart,
-          idxEnd,
-          this.tagGroups[this.selectedTagGroupId].tag_group_id,
-          this.tags[this.selectedTag].tag_id
-      )
-      console.log(selection.toString())
+      if (this.reloadCount === 0) {
+        console.log("add tag")
+        createWord(
+            this,
+            this.selectedProjectId,
+            parentIdx,
+            idxStart,
+            idxEnd,
+            this.tagGroups[this.selectedTagGroupId].tag_group_id,
+            this.tags[this.selectedTag].tag_id
+        )
+        console.log(selection.toString())
+      } else {
+        alert("데이터 reload 이후에는 단어 추가/삭제가 제한됩니다.")
+      }
     },
     setParagraphHighlight(nowData, paragraphData) {
       let paragraphIdx = null;

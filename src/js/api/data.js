@@ -55,7 +55,7 @@ export const getDataList = async (context, projectId, page, tagGroupId, pageable
                 // context.sentenceMap.set(d.id, d.data_tags)
             }
 
-            console.log(result.data);
+            console.log('reloaded', result.data);
         } catch (error) {
             context.lineData = []
             context.dataPage = 0
@@ -91,12 +91,38 @@ export const getWordDataList = async (context, projectId, startIndex, endIndex, 
         try {
             const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/data/${tagGroupId}/rank/word?size=100&page=${page}&sort=${pageable}`)
 
-            // for (let word of result.data) {
-            //     let parentId = word.parent_id
-            //     if (context.wordTagData[parentId] === undefined) context.wordTagData[parentId] = []
-            //     context.wordTagData[parentId].push(word)
-            // }
-            console.log(result.data);
+            context.lineData = []
+            context.dataPage = result.data.page.number + 1
+            context.dataTotalPage = result.data.page.totalPages
+
+            const sentenceData = {}
+            for (let d of result.data._embedded.rankWordIndexResponseDtoList) {
+                sentenceData[d.parent_id] = {
+                    id: d.parent_id,
+                    project_id: d.project_id,
+                    text: d.parent_text
+                }
+            }
+            context.lineData = Object.values(sentenceData)
+
+            for (let d of context.lineData) {
+                d.search = true
+                d.text = d.text
+                    .replaceAll('\n', ' ')
+                    .replaceAll('\t', ' ')
+                    .replaceAll('\r', ' ')
+                    .replaceAll('\b', ' ')
+                    .replaceAll('\v', ' ')
+                    .replaceAll('\f', ' ')
+                // context.sentenceMap.set(d.id, d.data_tags)
+            }
+
+            for (let word of result.data._embedded.rankWordIndexResponseDtoList) {
+                let parentId = word.parent_id
+                if (context.wordTagData[parentId] === undefined) context.wordTagData[parentId] = []
+                context.wordTagData[parentId].push(word)
+            }
+            console.log('reloaded', result.data);
         } catch (error) {
             console.error('get word reload data error', error);
         } finally {
@@ -324,21 +350,34 @@ export const deleteWord = async (context, projectId, dataId) => {
         await axios.delete(`${context.$baseURL}api/v1/project/${projectId}/data/${dataId}`)
 
         context.wordTagData = {}
-        if (context.lineData.length > 0) {
-            let startIdx = context.lineData[context.lineData.length - 1].id
-            let endIdx = context.lineData[0].id
+        if (this.reloadCount === 0) {
+            if (context.lineData.length > 0) {
+                let startIdx = context.lineData[context.lineData.length - 1].id
+                let endIdx = context.lineData[0].id
 
+                context.showLoadingDialog = false
+                await getWordDataList(
+                    context,
+                    context.selectedProjectId,
+                    startIdx,
+                    endIdx,
+                    context.tagGroups[context.selectedTagGroupId].tag_group_id,
+                    context.dataPage - 1,
+                    context.selectionRank
+                )
+            }
+        } else {
             context.showLoadingDialog = false
             await getWordDataList(
                 context,
                 context.selectedProjectId,
-                startIdx,
-                endIdx,
+                0, 0,
                 context.tagGroups[context.selectedTagGroupId].tag_group_id,
                 context.dataPage - 1,
                 context.selectionRank
             )
         }
+
     } catch (error) {
         console.error('word data delete error', error);
         context.showLoadingDialog = false
