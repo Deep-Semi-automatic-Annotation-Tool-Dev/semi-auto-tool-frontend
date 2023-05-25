@@ -6,9 +6,9 @@ import {disconnectLoggingSSE, initStatusSSE} from "@/js/sse/train";
 export const initVariables = (context) => {
     context.initStatus = true
 
-    context.dataPage = 0
+    context.dataPage = 1
     context.dataPageSave = 1
-    context.dataTotalPage = 1
+    context.dataTotalPage = 0
     context.selectedTagGroupId = 0
     context.stepperIdx = 0
     context.projectRightClickedId = 0
@@ -20,11 +20,12 @@ export const initVariables = (context) => {
     context.tagMod = 'sentence'
     context.wordTagData = {}
     context.paragraphData = {}
-    context.selectionRank = 'sumRank'
+    context.selectionRank = 'sum'
     context.trainResultData = null
     context.firstParagraph = -1
     context.childData = []
     context.makeParagraphStatus = ''
+    context.reloadCount = 0
 }
 
 export const loadProject = async (context, id, page) => {

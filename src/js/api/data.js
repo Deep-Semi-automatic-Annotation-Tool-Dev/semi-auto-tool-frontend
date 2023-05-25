@@ -1,39 +1,69 @@
 import axios from "axios";
 import {loadProject} from "@/js/api/common";
 
-export const getDataList = async (context, id, page) => {
+export const getDataList = async (context, projectId, page, tagGroupId, pageable) => {
     context.loadingDialogTitle = '데이터 로딩'
     context.loadingDialogSubTitle = "텍스트 데이터를 가져오는 중 입니다."
     context.showLoadingDialog = true
 
     // context.sentenceMap.clear()
-    try {
-        const result = await axios.get(`${context.$baseURL}api/v1/project/${id}/data?size=100&page=${page}`)
-        context.lineData = result.data._embedded.dataResponseControllerDtoList;
-        context.dataPage = result.data.page.number + 1
-        context.dataTotalPage = result.data.page.totalPages
+    if (context.reloadCount === 0) {
+        try {
+            const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/data?size=100&page=${page}`)
+            context.lineData = result.data._embedded.dataResponseControllerDtoList;
+            context.dataPage = result.data.page.number + 1
+            context.dataTotalPage = result.data.page.totalPages
 
-        for (let d of context.lineData) {
-            d.search = true
-            d.text = d.text
-                .replaceAll('\n', ' ')
-                .replaceAll('\t', ' ')
-                .replaceAll('\r', ' ')
-                .replaceAll('\b', ' ')
-                .replaceAll('\v', ' ')
-                .replaceAll('\f', ' ')
-            // context.sentenceMap.set(d.id, d.data_tags)
+            for (let d of context.lineData) {
+                d.search = true
+                d.text = d.text
+                    .replaceAll('\n', ' ')
+                    .replaceAll('\t', ' ')
+                    .replaceAll('\r', ' ')
+                    .replaceAll('\b', ' ')
+                    .replaceAll('\v', ' ')
+                    .replaceAll('\f', ' ')
+                // context.sentenceMap.set(d.id, d.data_tags)
+            }
+
+            console.log(result.data);
+            // console.log(context.sentenceMap);
+        } catch (error) {
+            context.lineData = []
+            context.dataPage = 0
+            context.dataTotalPage = 0
+            console.error('get data error', error);
+        } finally {
+            context.showLoadingDialog = false
         }
+    } else {
+        try {
+            const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/data/${tagGroupId}/rank/sentence?size=100&page=${page}&sort=${pageable}`)
+            context.lineData = result.data._embedded.dataResponseControllerDtoList;
+            context.dataPage = result.data.page.number + 1
+            context.dataTotalPage = result.data.page.totalPages
 
-        console.log(result.data);
-        // console.log(context.sentenceMap);
-    } catch (error) {
-        context.lineData = []
-        context.dataPage = 0
-        context.dataTotalPage = 0
-        console.error('get data error', error);
-    } finally {
-        context.showLoadingDialog = false
+            for (let d of context.lineData) {
+                d.search = true
+                d.text = d.text
+                    .replaceAll('\n', ' ')
+                    .replaceAll('\t', ' ')
+                    .replaceAll('\r', ' ')
+                    .replaceAll('\b', ' ')
+                    .replaceAll('\v', ' ')
+                    .replaceAll('\f', ' ')
+                // context.sentenceMap.set(d.id, d.data_tags)
+            }
+
+            console.log(result.data);
+        } catch (error) {
+            context.lineData = []
+            context.dataPage = 0
+            context.dataTotalPage = 0
+            console.error('get data reload error', error);
+        } finally {
+            context.showLoadingDialog = false
+        }
     }
 }
 

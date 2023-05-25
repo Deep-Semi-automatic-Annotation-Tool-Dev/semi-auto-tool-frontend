@@ -502,13 +502,14 @@
                   </v-table>
                   <v-select
                       label="리로드할 Rank 선택"
-                      :items="['sumRank', 'bertRank', 'gptRank']"
+                      :items="['sum', 'bert', 'gpt']"
                       item-title="tag_group_name"
                       item-value="value"
                       :hide-details="true"
                       v-model="selectionRank"
                       variant="outlined"
                       density="compact"
+                      @update:modelValue="changeResultTarget"
                   ></v-select>
                 </div>
                 <div class="stepper-item-buttons">
@@ -986,12 +987,14 @@ export default {
       logProgressNow: 0,
 
       trainResultData: null,
-      selectionRank: 'sumRank',
+      selectionRank: 'sum',
 
       makeParagraphStatus: '',
       firstParagraph: -1,
 
-      childData: []
+      childData: [],
+
+      reloadCount: 0,
     }
   },
   components: {
@@ -1066,8 +1069,24 @@ export default {
     stepperPrev() {
       if (this.stepperIdx - 1 >= 0) this.stepperIdx--;
     },
-    dataReloading() {
+    async dataReloading() {
       this.stepperIdx = 0;
+      this.reloadCount += 1;
+
+      this.tagMod = 'sentence'
+      this.wordTagData = {}
+      this.paragraphData = {}
+      this.lineData = []
+      this.dataPage = 1
+      this.dataTotalPage = 1
+
+      await getDataList(
+          this,
+          this.selectedProjectId,
+          this.dataPage - 1,
+          this.tagGroups[this.selectedTagGroupId].tag_group_id,
+          this.selectionRank
+      )
     },
     gotoTag() {
       this.stepperIdx = 0;
@@ -1303,7 +1322,13 @@ export default {
       switch (this.tagMod) {
         case 'word': {
           this.lineData = []
-          await getDataList(this, this.selectedProjectId, page - 1)
+          await getDataList(
+              this,
+              this.selectedProjectId,
+              page - 1,
+              this.tagGroups[this.selectedTagGroupId].tag_group_id,
+              this.selectionRank
+          )
 
           this.wordTagData = {}
           if (this.lineData.length > 0) {
@@ -1315,7 +1340,13 @@ export default {
         }
         case 'sentence': {
           this.lineData = []
-          await getDataList(this, this.selectedProjectId, page - 1)
+          await getDataList(
+              this,
+              this.selectedProjectId,
+              page - 1,
+              this.tagGroups[this.selectedTagGroupId].tag_group_id,
+              this.selectionRank
+          )
           break
         }
         case 'paragraph': {
@@ -1363,7 +1394,13 @@ export default {
           }
 
           this.lineData = []
-          await getDataList(this, this.selectedProjectId, page - 1)
+          await getDataList(
+              this,
+              this.selectedProjectId,
+              page - 1,
+              this.tagGroups[this.selectedTagGroupId].tag_group_id,
+              this.selectionRank
+          )
 
           this.paragraphData = {}
           let startIdx = this.lineData[this.lineData.length - 1].id
@@ -1407,7 +1444,13 @@ export default {
       switch (d) {
         case 'word': {
           this.lineData = []
-          await getDataList(this, this.selectedProjectId, this.dataPage - 1)
+          await getDataList(
+              this,
+              this.selectedProjectId,
+              this.dataPage - 1,
+              this.tagGroups[this.selectedTagGroupId].tag_group_id,
+              this.selectionRank
+          )
 
           this.wordTagData = {}
           if (this.lineData.length > 0) {
@@ -1419,7 +1462,13 @@ export default {
         }
         case 'sentence': {
           this.lineData = []
-          await getDataList(this, this.selectedProjectId, this.dataPage - 1)
+          await getDataList(
+              this,
+              this.selectedProjectId,
+              this.dataPage - 1,
+              this.tagGroups[this.selectedTagGroupId].tag_group_id,
+              this.selectionRank
+          )
           break
         }
         case 'paragraph': {
@@ -1427,7 +1476,13 @@ export default {
           this.firstParagraph = -1
           this.childData = []
           this.makeParagraphStatus = '문단을 지정할 문장을 선택해 주세요'
-          await getDataList(this, this.selectedProjectId, this.dataPage - 1)
+          await getDataList(
+              this,
+              this.selectedProjectId,
+              this.dataPage - 1,
+              this.tagGroups[this.selectedTagGroupId].tag_group_id,
+              this.selectionRank
+          )
 
           this.paragraphData = {}
           let startIdx = this.lineData[this.lineData.length - 1].id
@@ -1442,9 +1497,6 @@ export default {
       console.log(d)
     },
 
-    onWordTagClicked() {
-      console.log('dddd')
-    },
     setWordHighlight(word, wordTag) {
       const sentenceIdx = word.id
       const targetInfo = wordTag[sentenceIdx]
@@ -1781,6 +1833,10 @@ export default {
         }
       }
       this.initStatus = false
+    },
+
+    changeResultTarget(e) {
+      console.log(e)
     }
   },
   beforeUnmount() {
