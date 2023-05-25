@@ -67,24 +67,43 @@ export const getDataList = async (context, projectId, page, tagGroupId, pageable
     }
 }
 
-export const getWordDataList = async (context, projectId, startIndex, endIndex) => {
+export const getWordDataList = async (context, projectId, startIndex, endIndex, tagGroupId, page, pageable) => {
     context.loadingDialogTitle = '단어 데이터 로딩'
     context.loadingDialogSubTitle = "단어 태깅 데이터를 가져오는 중 입니다."
     context.showLoadingDialog = true
-    try {
-        const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/data/word?startIndex=${startIndex}&endIndex=${endIndex}`)
 
-        for (let word of result.data) {
-            let parentId = word.parent_id
-            if (context.wordTagData[parentId] === undefined) context.wordTagData[parentId] = []
-            context.wordTagData[parentId].push(word)
+    if (context.reloadCount === 0) {
+        try {
+            const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/data/word?startIndex=${startIndex}&endIndex=${endIndex}`)
+
+            for (let word of result.data) {
+                let parentId = word.parent_id
+                if (context.wordTagData[parentId] === undefined) context.wordTagData[parentId] = []
+                context.wordTagData[parentId].push(word)
+            }
+            // console.log(result.data);
+        } catch (error) {
+            console.error('get word data error', error);
+        } finally {
+            context.showLoadingDialog = false
         }
-        // console.log(result.data);
-    } catch (error) {
-        console.error('get word data error', error);
-    } finally {
-        context.showLoadingDialog = false
+    } else {
+        try {
+            const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/data/${tagGroupId}/rank/word?size=100&page=${page}&sort=${pageable}`)
+
+            // for (let word of result.data) {
+            //     let parentId = word.parent_id
+            //     if (context.wordTagData[parentId] === undefined) context.wordTagData[parentId] = []
+            //     context.wordTagData[parentId].push(word)
+            // }
+            console.log(result.data);
+        } catch (error) {
+            console.error('get word reload data error', error);
+        } finally {
+            context.showLoadingDialog = false
+        }
     }
+
 }
 
 export const getParagraphDataList = async (context, projectId, startIndex, endIndex) => {
@@ -310,7 +329,15 @@ export const deleteWord = async (context, projectId, dataId) => {
             let endIdx = context.lineData[0].id
 
             context.showLoadingDialog = false
-            await getWordDataList(context, context.selectedProjectId, startIdx, endIdx)
+            await getWordDataList(
+                context,
+                context.selectedProjectId,
+                startIdx,
+                endIdx,
+                context.tagGroups[context.selectedTagGroupId].tag_group_id,
+                context.dataPage - 1,
+                context.selectionRank
+            )
         }
     } catch (error) {
         console.error('word data delete error', error);

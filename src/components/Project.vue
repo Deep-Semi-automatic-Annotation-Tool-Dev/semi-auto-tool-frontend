@@ -1334,7 +1334,15 @@ export default {
           if (this.lineData.length > 0) {
             let startIdx = this.lineData[this.lineData.length - 1].id
             let endIdx = this.lineData[0].id
-            await getWordDataList(this, this.selectedProjectId, startIdx, endIdx)
+            await getWordDataList(
+                this,
+                this.selectedProjectId,
+                startIdx,
+                endIdx,
+                this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                page - 1,
+                this.selectionRank
+            )
           }
           break
         }
@@ -1456,7 +1464,15 @@ export default {
           if (this.lineData.length > 0) {
             let startIdx = this.lineData[this.lineData.length - 1].id
             let endIdx = this.lineData[0].id
-            await getWordDataList(this, this.selectedProjectId, startIdx, endIdx)
+            await getWordDataList(
+                this,
+                this.selectedProjectId,
+                startIdx,
+                endIdx,
+                this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                this.dataPage - 1,
+                this.selectionRank
+            )
           }
           break
         }
