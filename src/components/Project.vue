@@ -1673,7 +1673,11 @@ export default {
               return;
             }
           }
-          alert("다른 태그 그룹에서 태그가 지정된 단어는 삭제가 불가능합니다.")
+          if (this.reloadCount === 0) {
+            alert("다른 태그 그룹에서 태그가 지정된 단어는 삭제가 불가능합니다.")
+          } else {
+            alert("데이터 reload 이후에는 단어 추가/삭제가 제한됩니다.")
+          }
           return;
         }
       }
