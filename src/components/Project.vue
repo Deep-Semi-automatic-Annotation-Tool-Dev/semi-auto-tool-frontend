@@ -1660,11 +1660,13 @@ export default {
             if (tag.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
               if (confirm(`'${item.text}'에서 '${tag.tagName}'태그를 삭제하시겠습니까?`)) {
                 console.log("remove tag", item)
-                if (item.data_target_tags.length === 1) {
+                if (item.data_target_tags.length === 0 && this.reloadCount !== 0) {
+                  alert("데이터 reload 이후에는 단어 추가/삭제가 제한됩니다.")
+                } else if (item.data_target_tags.length === 1) {
                   if (this.reloadCount === 0) {
                     deleteWord(this, this.selectedProjectId, item.id)
                   } else {
-                    alert("데이터 reload 이후에는 단어 추가/삭제가 제한됩니다.")
+                    deleteTagInWord(this, this.selectedProjectId, itemIdx, parentIdx, tag)
                   }
                 } else {
                   deleteTagInWord(this, this.selectedProjectId, itemIdx, parentIdx, tag)
