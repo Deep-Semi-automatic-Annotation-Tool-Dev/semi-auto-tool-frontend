@@ -88,11 +88,14 @@ export const getTrainList = async (context, projectId)  =>{
     context.loadingDialogTitle = '학습 기록 목록 가져오기'
     context.loadingDialogSubTitle = '학습 기록 목록 가져오는 중...'
     try {
-        const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/train`)
+        const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/train?size=200`)
         console.log(result.data)
+
+        context.showLoadingDialog = false
+        return result.data
     } catch (error) {
         console.error('get train result list error', error);
-    }  finally {
         context.showLoadingDialog = false
+        return null
     }
 }

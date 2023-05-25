@@ -1,6 +1,7 @@
 import {getTagGroupList, getTagList} from "@/js/api/tag";
 import {getDataList} from "@/js/api/data";
 import {disconnectLoggingSSE, initStatusSSE} from "@/js/sse/train";
+import {getTrainList} from "@/js/api/project";
 // import {getProjectStatus} from "@/js/api/train";
 
 export const initVariables = (context) => {
@@ -36,6 +37,14 @@ export const loadProject = async (context, id, page) => {
     initVariables(context)
     initStatusSSE(context, id)
 
+    const result = await getTrainList(context, id)
+    if (result !== null && result.page.totalElements > 0) {
+        context.reloadCount = 1
+    } else {
+        context.reloadCount = 0
+    }
+    console.log("reloaded", context.reloadCount)
+
     await getTagGroupList(context, id)
     if (context.tagGroups.length > 0) {
         console.log(context.tagGroups)
@@ -43,6 +52,6 @@ export const loadProject = async (context, id, page) => {
             id,
             context.tagGroups[context.selectedTagGroupId].tag_group_id)
     }
-    await getDataList(context, id, page)
+    await getDataList(context, id, page, context.tagGroups[context.selectedTagGroupId].tag_group_id, context.selectionRank)
     // await getProjectStatus(context, context.tagGroups[context.selectedTagGroupId].tag_group_id)
 }
