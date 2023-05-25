@@ -10,7 +10,7 @@ const router = new createRouter({
     routes: [
         // TODO: 추가한 페이지 여기에 추가
         // {path: '/', component: IndexComponenet, name: 'index'},
-        {path: '/', redirect: '/dashboard'},
+        {path: '/', redirect: '/project'},
         {path: '/project', component: ProjectComponenet, name: 'project'},
         {path: '/dashboard', component: DashboardComponenet, name: 'dashboard'},
     ]
