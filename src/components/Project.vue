@@ -1083,18 +1083,30 @@ export default {
             this.firstParagraph = -1
             this.childData = []
             this.makeParagraphStatus = '문단을 지정할 문장을 선택해 주세요'
-            await getDataList(
-                this,
-                this.selectedProjectId,
-                this.dataPage - 1,
-                this.tagGroups[this.selectedTagGroupId].tag_group_id,
-                this.selectionRank
-            )
-
             this.paragraphData = {}
-            let startIdx = this.lineData[this.lineData.length - 1].id
-            let endIdx = this.lineData[0].id
-            await getParagraphDataList(this, this.selectedProjectId, startIdx, endIdx)
+
+            if (this.reloadCount === 0) {
+              await getDataList(
+                  this,
+                  this.selectedProjectId,
+                  this.dataPage - 1,
+                  this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                  this.selectionRank
+              )
+
+              let startIdx = this.lineData[this.lineData.length - 1].id
+              let endIdx = this.lineData[0].id
+              await getParagraphDataList(this, this.selectedProjectId, startIdx, endIdx)
+            } else  {
+              await getParagraphDataList(
+                  this,
+                  this.selectedProjectId,
+                  0, 0,
+                  this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                  this.dataPage - 1,
+                  this.selectionRank
+              )
+            }
             break
           }
         }
@@ -1462,18 +1474,30 @@ export default {
           }
 
           this.lineData = []
-          await getDataList(
-              this,
-              this.selectedProjectId,
-              page - 1,
-              this.tagGroups[this.selectedTagGroupId].tag_group_id,
-              this.selectionRank
-          )
-
           this.paragraphData = {}
-          let startIdx = this.lineData[this.lineData.length - 1].id
-          let endIdx = this.lineData[0].id
-          await getParagraphDataList(this, this.selectedProjectId, startIdx, endIdx)
+
+          if (this.reloadCount === 0) {
+            await getDataList(
+                this,
+                this.selectedProjectId,
+                page - 1,
+                this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                this.selectionRank
+            )
+
+            let startIdx = this.lineData[this.lineData.length - 1].id
+            let endIdx = this.lineData[0].id
+            await getParagraphDataList(this, this.selectedProjectId, startIdx, endIdx)
+          } else {
+            await getParagraphDataList(
+                this,
+                this.selectedProjectId,
+                0, 0,
+                this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                this.dataPage - 1,
+                this.selectionRank
+            )
+          }
           break
         }
       }
@@ -1560,22 +1584,34 @@ export default {
           break
         }
         case 'paragraph': {
+          this.makeParagraphStatus = '문단을 지정할 문장을 선택해 주세요'
           this.lineData = []
           this.firstParagraph = -1
           this.childData = []
-          this.makeParagraphStatus = '문단을 지정할 문장을 선택해 주세요'
-          await getDataList(
-              this,
-              this.selectedProjectId,
-              this.dataPage - 1,
-              this.tagGroups[this.selectedTagGroupId].tag_group_id,
-              this.selectionRank
-          )
-
           this.paragraphData = {}
-          let startIdx = this.lineData[this.lineData.length - 1].id
-          let endIdx = this.lineData[0].id
-          await getParagraphDataList(this, this.selectedProjectId, startIdx, endIdx)
+
+          if (this.reloadCount === 0) {
+            await getDataList(
+                this,
+                this.selectedProjectId,
+                this.dataPage - 1,
+                this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                this.selectionRank
+            )
+
+            let startIdx = this.lineData[this.lineData.length - 1].id
+            let endIdx = this.lineData[0].id
+            await getParagraphDataList(this, this.selectedProjectId, startIdx, endIdx)
+          } else {
+            await getParagraphDataList(
+                this,
+                this.selectedProjectId,
+                0, 0,
+                this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                this.dataPage - 1,
+                this.selectionRank
+            )
+          }
           break
         }
       }
@@ -1782,8 +1818,19 @@ export default {
           if (tag.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id && this.firstParagraph === -1) {
             if (confirm(`${startDataIdx}번 문장에서 시작하는 문단의 '${tag.tagName}'태그를 삭제하시겠습니까?`)) {
               // console.log("remove tag", item)
-              if (target.data_target_tags.length === 1) {
-                deleteParagraph(this, this.selectedProjectId, parentIdx)
+              if (target.data_target_tags.length === 0 && this.reloadCount !== 0) {
+                alert("데이터 reload 이후에는 단어 추가/삭제가 제한됩니다.")
+              } else if (target.data_target_tags.length === 1) {
+                if (this.reloadCount === 0) {
+                  deleteParagraph(this, this.selectedProjectId, parentIdx)
+                } else {
+                  deleteTagInParagraph(
+                      this,
+                      this.selectedProjectId,
+                      parentIdx,
+                      tag
+                  )
+                }
               } else {
                 deleteTagInParagraph(
                     this,
@@ -1811,40 +1858,44 @@ export default {
         }
         // console.log(parentIdx, selection)
       } catch (e) {
-        console.log("문단 추가")
-        if (this.firstParagraph === -1) {
-          const nowData = this.lineData[idx]
-          this.firstParagraph = {id: nowData.id, idx: idx, page: this.dataPage}
-          this.makeParagraphStatus = `${this.dataPage}페이지 ${idx}번 문장(문장번호 ${nowData.id}) 선택. 문단의 시작이나 끝을 선택해주세요.`
-        } else {
-          if (this.childData.length === 0 && this.firstParagraph.page === this.dataPage) {
-            let startIdx = this.firstParagraph.idx;
-            let endIdx = idx
-            if (endIdx < startIdx) {
-              const tmp = startIdx
-              startIdx = endIdx
-              endIdx = tmp
+        if (this.reloadCount === 0) {
+          console.log("문단 추가")
+          if (this.firstParagraph === -1) {
+            const nowData = this.lineData[idx]
+            this.firstParagraph = {id: nowData.id, idx: idx, page: this.dataPage}
+            this.makeParagraphStatus = `${this.dataPage}페이지 ${idx}번 문장(문장번호 ${nowData.id}) 선택. 문단의 시작이나 끝을 선택해주세요.`
+          } else {
+            if (this.childData.length === 0 && this.firstParagraph.page === this.dataPage) {
+              let startIdx = this.firstParagraph.idx;
+              let endIdx = idx
+              if (endIdx < startIdx) {
+                const tmp = startIdx
+                startIdx = endIdx
+                endIdx = tmp
+              }
+              for (;startIdx <= endIdx;startIdx++) this.childData.push(this.lineData[startIdx].id)
+            } else if (this.firstParagraph.page !== this.dataPage) {
+              if (this.firstParagraph.page < this.dataPage) {
+                for (let startIdx = 0;startIdx <= idx;startIdx++) this.childData.push(this.lineData[startIdx].id)
+              } else {
+                for (let startIdx = 99;startIdx >= idx;startIdx--) this.childData.push(this.lineData[startIdx].id)
+              }
             }
-            for (;startIdx <= endIdx;startIdx++) this.childData.push(this.lineData[startIdx].id)
-          } else if (this.firstParagraph.page !== this.dataPage) {
-            if (this.firstParagraph.page < this.dataPage) {
-              for (let startIdx = 0;startIdx <= idx;startIdx++) this.childData.push(this.lineData[startIdx].id)
-            } else {
-              for (let startIdx = 99;startIdx >= idx;startIdx--) this.childData.push(this.lineData[startIdx].id)
-            }
+
+            await createParagraph(
+                this,
+                this.selectedProjectId,
+                this.childData,
+                this.tags[this.selectedTag].tag_group_id,
+                this.tags[this.selectedTag].tag_id
+            )
+
+            this.firstParagraph = -1
+            this.childData = []
+            this.makeParagraphStatus = '문단을 지정할 문장을 선택해 주세요'
           }
-
-          await createParagraph(
-              this,
-              this.selectedProjectId,
-              this.childData,
-              this.tags[this.selectedTag].tag_group_id,
-              this.tags[this.selectedTag].tag_id
-          )
-
-          this.firstParagraph = -1
-          this.childData = []
-          this.makeParagraphStatus = '문단을 지정할 문장을 선택해 주세요'
+        } else {
+          alert("데이터 reload 이후에는 단어 추가/삭제가 제한됩니다.")
         }
       }
     },

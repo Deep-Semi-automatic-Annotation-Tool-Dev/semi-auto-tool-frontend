@@ -129,28 +129,73 @@ export const getWordDataList = async (context, projectId, startIndex, endIndex, 
             context.showLoadingDialog = false
         }
     }
-
 }
 
-export const getParagraphDataList = async (context, projectId, startIndex, endIndex) => {
+export const getParagraphDataList = async (context, projectId, startIndex, endIndex, tagGroupId, page, pageable) => {
     context.loadingDialogTitle = '문단 데이터 로딩'
     context.loadingDialogSubTitle = "문단 태깅 데이터를 가져오는 중 입니다."
     context.showLoadingDialog = true
-    try {
-        const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/data/paragraph?startIndex=${startIndex}&endIndex=${endIndex}`)
 
-        result.data.paragraph_indexes.sort((a, b) => {
-            return b.start_index - a.start_index
-        })
-        console.log(result.data);
-        context.paragraphData = {}
-        for (let data of result.data.paragraph_indexes) {
-            context.paragraphData[data.id] = data
+    if (context.reloadCount === 0) {
+        try {
+            const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/data/paragraph?startIndex=${startIndex}&endIndex=${endIndex}`)
+
+            result.data.paragraph_indexes.sort((a, b) => {
+                return b.start_index - a.start_index
+            })
+            console.log(result.data);
+            context.paragraphData = {}
+            for (let data of result.data.paragraph_indexes) {
+                context.paragraphData[data.id] = data
+            }
+        } catch (error) {
+            console.error('get paragraph data error', error);
+        } finally {
+            context.showLoadingDialog = false
         }
-    } catch (error) {
-        console.error('get word data error', error);
-    } finally {
-        context.showLoadingDialog = false
+    } else {
+        try {
+            const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/data/${tagGroupId}/rank/paragraph?size=100&page=${page}&sort=${pageable}`)
+
+            context.lineData = []
+            context.dataPage = result.data.page.number + 1
+            context.dataTotalPage = result.data.page.totalPages
+
+            for (let d of result.data._embedded.rankParagraphResponseDtoList) {
+                for (let l of d.child_data) {
+                    context.lineData.push({
+                        id: l.id,
+                        project_id: d.project_id,
+                        text: l.text
+                    })
+                }
+            }
+
+            for (let d of context.lineData) {
+                d.search = true
+                d.text = d.text
+                    .replaceAll('\n', ' ')
+                    .replaceAll('\t', ' ')
+                    .replaceAll('\r', ' ')
+                    .replaceAll('\b', ' ')
+                    .replaceAll('\v', ' ')
+                    .replaceAll('\f', ' ')
+                // context.sentenceMap.set(d.id, d.data_tags)
+            }
+
+            result.data._embedded.rankParagraphResponseDtoList.sort((a, b) => {
+                return b.start_index - a.start_index
+            })
+            context.paragraphData = {}
+            for (let data of result.data._embedded.rankParagraphResponseDtoList) {
+                context.paragraphData[data.id] = data
+            }
+            console.log('reloaded', result.data);
+        } catch (error) {
+            console.error('get paragraph reload data error', error);
+        } finally {
+            context.showLoadingDialog = false
+        }
     }
 }
 
@@ -496,13 +541,25 @@ export const deleteParagraph = async (context, projectId, dataId) => {
     try {
         await axios.delete(`${context.$baseURL}api/v1/project/${projectId}/data/${dataId}`)
 
-        context.paragraphData = []
-        if (context.lineData.length > 0) {
-            let startIdx = context.lineData[context.lineData.length - 1].id
-            let endIdx = context.lineData[0].id
+        context.paragraphData = {}
+        if (context.reloadCount === 0) {
+            if (context.lineData.length > 0) {
+                let startIdx = context.lineData[context.lineData.length - 1].id
+                let endIdx = context.lineData[0].id
 
+                context.showLoadingDialog = false
+                await getParagraphDataList(context, context.selectedProjectId, startIdx, endIdx)
+            }
+        } else {
             context.showLoadingDialog = false
-            await getParagraphDataList(context, context.selectedProjectId, startIdx, endIdx)
+            await getParagraphDataList(
+                context,
+                context.selectedProjectId,
+                0, 0,
+                context.tagGroups[context.selectedTagGroupId].tag_group_id,
+                context.dataPage - 1,
+                context.selectionRank
+            )
         }
     } catch (error) {
         console.error('paragraph data delete error', error);
