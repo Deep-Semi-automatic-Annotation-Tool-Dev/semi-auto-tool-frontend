@@ -21,6 +21,48 @@
 
       <div v-if="selectedProjectId !== -1" id="layout-dashboard-history">
         <div id="history-top-title">{{ this.selectedProjectName }}</div>
+        <div class="layout-dashboard-card card-w100">
+          <div class="card-title">주요 정보</div>
+          <v-divider color="white" thickness="1" style="width: 100%"></v-divider>
+          <div class="card-content card-content-row">
+            <div class="card-content-row-center">
+              <div>데이터 개수</div>
+              <div>{{ trainResultData.total_data_count }}개</div>
+            </div>
+            <div class="card-content-row-center">
+              <div>태그 그룹 개수</div>
+              <div>{{ trainResultData.tag_group_stats.length }}개</div>
+            </div>
+          </div>
+        </div>
+        <div class="layout-dashboard-card card-w100">
+          <div class="card-title">태깅 정보</div>
+          <v-divider color="white" thickness="1" style="width: 100%"></v-divider>
+          <div class="card-content card-content-tag">
+            <v-container class="pa-0 ma-0">
+              <v-select
+                  label="태그 그룹"
+                  density="compact"
+                  :items="tagGroups"
+                  item-title="tag_group_name"
+                  item-value="value"
+                  :hide-details="true"
+                  @update:model-value="changeGroup"
+                  v-model="tagGroupSelectionModel"
+              ></v-select>
+            </v-container>
+            <div class="card-content-row">
+              <div class="card-content-row-center">
+                <div>데이터 개수</div>
+                <div>{{ trainResultData.total_data_count }}개</div>
+              </div>
+              <div class="card-content-row-center">
+                <div>태그 그룹 개수</div>
+                <div>{{ trainResultData.tag_group_stats.length }}개</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div v-else>통계를 확인할 프로젝트를 선택해 주세요.</div>
     </div>
@@ -65,7 +107,13 @@ export default {
 
       projectList: [],
       selectedProjectId: -1,
-      selectedProjectName: ''
+      selectedProjectName: '',
+
+      tagGroups: [],
+      tagGroupSelectionModel: 0,
+      selectedTagGroupId: 0,
+
+      trainResultData: []
     }
   },
   async created() {
@@ -76,7 +124,14 @@ export default {
       this.selectedProjectId = id
       this.selectedProjectName = name
       loadHistory(this, this.selectedProjectId)
-    }
+    },
+    async changeGroup(v) {
+      this.selectedTagGroupId = v
+      console.log(this.tagGroupSelectionModel)
+      // await getTagList(this,
+      //     this.selectedProjectId,
+      //     this.tagGroups[this.selectedTagGroupId].tag_group_id)
+    },
   }
 }
 </script>

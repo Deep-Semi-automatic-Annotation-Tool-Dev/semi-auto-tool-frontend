@@ -101,7 +101,7 @@
 
 #layout-dashboard-history {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: flex-start;
   padding: 0;
   gap: 10px;
@@ -129,5 +129,58 @@
 
   flex: none;
   order: 0;
-  flex-grow: 1;
+  flex-grow: 0;
+}
+
+.layout-dashboard-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 5px 0 5px 0;
+  gap: 0;
+
+  background: $main-color;
+  border-radius: 15px;
+
+  flex: none;
+  order: 0;
+  align-self: stretch;
+  flex-grow: 0;
+
+  box-sizing: border-box;
+}
+
+.card-w100 {
+  width: 100%;
+}
+
+.card-title {
+  padding: 10px 20px 10px 20px;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.card-content {
+  padding: 10px 20px 10px 20px;
+  width: 100%;
+  color: white;
+}
+
+.card-content-tag {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-content-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  width: 100%;
+}
+
+.card-content-row-center {
+  text-align: center;
+  font-size: 14px;
 }
