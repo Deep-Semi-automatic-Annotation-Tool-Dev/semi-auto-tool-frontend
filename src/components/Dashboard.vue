@@ -19,7 +19,7 @@
         </div>
       </div>
 
-      <div v-if="selectedProjectId !== -1" id="layout-dashboard-history">
+      <div  v-if="selectedProjectId !== -1 && trainResultData !== null" id="layout-dashboard-history">
         <div id="history-top-title">{{ this.selectedProjectName }}</div>
         <div class="layout-dashboard-card card-w100">
           <div class="card-title">주요 정보</div>
@@ -31,14 +31,14 @@
             </div>
             <div class="card-content-row-center">
               <div>태그 그룹 개수</div>
-              <div>{{ trainResultData.tag_group_stats.length }}개</div>
+              <div>{{ tagGroups.length }}개</div>
             </div>
           </div>
         </div>
         <div class="layout-dashboard-card card-w100">
           <div class="card-title">태깅 정보</div>
           <v-divider color="white" thickness="1" style="width: 100%"></v-divider>
-          <div class="card-content card-content-tag">
+          <div v-if="tagGroups.length > 0" class="card-content card-content-tag">
             <v-container class="pa-0 ma-0">
               <v-select
                   label="태그 그룹"
@@ -53,17 +53,21 @@
             </v-container>
             <div class="card-content-row">
               <div class="card-content-row-center">
-                <div>데이터 개수</div>
-                <div>{{ trainResultData.total_data_count }}개</div>
+                <div>태그그룹 태깅 비율</div>
+                <div v-if="trainResultData.total_data_count > 0">{{ Math.ceil(trainResultData.tag_group_stats[tagGroups[selectedTagGroupId].tag_group_id].tag_group_tagged_count / trainResultData.total_data_count * 10000) / 100 }}%</div>
+                <div v-else>0%</div>
               </div>
               <div class="card-content-row-center">
-                <div>태그 그룹 개수</div>
-                <div>{{ trainResultData.tag_group_stats.length }}개</div>
+                <div>태그그룹 태그 개수</div>
+                <div>{{ trainResultData.tag_group_stats[tagGroups[selectedTagGroupId].tag_group_id].per_tag_count.length }}개</div>
               </div>
             </div>
+            <div class="card-content-row-tags"></div>
           </div>
+          <div v-else class="card-content card-content-tag">태그 그룹이 존재하지 않습니다.</div>
         </div>
       </div>
+      <div v-else-if="trainResultData !== null">최신 통계가 존재하지 않습니다. 한번 이상 학습 완료 후 확인해 주세요.</div>
       <div v-else>통계를 확인할 프로젝트를 선택해 주세요.</div>
     </div>
 
@@ -113,7 +117,7 @@ export default {
       tagGroupSelectionModel: 0,
       selectedTagGroupId: 0,
 
-      trainResultData: []
+      trainResultData: null
     }
   },
   async created() {

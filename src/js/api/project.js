@@ -89,6 +89,11 @@ export const getRecentTrainResultALL = async (context, projectId) => {
         const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/statistics`)
         console.log(result.data)
         context.trainResultData = result.data
+        const tags = {}
+        for (let tag of context.trainResultData.tag_group_stats) {
+            tags[tag.tag_group_id] = tag
+        }
+        context.trainResultData.tag_group_stats = tags
         console.log(context.trainResultData)
     } catch (error) {
         console.error('get train result error', error);
