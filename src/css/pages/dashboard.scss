@@ -98,3 +98,36 @@
 .list-vuetify-item:hover {
   background: rgba(255, 255, 255, 0.25);
 }
+
+#layout-dashboard-history {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0;
+  gap: 10px;
+
+  width: calc(100% - 220px);
+  height: 100%;
+
+  flex: none;
+  order: 1;
+  align-self: stretch;
+  flex-grow: 1;
+}
+
+#history-top-title {
+  font-style: normal;
+  font-weight: 600;
+  font-size: 20px;
+  //line-height: 23px;
+  display: flex;
+  align-items: center;
+
+  color: $text-black;
+
+  width: 100%;
+
+  flex: none;
+  order: 0;
+  flex-grow: 1;
+}

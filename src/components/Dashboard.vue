@@ -18,6 +18,11 @@
           </div>
         </div>
       </div>
+
+      <div v-if="selectedProjectId !== -1" id="layout-dashboard-history">
+        <div id="history-top-title">{{ this.selectedProjectName }}</div>
+      </div>
+      <div v-else>통계를 확인할 프로젝트를 선택해 주세요.</div>
     </div>
 
 
@@ -58,7 +63,7 @@ export default {
       loadingDialogSubTitle: "",
 
       projectList: [],
-      selectedProjectId: 0,
+      selectedProjectId: -1,
       selectedProjectName: ''
     }
   },
