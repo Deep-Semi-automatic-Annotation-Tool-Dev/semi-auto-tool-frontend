@@ -48,7 +48,8 @@
 import AppBar from './appbar/AppBar';
 import Dialog from "@/components/dialog/Dialog";
 
-import {getProjectList, getTrainList} from "@/js/api/project";
+import {getProjectList} from "@/js/api/project";
+import {loadHistory} from "@/js/api/dashboard";
 
 export default {
   name: "DashboardComponent",
@@ -74,7 +75,7 @@ export default {
     projectListLeftClick(e, id, name) {
       this.selectedProjectId = id
       this.selectedProjectName = name
-      getTrainList(this, this.selectedProjectId)
+      loadHistory(this, this.selectedProjectId)
     }
   }
 }
