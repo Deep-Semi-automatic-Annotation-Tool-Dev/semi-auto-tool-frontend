@@ -51,7 +51,7 @@
         <!--   문장/태그 편집 영역   -->
         <div v-if="!(trainStatus !== -1 || (trainStatus === -1 && stepperIdx === 3))" id="layout-project-text-area">
           <div id="layout-project-editor-top">
-            <div id="editor-top-title">{{ this.selectedProjectName }}</div>
+            <div id="editor-top-title">{{ this.selectedProjectName }}{{ reloadCount > 0 ? " - reloaded" : "" }}</div>
 <!--            <v-btn color="light_magenta" height="30">-->
 <!--              저장-->
 <!--            </v-btn>-->
@@ -240,7 +240,12 @@
                     </v-select>
                   </v-container>
                   <v-container class="pa-0 ma-0">
-                    <v-btn color="light_magenta" id="tags-group-add-btn" @click="addTagButtonClicked">
+                    <v-btn
+                        color="light_magenta"
+                        id="tags-group-add-btn"
+                        @click="addTagButtonClicked"
+                        :disabled="reloadCount > 0"
+                    >
                       그룹 추가
                     </v-btn>
                   </v-container>
@@ -295,7 +300,7 @@
                         color="light_brown"
                         id="tag-top-add-btn"
                         @click="showAddTagDialog = true"
-                        :disabled="this.tagGroups.length === 0"
+                        :disabled="this.tagGroups.length === 0 || reloadCount > 0"
                     >
                       태그추가
                     </v-btn>
@@ -478,6 +483,19 @@
 <!--              <v-divider vertical></v-divider>-->
               <div class="stepper-item-content-area" :class="stepperIdx !== 3 ? 'unselected' : ''">
                 <div v-if=" tagGroups.length > 0" style="width: 100%">
+                  <v-container class="pa-0 mb-1 ma-0">
+                    <v-select
+                        label="태그 그룹 선택"
+                        density="compact"
+                        :items="tagGroups"
+                        item-title="tag_group_name"
+                        item-value="value"
+                        :hide-details="true"
+                        variant="outlined"
+                        @update:model-value="changeGroup"
+                        v-model="tagGroupSelectionModel"
+                    ></v-select>
+                  </v-container>
                   <div class="model-summary">{{ tagGroups[selectedTagGroupId].tag_group_name }} - 최근 학습 결과</div>
                   <v-table v-if="trainResultData !== null" class="table-result">
                     <thead>
@@ -1046,13 +1064,13 @@ export default {
 
     async changeGroup(v) {
       // console.log(this.tagGroups[v])
-      if (this.reloadCount === 0) {
-        this.selectedTagGroupId = v
-        console.log(this.tagGroupSelectionModel)
-        await getTagList(this,
-            this.selectedProjectId,
-            this.tagGroups[this.selectedTagGroupId].tag_group_id)
-      } else {
+      this.selectedTagGroupId = v
+      console.log(this.tagGroupSelectionModel)
+      await getTagList(this,
+          this.selectedProjectId,
+          this.tagGroups[this.selectedTagGroupId].tag_group_id)
+
+      if (this.reloadCount > 0) {
         switch (this.tagMod) {
           case 'word': {
             this.lineData = []
