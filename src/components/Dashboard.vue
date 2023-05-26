@@ -62,7 +62,43 @@
                 <div>{{ trainResultData.tag_group_stats[tagGroups[selectedTagGroupId].tag_group_id].per_tag_count.length }}개</div>
               </div>
             </div>
-            <div class="card-content-row-tags"></div>
+            <div class="card-content-row-tags">
+<!--              <div-->
+<!--                  v-for="tag in trainResultData.tag_group_stats[tagGroups[selectedTagGroupId].tag_group_id].per_tag_count"-->
+<!--                  :key="tag.tag_name"-->
+<!--              >{{ tag.tag_name }}</div>-->
+              <v-chip
+                  v-for="tag in trainResultData.tag_group_stats[tagGroups[selectedTagGroupId].tag_group_id].per_tag_count"
+                  :key="tag.tag_name"
+                  size="small"
+                  style="margin-right: 10px"
+                  :style="[chipBackground(`#${tag.tag_color}`),
+                      setChipBackgroundColor(`#${tag.tag_color}`)]"
+              >
+                {{ tag.tag_name }} - {{ Math.ceil(tag.data_count / trainResultData.tag_group_stats[tagGroups[selectedTagGroupId].tag_group_id].tag_group_tagged_count * 10000) / 100 }}%
+              </v-chip>
+            </div>
+            <v-table theme="dark">
+              <thead>
+              <tr>
+                <th></th>
+                <th>GPT</th>
+                <th>Bert</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>train</td>
+                <td>{{ trainResultData.tag_group_stats[tagGroups[selectedTagGroupId].tag_group_id].current_train_tag_group_gpt_train_acc }}</td>
+                <td>{{trainResultData.tag_group_stats[tagGroups[selectedTagGroupId].tag_group_id].current_train_tag_group_bert_train_acc }}</td>
+              </tr>
+              <tr>
+                <td>test</td>
+                <td>{{ trainResultData.tag_group_stats[tagGroups[selectedTagGroupId].tag_group_id].current_train_tag_group_gpt_test_acc }}</td>
+                <td>{{ trainResultData.tag_group_stats[tagGroups[selectedTagGroupId].tag_group_id].current_train_tag_group_bert_test_acc }}</td>
+              </tr>
+              </tbody>
+            </v-table>
           </div>
           <div v-else class="card-content card-content-tag">태그 그룹이 존재하지 않습니다.</div>
         </div>
@@ -96,6 +132,24 @@ import Dialog from "@/components/dialog/Dialog";
 
 import {getProjectList} from "@/js/api/project";
 import {loadHistory} from "@/js/api/dashboard";
+
+
+const hexToRgb = (hex) => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : null;
+}
+
+const setTextColorToBackground = (hex) => {
+  const rgb = hexToRgb(hex)
+  const brightness = Math.round(((parseInt(rgb.r) * 299) +
+      (parseInt(rgb.g) * 587) +
+      (parseInt(rgb.b) * 114)) / 1000)
+  return (brightness > 125) ? 'black' : 'white'
+}
 
 export default {
   name: "DashboardComponent",
@@ -135,6 +189,14 @@ export default {
       // await getTagList(this,
       //     this.selectedProjectId,
       //     this.tagGroups[this.selectedTagGroupId].tag_group_id)
+    },
+    chipBackground (color) {
+      return {
+        'background': color
+      }
+    },
+    setChipBackgroundColor(hex) {
+      return {'color': setTextColorToBackground(hex)};
     },
   }
 }

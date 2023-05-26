@@ -91,6 +91,9 @@ export const getRecentTrainResultALL = async (context, projectId) => {
         context.trainResultData = result.data
         const tags = {}
         for (let tag of context.trainResultData.tag_group_stats) {
+            tag.per_tag_count.sort((a, b) => {
+                return b.data_count - a.data_count
+            })
             tags[tag.tag_group_id] = tag
         }
         context.trainResultData.tag_group_stats = tags

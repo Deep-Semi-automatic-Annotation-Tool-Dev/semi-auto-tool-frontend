@@ -184,3 +184,10 @@
   text-align: center;
   font-size: 14px;
 }
+
+.card-content-row-tags {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+}
