@@ -52,6 +52,10 @@ export const loadProject = async (context, id, page) => {
             id,
             context.tagGroups[context.selectedTagGroupId].tag_group_id)
     }
-    await getDataList(context, id, page, context.tagGroups[context.selectedTagGroupId].tag_group_id, context.selectionRank)
+    if (context.reloadCount === 0) {
+        await getDataList(context, id, page)
+    } else {
+        await getDataList(context, id, page, context.tagGroups[context.selectedTagGroupId].tag_group_id, context.selectionRank)
+    }
     // await getProjectStatus(context, context.tagGroups[context.selectedTagGroupId].tag_group_id)
 }

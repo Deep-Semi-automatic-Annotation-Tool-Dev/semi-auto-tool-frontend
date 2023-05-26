@@ -227,6 +227,7 @@
                           <v-list-item v-bind="props">
                             <template v-slot:append>
                               <v-btn
+                                  v-if="reloadCount === 0"
                                   color="grey-lighten-1"
                                   icon="mdi-delete"
                                   variant="text"
