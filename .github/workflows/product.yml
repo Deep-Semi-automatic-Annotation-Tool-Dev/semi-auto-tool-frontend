@@ -31,7 +31,7 @@ jobs:
         with:
           host: ${{ secrets.REMOTE_IP }}
           username: ${{ secrets.REMOTE_SSH_ID }}
-          key: ${{ secrets.REMOTE_SSH_KEY }}
+          password: ${{ secrets.REMOTE_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
             cd /var/www/html/autotag
@@ -40,9 +40,9 @@ jobs:
       - name: Copy file to remote
         uses: garygrossgarten/github-action-scp@release
         with:
-          local: ./dist/
+          local: ./dist
           remote: /var/www/html/autotag
           host: ${{ secrets.REMOTE_IP }}
           username: ${{ secrets.REMOTE_SSH_ID }}
-          privateKey: ${{ secrets.REMOTE_SSH_KEY }}
+          password: ${{ secrets.REMOTE_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
