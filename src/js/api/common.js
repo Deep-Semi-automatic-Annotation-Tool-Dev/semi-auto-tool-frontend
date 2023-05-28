@@ -1,7 +1,7 @@
 import {getTagGroupList, getTagList} from "@/js/api/tag";
 import {getDataList} from "@/js/api/data";
-import {disconnectLoggingSSE, initStatusSSE} from "@/js/sse/train";
-import {getTrainList} from "@/js/api/project";
+import {disconnectLoggingSSE, disconnectStatusSSE, initStatusSSE} from "@/js/sse/train";
+// import {getTrainList} from "@/js/api/project";
 // import {getProjectStatus} from "@/js/api/train";
 
 export const initVariables = (context) => {
@@ -39,17 +39,18 @@ export const loadProject = async (context, id, page) => {
     // context.wordMap.clear()
     // context.paragraphMap.clear()
     disconnectLoggingSSE()
+    disconnectStatusSSE()
 
     initVariables(context)
     initStatusSSE(context, id)
 
-    const result = await getTrainList(context, id)
-    if (result !== null && result.page.totalElements > 0) {
-        context.reloadCount = 1
-    } else {
-        context.reloadCount = 0
-    }
-    console.log("reloaded", context.reloadCount)
+    // const result = await getTrainList(context, id)
+    // if (result !== null && result.page.totalElements > 0) {
+    //     context.reloadCount = 1
+    // } else {
+    //     context.reloadCount = 0
+    // }
+    // console.log("reloaded", context.reloadCount)
 
     await getTagGroupList(context, id)
     if (context.tagGroups.length > 0) {

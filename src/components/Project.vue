@@ -804,7 +804,7 @@ import {
   createProject,
   getProjectList,
   deleteProject,
-  renameProject, getRecentTrainResult
+  renameProject, getRecentTrainResult, getTrainList
 } from '@/js/api/project.js'
 import {
   addTagInData, addTagInParagraph,
@@ -1952,29 +1952,48 @@ export default {
       if (this.logDatas.length > 100) this.logDatas.pop()
     },
     handleError(message, lastEventId) {
+      message = JSON.parse(message
+          .replace("'{", "{").replace("}'", "}")
+          .replace('"{', "{").replace('}"', "}")
+          .replaceAll("'", '"'))
       console.warn('Received a error w/o an event!', message, lastEventId);
       disconnectLoggingSSE()
       this.logMsg = "학습 오류"
       this.isIndeterminate = true
+      this.trainStatus = -1
+      alert(`학습중 오류 발생: ${message.message}`)
+      this.stepperNext()
     },
     handleSuccess(message, lastEventId) {
       console.warn('Received a success w/o an event!', message, lastEventId);
       disconnectLoggingSSE()
       this.logMsg = "학습 성공"
       this.isIndeterminate = true
+      this.trainStatus = -1
     },
 
     async startTrainCheck(data) {
       this.showTrainStart = false
       // 프로젝트 이동 시 저장 여부 다이얼로그 버튼 클릭
       if (data.type === this.DIALOG_CLICK_YES) {
-        await startTrain(this,
+        const key = await startTrain(this,
             this.selectedProjectId,
             this.tagGroups[this.selectedTagGroupId].tag_group_id,
             this.trainName,
             this.trainEpoch,
             this.trainLearningRate
         )
+
+        if (key !== null) {
+          this.showLoadingDialog = true
+          this.loadingDialogTitle = "학습 시작중..."
+          this.loadingDialogSubTitle = "학습을 시작하기 전 준비중 입니다."
+          this.trainStatus = key
+          this.stepperIdx = 2
+          initLogSSE(this, this.trainStatus)
+        } else {
+          alert("학습 시작에 오류가 발생했습니다. 다시 시도해 주세요.")
+        }
       }
     },
     startTrain() {
@@ -1991,7 +2010,7 @@ export default {
     },
 
 
-    receiveStatus(message, lastEventId) {
+    async receiveStatus(message, lastEventId) {
       const data = JSON.parse(message.replaceAll("'", '"'))
       console.log('Received status', data, lastEventId);
       if (data.stream_key !== '-1') {
@@ -2000,14 +2019,27 @@ export default {
         initLogSSE(this, this.trainStatus)
       } else {
         this.trainStatus = -1
-        if (this.initStatus) {
-          this.stepperIdx = 0
-        } else {
-          this.stepperIdx = 3
-          getRecentTrainResult(this, this.selectedProjectId)
+        this.stepperIdx = 0
+        try {
+          let trainResult = await getTrainList(this, this.selectedProjectId)
+          trainResult = trainResult._embedded.trainResponseControllerDtoList
+          if (trainResult[trainResult.length - 1].train_status === "FAIL") {
+            alert(`최근 실행한 ${trainResult[trainResult.length - 1].train_name} 학습이 실패했습니다. 다시 시도해주세요.`)
+          }
+          console.log(trainResult[trainResult.length - 1])
+        } catch (e) {
+          console.info("not train")
         }
       }
-      this.initStatus = false
+      disconnectStatusSSE()
+      //   if (this.initStatus) {
+      //     this.stepperIdx = 0
+      //   } else {
+      //     this.stepperIdx = 3
+      //     getRecentTrainResult(this, this.selectedProjectId)
+      //   }
+      // }
+      // this.initStatus = false
     },
 
     changeResultTarget(e) {

@@ -20,7 +20,7 @@ export const initStatusSSE = (context, project_id) => {
 
     sseStatus.connect()
         .then(sse => {
-            console.log('We\'re connected!');
+            console.log('init status connected!');
             console.log(sse)
 
             // setTimeout(() => {
@@ -29,7 +29,7 @@ export const initStatusSSE = (context, project_id) => {
             // }, 2 * 1000);
         })
         .catch((err) => {
-            console.error('Failed to connect to server', err);
+            console.error('Failed to connect init status', err);
         });
 }
 
@@ -44,6 +44,7 @@ export const disconnectLoggingSSE = () => {
 
 export const initLogSSE = (context, streamKey) => {
     disconnectLoggingSSE()
+    context.logDatas = []
 
     sseTrain = context.$sse.create({
         url: `${context.$mlURL}api/v1/stream/${streamKey}`,
@@ -56,9 +57,9 @@ export const initLogSSE = (context, streamKey) => {
     sseTrain.on('error', context.handleError);
 
     sseTrain.connect()
-        .then(sse => {
-            console.log('We\'re connected!');
-            console.log(sse)
+        .then(() => {
+            console.log('run log connected!');
+            context.showLoadingDialog = false
 
             // setTimeout(() => {
             //     sseTrain.off('run', context.handleMessage);
@@ -66,6 +67,7 @@ export const initLogSSE = (context, streamKey) => {
             // }, 2 * 1000);
         })
         .catch((err) => {
-            console.error('Failed to connect to server', err);
-        });
+            context.showLoadingDialog = false
+            console.error('Failed to connect run log', err);
+        })
 }
