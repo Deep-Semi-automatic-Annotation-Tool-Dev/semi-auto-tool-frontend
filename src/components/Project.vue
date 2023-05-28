@@ -1583,7 +1583,7 @@ export default {
                 this,
                 this.selectedProjectId,
                 this.dataPage - 1,
-                this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                0,
                 this.selectionRank
             )
 
@@ -1595,7 +1595,7 @@ export default {
                   this.selectedProjectId,
                   startIdx,
                   endIdx,
-                  this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                  0,
                   this.dataPage - 1,
                   this.selectionRank
               )
@@ -1615,13 +1615,23 @@ export default {
         }
         case 'sentence': {
           this.lineData = []
-          await getDataList(
-              this,
-              this.selectedProjectId,
-              this.dataPage - 1,
-              this.tagGroups[this.selectedTagGroupId].tag_group_id,
-              this.selectionRank
-          )
+          if (this.reloadCount === 0) {
+            await getDataList(
+                this,
+                this.selectedProjectId,
+                this.dataPage - 1,
+                0,
+                this.selectionRank
+            )
+          } else {
+            await getDataList(
+                this,
+                this.selectedProjectId,
+                this.dataPage - 1,
+                this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                this.selectionRank
+            )
+          }
           break
         }
         case 'paragraph': {
@@ -1635,9 +1645,7 @@ export default {
             await getDataList(
                 this,
                 this.selectedProjectId,
-                this.dataPage - 1,
-                this.tagGroups[this.selectedTagGroupId].tag_group_id,
-                this.selectionRank
+                this.dataPage - 1
             )
 
             let startIdx = this.lineData[this.lineData.length - 1].id
@@ -1923,13 +1931,17 @@ export default {
               }
             }
 
-            await createParagraph(
-                this,
-                this.selectedProjectId,
-                this.childData,
-                this.tags[this.selectedTag].tag_group_id,
-                this.tags[this.selectedTag].tag_id
-            )
+            try {
+              await createParagraph(
+                  this,
+                  this.selectedProjectId,
+                  this.childData,
+                  this.tags[this.selectedTag].tag_group_id,
+                  this.tags[this.selectedTag].tag_id
+              )
+            } catch (e) {
+              alert("태그가 없습니다.")
+            }
 
             this.firstParagraph = -1
             this.childData = []

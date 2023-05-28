@@ -61,6 +61,13 @@ export const getDataList = async (context, projectId, page, tagGroupId, pageable
             context.dataPage = 0
             context.dataTotalPage = 0
             console.error('get data reload error', error);
+            if (error.response.data.type === 'ES010') {
+                alert("모든 데이터의 태깅이 완료되었습니다.")
+            } else if (error.response.data.type === 'ES060') {
+                alert("학습이 성공적으로 진행되지 않았습니다.")
+            } else {
+                alert(`오류가 발생했습니다. error: ${error.response.data.type}`)
+            }
         } finally {
             context.showLoadingDialog = false
         }
@@ -125,6 +132,13 @@ export const getWordDataList = async (context, projectId, startIndex, endIndex, 
             console.log('reloaded', result.data);
         } catch (error) {
             console.error('get word reload data error', error);
+            if (error.response.data.type === 'ES010') {
+                alert("모든 데이터의 태깅이 완료되었습니다.")
+            } else if (error.response.data.type === 'ES060') {
+                alert("학습이 성공적으로 진행되지 않았습니다.")
+            } else {
+                alert(`오류가 발생했습니다. error: ${error.response.data.type}`)
+            }
         } finally {
             context.showLoadingDialog = false
         }
@@ -193,6 +207,13 @@ export const getParagraphDataList = async (context, projectId, startIndex, endIn
             console.log('reloaded', result.data);
         } catch (error) {
             console.error('get paragraph reload data error', error);
+            if (error.response.data.type === 'ES010') {
+                alert("모든 데이터의 태깅이 완료되었습니다.")
+            } else if (error.response.data.type === 'ES060') {
+                alert("학습이 성공적으로 진행되지 않았습니다.")
+            } else {
+                alert(`오류가 발생했습니다. error: ${error.response.data.type}`)
+            }
         } finally {
             context.showLoadingDialog = false
         }
