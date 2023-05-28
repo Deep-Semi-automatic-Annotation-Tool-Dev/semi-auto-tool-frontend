@@ -549,6 +549,11 @@ export const createParagraph = async (context, projectId, childDatas, tagGroupId
         context.paragraphData[result.data.id] = result.data
     } catch (error) {
         console.error('post word error', error);
+        if (error.response.data.type === 'ES008') {
+            alert("중복 데이터가 존재합니다.")
+        } else {
+            alert(`오류가 발생했습니다. error: ${error.response.data.type}`)
+        }
     } finally {
         context.showLoadingDialog = false
     }
