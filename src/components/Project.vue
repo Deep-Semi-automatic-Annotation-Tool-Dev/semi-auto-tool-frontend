@@ -789,12 +789,15 @@
   >
     <context-menu-item
         label="이름 변경"
+        :disabled="!editable"
         @click="tagContextMenuClick(this.CONTEXTMENU_TAG_RENAME)"/>
     <context-menu-item
         label="색상 변경"
+        :disabled="!editable"
         @click="tagContextMenuClick(this.CONTEXTMENU_TAG_COLOR)"/>
     <context-menu-item
         label="삭제"
+        :disabled="!editable"
         @click="tagContextMenuClick(this.CONTEXTMENU_TAG_DELETE)">
     </context-menu-item>
   </context-menu>
