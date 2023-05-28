@@ -60,6 +60,7 @@
                 @click="handleFileImport"
                 icon="mdi-file-upload"
                 variant="text"
+                :disabled="!editable"
             ></v-btn>
             <v-btn
                 @click="handleDownloadResult"
@@ -1429,7 +1430,7 @@ export default {
                 this,
                 this.selectedProjectId,
                 page - 1,
-                this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                0,
                 this.selectionRank
             )
 
@@ -1461,13 +1462,24 @@ export default {
         }
         case 'sentence': {
           this.lineData = []
-          await getDataList(
-              this,
-              this.selectedProjectId,
-              page - 1,
-              this.tagGroups[this.selectedTagGroupId].tag_group_id,
-              this.selectionRank
-          )
+          if (this.reloadCount === 0) {
+            await getDataList(
+                this,
+                this.selectedProjectId,
+                page - 1,
+                0,
+                this.selectionRank
+            )
+          } else {
+            await getDataList(
+                this,
+                this.selectedProjectId,
+                page - 1,
+                this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                this.selectionRank
+            )
+          }
+
           break
         }
         case 'paragraph': {
@@ -1522,7 +1534,7 @@ export default {
                 this,
                 this.selectedProjectId,
                 page - 1,
-                this.tagGroups[this.selectedTagGroupId].tag_group_id,
+                0,
                 this.selectionRank
             )
 
