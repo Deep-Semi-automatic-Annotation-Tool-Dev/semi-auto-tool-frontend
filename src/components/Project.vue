@@ -545,6 +545,13 @@
                   >
                     데이터 리로드
                   </v-btn>
+                  <v-btn
+                      color="light_brown"
+                      size="small"
+                      @click="dataLoadAll"
+                  >
+                    전체 데이터 확인
+                  </v-btn>
                   <v-btn color="light_magenta" size="small" @click="gotoTag">
                     태깅으로 돌아가기
                   </v-btn>
@@ -1178,6 +1185,9 @@ export default {
           this.tagGroups[this.selectedTagGroupId].tag_group_id,
           this.selectionRank
       )
+    },
+    async dataLoadAll() {
+      await loadProject(this, this.selectedProjectId, 1)
     },
     gotoTag() {
       this.stepperIdx = 0;
