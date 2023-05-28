@@ -1952,16 +1952,16 @@ export default {
       if (this.logDatas.length > 100) this.logDatas.pop()
     },
     handleError(message, lastEventId) {
-      message = JSON.parse(message
-          .replace("'{", "{").replace("}'", "}")
-          .replace('"{', "{").replace('}"', "}")
-          .replaceAll("'", '"'))
+      // message = JSON.parse(message
+      //     .replace("'{", "{").replace("}'", "}")
+      //     .replace('"{', "{").replace('}"', "}")
+      //     .replaceAll("'", '"'))
       console.warn('Received a error w/o an event!', message, lastEventId);
       disconnectLoggingSSE()
       this.logMsg = "학습 오류"
       this.isIndeterminate = true
       this.trainStatus = -1
-      alert(`학습중 오류 발생: ${message.message}`)
+      alert(`학습중 오류 발생: ${message}`)
       this.stepperNext()
     },
     handleSuccess(message, lastEventId) {
@@ -1970,6 +1970,8 @@ export default {
       this.logMsg = "학습 성공"
       this.isIndeterminate = true
       this.trainStatus = -1
+      alert("학습 성공")
+      this.stepperNext()
     },
 
     async startTrainCheck(data) {
