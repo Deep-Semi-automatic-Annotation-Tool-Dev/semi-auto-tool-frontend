@@ -74,6 +74,9 @@
                 accept="text/csv"
                 @change="onFileChanged"
             >
+            <v-btn v-if="!editable" variant="outlined" color="color_accept" size="small" @click="skipTrain">
+              리로드 바로가기
+            </v-btn>
           </div>
           <div id="layout-project-editor-main">
             <div id="layout-project-editor-main-title">
