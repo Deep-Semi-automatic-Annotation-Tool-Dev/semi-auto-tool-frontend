@@ -1771,15 +1771,20 @@ export default {
       if (idxStart === idxEnd) return
       if (this.editable) {
         console.log("add tag")
-        createWord(
-            this,
-            this.selectedProjectId,
-            parentIdx,
-            idxStart,
-            idxEnd,
-            this.tagGroups[this.selectedTagGroupId].tag_group_id,
-            this.tags[this.selectedTag].tag_id
-        )
+        try {
+          createWord(
+              this,
+              this.selectedProjectId,
+              parentIdx,
+              idxStart,
+              idxEnd,
+              this.tagGroups[this.selectedTagGroupId].tag_group_id,
+              this.tags[this.selectedTag].tag_id
+          )
+        } catch (e) {
+          alert("태그가 없습니다.")
+        }
+
         console.log(selection.toString())
       } else {
         alert("학습이 성공적으로 완료되면 단어 추가/삭제가 제한됩니다.")
