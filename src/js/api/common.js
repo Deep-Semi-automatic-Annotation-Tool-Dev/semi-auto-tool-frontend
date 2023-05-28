@@ -1,7 +1,7 @@
 import {getTagGroupList, getTagList} from "@/js/api/tag";
 import {getDataList} from "@/js/api/data";
 import {disconnectLoggingSSE, disconnectStatusSSE, initStatusSSE} from "@/js/sse/train";
-// import {getTrainList} from "@/js/api/project";
+import {getTrainList} from "@/js/api/project";
 // import {getProjectStatus} from "@/js/api/train";
 
 export const initVariables = (context) => {
@@ -44,12 +44,14 @@ export const loadProject = async (context, id, page) => {
     initVariables(context)
     initStatusSSE(context, id)
 
-    // const result = await getTrainList(context, id)
-    // if (result !== null && result.page.totalElements > 0) {
-    //     context.reloadCount = 1
-    // } else {
-    //     context.reloadCount = 0
-    // }
+    const result = await getTrainList(context, id, false)
+    if (result !== null && result.page.totalElements > 0) {
+        // context.reloadCount = 1
+        context.editable = false
+    } else {
+        // context.reloadCount = 0
+        context.editable = true
+    }
     // console.log("reloaded", context.reloadCount)
 
     await getTagGroupList(context, id)

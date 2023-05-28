@@ -51,7 +51,7 @@
         <!--   문장/태그 편집 영역   -->
         <div v-if="!(trainStatus !== -1 || (trainStatus === -1 && stepperIdx === 3))" id="layout-project-text-area">
           <div id="layout-project-editor-top">
-            <div id="editor-top-title">{{ this.selectedProjectName }}{{ reloadCount > 0 ? " - reloaded" : "" }}</div>
+            <div id="editor-top-title">{{ this.selectedProjectName }}</div>
 <!--            <v-btn color="light_magenta" height="30">-->
 <!--              저장-->
 <!--            </v-btn>-->
@@ -227,7 +227,7 @@
                           <v-list-item v-bind="props">
                             <template v-slot:append>
                               <v-btn
-                                  v-if="reloadCount === 0"
+                                  v-if="editable"
                                   color="grey-lighten-1"
                                   icon="mdi-delete"
                                   variant="text"
@@ -245,7 +245,7 @@
                         color="light_magenta"
                         id="tags-group-add-btn"
                         @click="addTagButtonClicked"
-                        :disabled="reloadCount > 0"
+                        :disabled="!editable"
                     >
                       그룹 추가
                     </v-btn>
@@ -301,7 +301,7 @@
                         color="light_brown"
                         id="tag-top-add-btn"
                         @click="showAddTagDialog = true"
-                        :disabled="this.tagGroups.length === 0 || reloadCount > 0"
+                        :disabled="this.tagGroups.length === 0 || !editable"
                     >
                       태그추가
                     </v-btn>
@@ -1018,6 +1018,7 @@ export default {
       childData: [],
 
       reloadCount: 0,
+      editable: true
     }
   },
   components: {
@@ -1155,6 +1156,7 @@ export default {
     async dataReloading() {
       this.stepperIdx = 0;
       this.reloadCount += 1;
+      this.editable = false
 
       this.tagMod = 'sentence'
       this.wordTagData = {}
@@ -1719,10 +1721,10 @@ export default {
             if (tag.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id) {
               if (confirm(`'${item.text}'에서 '${tag.tagName}'태그를 삭제하시겠습니까?`)) {
                 console.log("remove tag", item)
-                if (item.data_target_tags.length === 0 && this.reloadCount !== 0) {
-                  alert("데이터 reload 이후에는 단어 추가/삭제가 제한됩니다.")
+                if (item.data_target_tags.length === 0 && !this.editable) {
+                  alert("학습이 성공적으로 완료되면 단어 추가/삭제가 제한됩니다.")
                 } else if (item.data_target_tags.length === 1) {
-                  if (this.reloadCount === 0) {
+                  if (this.editable) {
                     deleteWord(this, this.selectedProjectId, item.id)
                   } else {
                     deleteTagInWord(this, this.selectedProjectId, itemIdx, parentIdx, tag)
@@ -1734,16 +1736,16 @@ export default {
               return;
             }
           }
-          if (this.reloadCount === 0) {
+          if (this.editable) {
             alert("다른 태그 그룹에서 태그가 지정된 단어는 삭제가 불가능합니다.")
           } else {
-            alert("데이터 reload 이후에는 단어 추가/삭제가 제한됩니다.")
+            alert("학습이 성공적으로 완료되면 단어 추가/삭제가 제한됩니다.")
           }
           return;
         }
       }
       if (idxStart === idxEnd) return
-      if (this.reloadCount === 0) {
+      if (this.editable) {
         console.log("add tag")
         createWord(
             this,
@@ -1756,7 +1758,7 @@ export default {
         )
         console.log(selection.toString())
       } else {
-        alert("데이터 reload 이후에는 단어 추가/삭제가 제한됩니다.")
+        alert("학습이 성공적으로 완료되면 단어 추가/삭제가 제한됩니다.")
       }
     },
     setParagraphHighlight(nowData, paragraphData) {
@@ -1841,10 +1843,10 @@ export default {
           if (tag.tagGroupId === this.tagGroups[this.selectedTagGroupId].tag_group_id && this.firstParagraph === -1) {
             if (confirm(`${startDataIdx}번 문장에서 시작하는 문단의 '${tag.tagName}'태그를 삭제하시겠습니까?`)) {
               // console.log("remove tag", item)
-              if (target.data_target_tags.length === 0 && this.reloadCount !== 0) {
-                alert("데이터 reload 이후에는 단어 추가/삭제가 제한됩니다.")
+              if (target.data_target_tags.length === 0 && !this.editable) {
+                alert("학습이 성공적으로 완료되면 단어 추가/삭제가 제한됩니다.")
               } else if (target.data_target_tags.length === 1) {
-                if (this.reloadCount === 0) {
+                if (this.editable) {
                   deleteParagraph(this, this.selectedProjectId, parentIdx)
                 } else {
                   deleteTagInParagraph(
@@ -1881,7 +1883,7 @@ export default {
         }
         // console.log(parentIdx, selection)
       } catch (e) {
-        if (this.reloadCount === 0) {
+        if (this.editable) {
           console.log("문단 추가")
           if (this.firstParagraph === -1) {
             const nowData = this.lineData[idx]
@@ -1918,7 +1920,7 @@ export default {
             this.makeParagraphStatus = '문단을 지정할 문장을 선택해 주세요'
           }
         } else {
-          alert("데이터 reload 이후에는 단어 추가/삭제가 제한됩니다.")
+          alert("학습이 성공적으로 완료되면 단어 추가/삭제가 제한됩니다.")
         }
       }
     },
@@ -1963,6 +1965,7 @@ export default {
       this.trainStatus = -1
       alert(`학습중 오류 발생: ${message}`)
       this.stepperNext()
+      this.initReloadPage()
     },
     handleSuccess(message, lastEventId) {
       console.warn('Received a success w/o an event!', message, lastEventId);
@@ -1972,6 +1975,7 @@ export default {
       this.trainStatus = -1
       alert("학습 성공")
       this.stepperNext()
+      this.initReloadPage()
     },
 
     async startTrainCheck(data) {
@@ -2008,7 +2012,18 @@ export default {
     },
     skipTrain() {
       this.stepperIdx = 3
-      getRecentTrainResult(this, this.selectedProjectId)
+      this.initReloadPage()
+    },
+    async initReloadPage() {
+      const result = await getTrainList(this, this.selectedProjectId, false)
+      if (result !== null && result.page.totalElements > 0) {
+        // context.reloadCount = 1
+        this.editable = false
+      } else {
+        // context.reloadCount = 0
+        this.editable = true
+      }
+      await getRecentTrainResult(this, this.selectedProjectId)
     },
 
 
@@ -2022,16 +2037,16 @@ export default {
       } else {
         this.trainStatus = -1
         this.stepperIdx = 0
-        try {
-          let trainResult = await getTrainList(this, this.selectedProjectId)
-          trainResult = trainResult._embedded.trainResponseControllerDtoList
-          if (trainResult[trainResult.length - 1].train_status === "FAIL") {
-            alert(`최근 실행한 ${trainResult[trainResult.length - 1].train_name} 학습이 실패했습니다. 다시 시도해주세요.`)
-          }
-          console.log(trainResult[trainResult.length - 1])
-        } catch (e) {
-          console.info("not train")
-        }
+        // try {
+        //   let trainResult = await getTrainList(this, this.selectedProjectId)
+        //   trainResult = trainResult._embedded.trainResponseControllerDtoList
+        //   if (trainResult[trainResult.length - 1].train_status === "FAIL") {
+        //     alert(`최근 실행한 ${trainResult[trainResult.length - 1].train_name} 학습이 실패했습니다. 다시 시도해주세요.`)
+        //   }
+        //   console.log(trainResult[trainResult.length - 1])
+        // } catch (e) {
+        //   console.info("not train")
+        // }
       }
       disconnectStatusSSE()
       //   if (this.initStatus) {

@@ -108,12 +108,12 @@ export const getRecentTrainResultALL = async (context, projectId) => {
 
 
 
-export const getTrainList = async (context, projectId)  =>{
+export const getTrainList = async (context, projectId, includeFailed)  =>{
     context.showLoadingDialog = true
     context.loadingDialogTitle = '학습 기록 목록 가져오기'
     context.loadingDialogSubTitle = '학습 기록 목록 가져오는 중...'
     try {
-        const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/train?size=200`)
+        const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/train?size=200&includeFailed${includeFailed}`)
         console.log(result.data)
 
         context.showLoadingDialog = false
