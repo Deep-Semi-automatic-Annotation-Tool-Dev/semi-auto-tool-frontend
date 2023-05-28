@@ -324,45 +324,6 @@
             </div>
           </div>
 
-<!--          <div class="stepper-item" :class="stepperIdx === 1 ? 'selected' : ''">-->
-<!--            <div class="stepper-item-top">-->
-<!--              <div class="stepper-item-top-circle" :class="stepperIdx === 1 ? 'selected' : ''">-->
-<!--                <div class="stepper-item-top-circle-num">2</div>-->
-<!--              </div>-->
-<!--              <div class="stepper-item-top-circle-title" :class="stepperIdx === 1 ? 'stepper-item-top-circle-title-selected' : ''">-->
-<!--                모델 - {{ modelLists[selectedModel].name }}-->
-<!--              </div>-->
-<!--            </div>-->
-
-<!--            <div class="stepper-item-content">-->
-<!--              <v-divider class="stepper-item-divider" vertical></v-divider>-->
-<!--              <div class="stepper-item-content-area" :class="stepperIdx !== 1 ? 'unselected' : ''">-->
-<!--                <div id="layout-project-model-area">-->
-<!--                  <div class="model-summary">Active Learning을 진행할 모델을 선택해주세요.</div>-->
-<!--                  <v-container class="pa-0 ma-0">-->
-<!--                    <v-select-->
-<!--                        label="모델 목록"-->
-<!--                        density="comfortable"-->
-<!--                        :items="modelLists"-->
-<!--                        item-title="name"-->
-<!--                        item-value="value"-->
-<!--                        :hide-details="true"-->
-<!--                        @update:model-value="changeModel"-->
-<!--                    ></v-select>-->
-<!--                  </v-container>-->
-<!--                </div>-->
-<!--                <div class="stepper-item-buttons">-->
-<!--                  <v-btn color="color_accept" size="small" @click="stepperNext">-->
-<!--                    학습-->
-<!--                  </v-btn>-->
-<!--                  <v-btn color="color_deny" size="small" @click="stepperPrev">-->
-<!--                    태깅 다시하기-->
-<!--                  </v-btn>-->
-<!--                </div>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--          </div>-->
-
           <div class="stepper-item" :class="stepperIdx === 1 ? 'selected' : ''">
             <div class="stepper-item-top">
               <div class="stepper-item-top-circle" :class="stepperIdx === 1 ? 'selected' : ''">
@@ -2048,7 +2009,11 @@ export default {
       }
     },
     startTrain() {
-      this.stepperNext()
+      if (this.tagGroups.length > 0) {
+        this.stepperNext()
+      } else {
+        alert("태깅 작업 진행 후 진행해주세요.")
+      }
     },
     checkTrainStart() {
       if (checkTrainName(this, this.trainName)) {
