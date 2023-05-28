@@ -27,6 +27,12 @@ export const initVariables = (context) => {
     context.childData = []
     context.makeParagraphStatus = ''
     context.reloadCount = 0
+    context.logDatas = []
+    context.trainStatus = -1
+    context.logMsg = ""
+    context.isIndeterminate = true
+    context.logProgressMax = 0
+    context.logProgressNow = 0
 }
 
 export const loadProject = async (context, id, page) => {

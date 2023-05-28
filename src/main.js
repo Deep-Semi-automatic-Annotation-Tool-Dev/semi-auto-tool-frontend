@@ -13,6 +13,8 @@ import VueSSE from 'vue-sse'
 const app = createApp(App)
 app.config.globalProperties.$baseURL = "https://autotag.hrabit64.xyz/";
 app.config.globalProperties.$mlURL = "https://autotag-ml.hrabit64.xyz/";
+// app.config.globalProperties.$baseURL = "https://api.auto-tag.xyz:30002/";
+// app.config.globalProperties.$mlURL = "https://ml-api.auto-tag.xyz:30002/";
 app.config.globalProperties.$crudURL = "https://autotag-crdt.hrabit64.xyz/";
 
 app.config.globalProperties.DIALOG_CLICK_YES = 1;

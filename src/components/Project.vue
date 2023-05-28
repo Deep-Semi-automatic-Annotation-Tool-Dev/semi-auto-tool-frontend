@@ -535,7 +535,11 @@
 <!--                  <v-btn color="color_accept" size="small" @click="stepperNext">-->
 <!--                    다음-->
 <!--                  </v-btn>-->
-                  <v-btn color="color_deny" size="small" @click="dataReloading">
+                  <v-btn
+                      color="color_deny"
+                      size="small"
+                      @click="dataReloading"
+                  >
                     데이터 리로드
                   </v-btn>
                   <v-btn color="light_magenta" size="small" @click="gotoTag">
