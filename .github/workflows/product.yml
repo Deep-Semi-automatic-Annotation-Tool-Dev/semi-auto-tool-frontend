@@ -25,3 +25,25 @@ jobs:
         run: npm install package.json
       - name: npm build
         run: npm run build
+        
+      - name: Clean Up
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_IP }}
+          username: ${{ secrets.REMOTE_SSH_ID }}
+          key: ${{ secrets.REMOTE_SSH_KEY }}
+          port: ${{ secrets.REMOTE_SSH_PORT }}
+          script: |
+            cd /var/www/html/autotag
+            rm -rf *
+            
+      - name: Copy file to remote
+        uses: garygrossgarten/github-action-scp@release
+        with:
+          local: ./dist/
+          remote: /var/www/html/autotag
+          host: ${{ secrets.REMOTE_IP }}
+          username: ${{ secrets.REMOTE_SSH_ID }}
+          privateKey: ${{ secrets.REMOTE_SSH_KEY }}
+          port: ${{ secrets.REMOTE_SSH_PORT }}
+        
