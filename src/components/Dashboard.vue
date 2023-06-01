@@ -62,22 +62,22 @@
                 <div>{{ trainResultData.tag_group_stats[tagGroups[selectedTagGroupId].tag_group_id].per_tag_count.length }}개</div>
               </div>
             </div>
-            <div class="card-content-row-tags">
-<!--              <div-->
-<!--                  v-for="tag in trainResultData.tag_group_stats[tagGroups[selectedTagGroupId].tag_group_id].per_tag_count"-->
-<!--                  :key="tag.tag_name"-->
-<!--              >{{ tag.tag_name }}</div>-->
-              <v-chip
-                  v-for="tag in trainResultData.tag_group_stats[tagGroups[selectedTagGroupId].tag_group_id].per_tag_count"
-                  :key="tag.tag_name"
-                  size="small"
-                  style="margin-right: 10px"
-                  :style="[chipBackground(`#${tag.tag_color}`),
+            <div class="card-content-tag-ratio">
+              <div class="card-content-row-tags">
+                <v-chip
+                    v-for="tag in trainResultData.tag_group_stats[tagGroups[selectedTagGroupId].tag_group_id].per_tag_count"
+                    :key="tag.tag_name"
+                    size="small"
+                    style="margin-right: 10px"
+                    :style="[chipBackground(`#${tag.tag_color}`),
                       setChipBackgroundColor(`#${tag.tag_color}`)]"
-              >
-                {{ tag.tag_name }} - {{ Math.ceil(tag.data_count / trainResultData.tag_group_stats[tagGroups[selectedTagGroupId].tag_group_id].tag_group_tagged_count * 10000) / 100 }}%
-              </v-chip>
+                >
+                  {{ tag.tag_name }} - {{ Math.ceil(tag.data_count / this.trainResultData.total_data_count * 10000) / 100 }}%
+                </v-chip>
+              </div>
+              <canvas id="chart-tag-ratio"></canvas>
             </div>
+
             <v-table theme="dark">
               <thead>
               <tr>
@@ -133,6 +133,8 @@ import Dialog from "@/components/dialog/Dialog";
 import {getProjectList} from "@/js/api/project";
 import {loadHistory} from "@/js/api/dashboard";
 
+import Chart from 'chart.js/auto'
+
 
 const hexToRgb = (hex) => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -171,24 +173,77 @@ export default {
       tagGroupSelectionModel: 0,
       selectedTagGroupId: 0,
 
-      trainResultData: null
+      trainResultData: null,
+
+      chartRatio: null
     }
   },
   async created() {
     await getProjectList(this);
   },
   methods: {
-    projectListLeftClick(e, id, name) {
+    drawChart() {
+      if (this.chartRatio !== null) {
+        this.chartRatio.destroy()
+        this.chartRatio = null
+      }
+
+      const datasets = [{
+        // label: this.tagGroups[this.selectedTagGroupId].tag_group_name + " 태깅 현황",
+        data: [],
+        backgroundColor: [],
+        hoverOffset: 4
+      }]
+      const labels = []
+      let notTagged = 100.0
+      for (let tag of this.trainResultData.tag_group_stats[this.tagGroups[this.selectedTagGroupId].tag_group_id].per_tag_count) {
+        const rgb = hexToRgb(tag.tag_color)
+        labels.push(tag.tag_name)
+        const tagged = Math.ceil(tag.data_count / this.trainResultData.total_data_count * 10000) / 100
+        notTagged -= tagged
+        datasets[0].data.push(tagged)
+        datasets[0].backgroundColor.push(`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`)
+      }
+
+      if (notTagged > 0) {
+        labels.push("태그되지 않음")
+        datasets[0].data.push(notTagged)
+        datasets[0].backgroundColor.push('rgb(0, 0, 0)')
+      }
+
+      this.chartRatio = new Chart(
+          document.getElementById('chart-tag-ratio'),
+          {
+            type: 'doughnut',
+            data: {
+              labels: labels,
+              datasets: datasets
+            },
+            options: {
+              responsive: false,
+              maintainAspectRatio: true,
+              plugins: {
+                legend: {
+                  display: false,
+                },
+                title: {
+                  display: false,
+                },
+              },
+            },
+          },
+      );
+    },
+    async projectListLeftClick(e, id, name) {
       this.selectedProjectId = id
       this.selectedProjectName = name
-      loadHistory(this, this.selectedProjectId)
+      await loadHistory(this, this.selectedProjectId)
+      this.drawChart()
     },
     async changeGroup(v) {
       this.selectedTagGroupId = v
       console.log(this.tagGroupSelectionModel)
-      // await getTagList(this,
-      //     this.selectedProjectId,
-      //     this.tagGroups[this.selectedTagGroupId].tag_group_id)
+      this.drawChart()
     },
     chipBackground (color) {
       return {

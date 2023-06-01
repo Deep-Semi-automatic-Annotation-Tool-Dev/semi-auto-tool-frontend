@@ -113,6 +113,8 @@
   order: 1;
   align-self: stretch;
   flex-grow: 1;
+
+  overflow-y: scroll;
 }
 
 #history-top-title {
@@ -190,4 +192,18 @@
   flex-direction: row;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.card-content-tag-ratio {
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#chart-tag-ratio {
+  //width: 50vw;
+ width: 300px;
 }
