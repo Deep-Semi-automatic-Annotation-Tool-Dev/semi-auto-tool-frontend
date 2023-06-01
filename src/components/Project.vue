@@ -2015,9 +2015,18 @@ export default {
         alert("태깅 작업 진행 후 진행해주세요.")
       }
     },
-    checkTrainStart() {
+    async checkTrainStart() {
       if (checkTrainName(this, this.trainName)) {
-        this.showTrainStart = true
+        const total = await getRecentTrainResult(this, this.selectedProjectId)
+        const tagGroupRatio = this.trainResultData[this.tagGroups[this.selectedTagGroupId].tag_group_name].tag_group_tagged_count / total.total_data_count
+        console.log(tagGroupRatio)
+        if (tagGroupRatio < 0.2) {
+          if (confirm(`최소 20% 이상의 데이터를 태깅 후 학습을 권고합니다. 현재 태깅 비율은 ${Math.ceil(tagGroupRatio * 10000) / 100}% 입니다.`)) {
+            this.showTrainStart = true
+          }
+        } else {
+          this.showTrainStart = true
+        }
       }
     },
     skipTrain() {

@@ -33,6 +33,7 @@ export const initVariables = (context) => {
     context.isIndeterminate = true
     context.logProgressMax = 0
     context.logProgressNow = 0
+    context.trainName = ''
 }
 
 export const loadProject = async (context, id, page) => {

@@ -73,11 +73,13 @@ export const getRecentTrainResult = async (context, projectId) => {
         for (let t of result.data.tag_group_stats) {
             context.trainResultData[t.tag_group_name] = t
         }
+        context.showLoadingDialog = false
+        return result.data
     } catch (error) {
         console.error('get train result error', error);
         context.trainResultData = null
-    }  finally {
         context.showLoadingDialog = false
+        return null
     }
 }
 
