@@ -48,6 +48,7 @@
                   item-value="value"
                   :hide-details="true"
                   @update:model-value="changeGroup"
+                  :disabled="nowDrawing"
                   v-model="tagGroupSelectionModel"
               ></v-select>
             </v-container>
@@ -175,7 +176,8 @@ export default {
 
       trainResultData: null,
 
-      chartRatio: null
+      chartRatio: null,
+      nowDrawing: false
     }
   },
   async created() {
@@ -183,9 +185,11 @@ export default {
   },
   methods: {
     drawChart() {
-      if (this.chartRatio !== null) {
-        this.chartRatio.destroy()
-        this.chartRatio = null
+      const canvas = document.getElementById('chart-tag-ratio');
+      this.nowDrawing = true
+
+      if (this.chartRatio !== null && this.chartRatio.ctx) {
+        this.chartRatio.destroy();
       }
 
       const datasets = [{
@@ -212,7 +216,7 @@ export default {
       }
 
       this.chartRatio = new Chart(
-          document.getElementById('chart-tag-ratio'),
+          canvas,
           {
             type: 'doughnut',
             data: {
@@ -220,6 +224,12 @@ export default {
               datasets: datasets
             },
             options: {
+              animation: {
+                onComplete: () => {
+                  console.log("Animation completed");
+                  this.nowDrawing = false
+                }
+              },
               responsive: false,
               maintainAspectRatio: true,
               plugins: {
@@ -235,10 +245,12 @@ export default {
       );
     },
     async projectListLeftClick(e, id, name) {
-      this.selectedProjectId = id
-      this.selectedProjectName = name
-      await loadHistory(this, this.selectedProjectId)
-      this.drawChart()
+      if (!this.nowDrawing) {
+        this.selectedProjectId = id
+        this.selectedProjectName = name
+        await loadHistory(this, this.selectedProjectId)
+        this.drawChart()
+      }
     },
     async changeGroup(v) {
       this.selectedTagGroupId = v
