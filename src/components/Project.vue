@@ -379,8 +379,17 @@
                       :min="0.00001"
                       :step="0.00001"
                       thumb-label
+                      @update:modelValue="changeLr"
                   >
                   </v-slider>
+                  <v-text-field
+                      v-model="trainLearningRateText"
+                      hide-details
+                      single-line
+                      density="compact"
+                      @focusout="checkLrText"
+                      @keyup.enter="checkLrText"
+                  ></v-text-field>
                 </v-container>
                 <div class="stepper-item-buttons">
                   <v-btn color="color_accept" size="small" @click="checkTrainStart">
@@ -978,6 +987,7 @@ export default {
 
       trainEpoch: 1,
       trainLearningRate: 0.00001,
+      trainLearningRateText: '0.00001',
 
       trainStatus: -1,
       logDatas: [],
@@ -1024,6 +1034,23 @@ export default {
     // }
   },
   methods: {
+    checkLrText() {
+      try {
+        if (this.trainLearningRateText === '') throw false
+        const v = Number(this.trainLearningRateText)
+        if (Number.isNaN(v)) throw false
+        console.log(v)
+
+        if (v <= 0) throw false
+        if (v > 1) throw false
+        this.trainLearningRate = v
+      } catch (e) {
+        return
+      }
+    },
+    changeLr(value) {
+      this.trainLearningRateText = String(value)
+    },
     clearSelectedParagraph() {
       this.firstParagraph = -1
       this.childData = []
