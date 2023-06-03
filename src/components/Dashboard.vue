@@ -30,8 +30,16 @@
               <div>{{ trainResultData.total_data_count }}개</div>
             </div>
             <div class="card-content-row-center">
+              <div>문단 태그 그룹 개수</div>
+              <div>{{ paragraphTagGroups.length }}개</div>
+            </div>
+            <div class="card-content-row-center">
               <div>문장 태그 그룹 개수</div>
               <div>{{ sentenceTagGroups.length }}개</div>
+            </div>
+            <div class="card-content-row-center">
+              <div>단어 태그 그룹 개수</div>
+              <div>{{ wordTagGroups.length }}개</div>
             </div>
           </div>
         </div>
@@ -90,15 +98,15 @@
               </thead>
               <tbody>
               <tr>
-                <td>train</td>
-                <td>{{ trainResultData.tag_group_stats[paragraphTagGroups[selectedParagraphTagGroupId].tag_group_id].current_train_tag_group_gpt_train_acc }}</td>
-                <td>{{trainResultData.tag_group_stats[paragraphTagGroups[selectedParagraphTagGroupId].tag_group_id].current_train_tag_group_bert_train_acc }}</td>
+                <td>val_acc</td>
+                <td>{{ trainResultData.tag_group_stats[paragraphTagGroups[selectedParagraphTagGroupId].tag_group_id].current_train_tag_group_gpt_val_acc }}</td>
+                <td>{{trainResultData.tag_group_stats[paragraphTagGroups[selectedParagraphTagGroupId].tag_group_id].current_train_tag_group_bert_val_acc }}</td>
               </tr>
-              <tr>
-                <td>test</td>
-                <td>{{ trainResultData.tag_group_stats[paragraphTagGroups[selectedParagraphTagGroupId].tag_group_id].current_train_tag_group_gpt_test_acc }}</td>
-                <td>{{ trainResultData.tag_group_stats[paragraphTagGroups[selectedParagraphTagGroupId].tag_group_id].current_train_tag_group_bert_test_acc }}</td>
-              </tr>
+<!--              <tr>-->
+<!--                <td>test</td>-->
+<!--                <td>{{ trainResultData.tag_group_stats[paragraphTagGroups[selectedParagraphTagGroupId].tag_group_id].current_train_tag_group_gpt_test_acc }}</td>-->
+<!--                <td>{{ trainResultData.tag_group_stats[paragraphTagGroups[selectedParagraphTagGroupId].tag_group_id].current_train_tag_group_bert_test_acc }}</td>-->
+<!--              </tr>-->
               </tbody>
             </v-table>
           </div>
@@ -159,15 +167,15 @@
               </thead>
               <tbody>
               <tr>
-                <td>train</td>
-                <td>{{ trainResultData.tag_group_stats[sentenceTagGroups[selectedSentenceTagGroupId].tag_group_id].current_train_tag_group_gpt_train_acc }}</td>
-                <td>{{trainResultData.tag_group_stats[sentenceTagGroups[selectedSentenceTagGroupId].tag_group_id].current_train_tag_group_bert_train_acc }}</td>
+                <td>val_acc</td>
+                <td>{{ trainResultData.tag_group_stats[sentenceTagGroups[selectedSentenceTagGroupId].tag_group_id].current_train_tag_group_gpt_val_acc }}</td>
+                <td>{{trainResultData.tag_group_stats[sentenceTagGroups[selectedSentenceTagGroupId].tag_group_id].current_train_tag_group_bert_val_acc }}</td>
               </tr>
-              <tr>
-                <td>test</td>
-                <td>{{ trainResultData.tag_group_stats[sentenceTagGroups[selectedSentenceTagGroupId].tag_group_id].current_train_tag_group_gpt_test_acc }}</td>
-                <td>{{ trainResultData.tag_group_stats[sentenceTagGroups[selectedSentenceTagGroupId].tag_group_id].current_train_tag_group_bert_test_acc }}</td>
-              </tr>
+<!--              <tr>-->
+<!--                <td>test</td>-->
+<!--                <td>{{ trainResultData.tag_group_stats[sentenceTagGroups[selectedSentenceTagGroupId].tag_group_id].current_train_tag_group_gpt_test_acc }}</td>-->
+<!--                <td>{{ trainResultData.tag_group_stats[sentenceTagGroups[selectedSentenceTagGroupId].tag_group_id].current_train_tag_group_bert_test_acc }}</td>-->
+<!--              </tr>-->
               </tbody>
             </v-table>
           </div>
@@ -228,15 +236,15 @@
               </thead>
               <tbody>
               <tr>
-                <td>train</td>
-                <td>{{ trainResultData.tag_group_stats[wordTagGroups[selectedWordTagGroupId].tag_group_id].current_train_tag_group_gpt_train_acc }}</td>
-                <td>{{trainResultData.tag_group_stats[wordTagGroups[selectedWordTagGroupId].tag_group_id].current_train_tag_group_bert_train_acc }}</td>
+                <td>val_acc</td>
+                <td>{{ trainResultData.tag_group_stats[wordTagGroups[selectedWordTagGroupId].tag_group_id].current_train_tag_group_gpt_val_acc }}</td>
+                <td>{{trainResultData.tag_group_stats[wordTagGroups[selectedWordTagGroupId].tag_group_id].current_train_tag_group_bert_val_acc }}</td>
               </tr>
-              <tr>
-                <td>test</td>
-                <td>{{ trainResultData.tag_group_stats[wordTagGroups[selectedWordTagGroupId].tag_group_id].current_train_tag_group_gpt_test_acc }}</td>
-                <td>{{ trainResultData.tag_group_stats[wordTagGroups[selectedWordTagGroupId].tag_group_id].current_train_tag_group_bert_test_acc }}</td>
-              </tr>
+<!--              <tr>-->
+<!--                <td>test</td>-->
+<!--                <td>{{ trainResultData.tag_group_stats[wordTagGroups[selectedWordTagGroupId].tag_group_id].current_train_tag_group_gpt_test_acc }}</td>-->
+<!--                <td>{{ trainResultData.tag_group_stats[wordTagGroups[selectedWordTagGroupId].tag_group_id].current_train_tag_group_bert_test_acc }}</td>-->
+<!--              </tr>-->
               </tbody>
             </v-table>
           </div>
@@ -541,17 +549,17 @@ export default {
     },
     async changeGroupSentence(v) {
       this.selectedSentenceTagGroupId = v
-      console.log(this.sentenceTagGroupSelectionModel)
+      console.log(this.selectedSentenceTagGroupId)
       this.drawSentenceChart()
     },
     async changeGroupWord(v) {
       this.selectedWordTagGroupId = v
-      console.log(this.wordTagGroupSelectionModel)
+      console.log(this.selectedWordTagGroupId)
       this.drawWordChart()
     },
     async changeGroupParagraph(v) {
       this.selectedParagraphTagGroupId = v
-      console.log(this.paragraphTagGroupSelectionModel)
+      console.log(this.selectedParagraphTagGroupId)
       this.drawParagraphChart()
     },
     chipBackground (color) {
