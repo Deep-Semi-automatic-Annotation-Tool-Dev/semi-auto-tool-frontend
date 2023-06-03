@@ -460,6 +460,7 @@
                 <div v-if=" tagGroups.length > 0" style="width: 100%">
                   <v-container class="pa-0 mb-1 ma-0">
                     <v-btn-toggle
+                        class="mb-3"
                         density="compact"
                         v-model="tagMod"
                         color="deep-purple-accent-3"
@@ -487,6 +488,18 @@
                         variant="outlined"
                         @update:model-value="changeGroup"
                         v-model="tagGroupSelectionModel"
+                        class="mb-3"
+                    ></v-select>
+                    <v-select
+                        label="리로드할 Rank 선택"
+                        :items="['sum', 'bert', 'gpt']"
+                        item-title="tag_group_name"
+                        item-value="value"
+                        :hide-details="true"
+                        v-model="selectionRank"
+                        variant="outlined"
+                        density="compact"
+                        @update:modelValue="changeResultTarget"
                     ></v-select>
                   </v-container>
                   <div class="model-summary">{{ tagGroups[selectedTagGroupId].tag_group_name }} - 최근 학습 결과</div>
@@ -511,17 +524,6 @@
 <!--                    </tr>-->
                     </tbody>
                   </v-table>
-                  <v-select
-                      label="리로드할 Rank 선택"
-                      :items="['sum', 'bert', 'gpt']"
-                      item-title="tag_group_name"
-                      item-value="value"
-                      :hide-details="true"
-                      v-model="selectionRank"
-                      variant="outlined"
-                      density="compact"
-                      @update:modelValue="changeResultTarget"
-                  ></v-select>
                 </div>
                 <div class="stepper-item-buttons">
 <!--                  <v-btn color="color_accept" size="small" @click="stepperNext">-->
