@@ -25,6 +25,7 @@ export const createProject = async (context, title) => {
     } catch (error) {
         console.error('post project error', error);
         context.showLoadingDialog = false
+        alert(`${error.response.data.detail} error: ${error.response.data.type}`)
     }
 }
 
@@ -43,6 +44,7 @@ export const renameProject = async (context, title, id) => {
     } catch (error) {
         context.showLoadingDialog = false
         console.error('put project error', error);
+        alert(`${error.response.data.detail} error: ${error.response.data.type}`)
     }
 }
 
@@ -59,6 +61,7 @@ export const deleteProject = async (context, id) => {
     } catch (error) {
         context.showLoadingDialog = false
         console.error('delete project error', error);
+        alert(`${error.response.data.detail} error: ${error.response.data.type}`)
     }
 }
 
