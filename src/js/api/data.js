@@ -613,7 +613,7 @@ export const postData = async (context, projectId, file, colName) => {
             })
         console.log(result);
         context.showLoadingDialog = false
-        loadProject(context, projectId, 0)
+        loadProject(context, projectId, 0, false)
     } catch (error) {
         console.error('post data error', error);
         alert(`${error.response.data.detail} error: ${error.response.data.type}`)

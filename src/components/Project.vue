@@ -993,7 +993,9 @@ export default {
       childData: [],
 
       reloadCount: 0,
-      editable: true
+      editable: true,
+
+      nowModId: this.DATA_TYPE_WORD
     }
   },
   components: {
@@ -1149,7 +1151,7 @@ export default {
       )
     },
     async dataLoadAll() {
-      await loadProject(this, this.selectedProjectId, 1)
+      await loadProject(this, this.selectedProjectId, 1, false)
     },
     gotoTag() {
       this.stepperIdx = 0;
@@ -1235,7 +1237,7 @@ export default {
       if (this.selectedProjectId === -1) {
         this.selectedProjectId = id
         this.selectedProjectName = name
-        loadProject(this, this.selectedProjectId, 0)
+        loadProject(this, this.selectedProjectId, 0, false)
       } else {
         // 이전에 선택한 화면이 있다면 저장 여부 물어보기
         this.moveProjectId = id
@@ -1249,7 +1251,7 @@ export default {
       if (data.type === this.DIALOG_CLICK_YES) {
         this.selectedProjectId = this.moveProjectId
         this.selectedProjectName = this.moveProjectName
-        loadProject(this, this.selectedProjectId, 0)
+        loadProject(this, this.selectedProjectId, 0, false)
       } // move cancel
     },
 
@@ -1262,7 +1264,7 @@ export default {
       if (data.type === this.DIALOG_CLICK_YES) {
         const title = data.projectTitle;
         if (checkTagGroupName(this, title)) {
-          await addTagGroup(this, this.selectedProjectId, title)
+          await addTagGroup(this, this.selectedProjectId, title, this.nowModId)
         }
       } // move cancel
     },
@@ -1551,8 +1553,9 @@ export default {
         case 'word': {
           this.lineData = []
           this.wordTagData = {}
+          this.nowModId = this.DATA_TYPE_WORD
 
-          await getTagGroupList(this, this.selectedProjectId, this.DATA_TYPE_WORD)
+          await getTagGroupList(this, this.selectedProjectId, this.nowModId)
 
           if (this.reloadCount === 0) {
             await getDataList(
@@ -1591,8 +1594,9 @@ export default {
         }
         case 'sentence': {
           this.lineData = []
+          this.nowModId = this.DATA_TYPE_SENTENCE
 
-          await getTagGroupList(this, this.selectedProjectId, this.DATA_TYPE_SENTENCE)
+          await getTagGroupList(this, this.selectedProjectId, this.nowModId)
 
           if (this.reloadCount === 0) {
             await getDataList(
@@ -1619,8 +1623,9 @@ export default {
           this.firstParagraph = -1
           this.childData = []
           this.paragraphData = {}
+          this.nowModId = this.DATA_TYPE_PARAGRAPH
 
-          await getTagGroupList(this, this.selectedProjectId, this.DATA_TYPE_PARAGRAPH)
+          await getTagGroupList(this, this.selectedProjectId, this.nowModId)
 
           if (this.reloadCount === 0) {
             await getDataList(

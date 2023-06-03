@@ -39,17 +39,17 @@ export const getTagList = async (context, projectId, tagGroupId) => {
     }
 }
 
-export const addTagGroup = async (context, projectId, groupText) => {
+export const addTagGroup = async (context, projectId, groupText, data_type_id) => {
     context.showLoadingDialog = true
     context.loadingDialogTitle = '태그 그룹 추가'
     context.loadingDialogSubTitle = '태그 그룹 추가 중...'
 
     try {
         await axios.post(`${context.$baseURL}api/v1/project/${projectId}/tagGroup`, {
-            "project_id": projectId,
-            "tag_group_name": groupText
+            "tag_group_name": groupText,
+            "data_type_id": data_type_id
         })
-        loadProject(context, projectId, context.dataPage - 1)
+        loadProject(context, projectId, context.dataPage - 1, true)
     } catch (error) {
         console.error('add tag group error', error);
     } finally {
@@ -64,7 +64,7 @@ export const deleteTagGroup = async (context, projectId, tagGroupId,) => {
 
     try {
         await axios.delete(`${context.$baseURL}api/v1/project/${projectId}/tagGroup/${tagGroupId}`)
-        loadProject(context, projectId, context.dataPage - 1)
+        loadProject(context, projectId, context.dataPage - 1, true)
     } catch (error) {
         console.error('delete tag group error', error);
     } finally {
@@ -82,7 +82,7 @@ export const addTag = async (context, projectId, tagGroupId, tag_name, tag_color
             "tag_name": tag_name,
             "tag_color": tag_color
         })
-        loadProject(context, projectId, context.dataPage - 1)
+        loadProject(context, projectId, context.dataPage - 1, true)
     } catch (error) {
         console.error('add tag group error', error);
     } finally {
@@ -97,7 +97,7 @@ export const deleteTag = async (context, projectId, tagGroupId, tagId) => {
 
     try {
         await axios.delete(`${context.$baseURL}api/v1/project/${projectId}/tagGroup/${tagGroupId}/tag/${tagId}`)
-        loadProject(context, projectId, context.dataPage - 1)
+        loadProject(context, projectId, context.dataPage - 1, true)
     } catch (error) {
         console.error('delete tag group error', error);
     } finally {
@@ -115,7 +115,7 @@ export const changeTagInform = async (context, projectId, tagGroupId, tagId, tag
             "tag_name": tag_name,
             "tag_color": tag_color
         })
-        loadProject(context, projectId, context.dataPage - 1)
+        loadProject(context, projectId, context.dataPage - 1, true)
     } catch (error) {
         console.error('delete tag group error', error);
     } finally {
