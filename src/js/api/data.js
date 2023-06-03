@@ -258,6 +258,7 @@ export const addTagInData = async (context, projectId, targetTag, targetDataIdx,
         console.log(result.data.data_tags);
     } catch (error) {
         console.error('put tag in data error', error);
+        alert(`${error.response.data.detail} error: ${error.response.data.type}`)
     } finally {
         context.showLoadingDialog = false
     }
@@ -291,6 +292,7 @@ export const deleteTagInData = async (context, projectId, targetTag, targetDataI
         targetData.data_tags = result.data.data_tags
     } catch (error) {
         console.error('put tag delete in data error', error);
+        alert(`${error.response.data.detail} error: ${error.response.data.type}`)
     } finally {
         context.showLoadingDialog = false
     }
@@ -326,6 +328,7 @@ export const createWord = async (context, projectId, parentId, startIdx, endIdx,
         // targetData.data_tags = result.data.data_tags
     } catch (error) {
         console.error('post word error', error);
+        alert(`${error.response.data.detail} error: ${error.response.data.type}`)
     } finally {
         context.showLoadingDialog = false
     }
@@ -369,6 +372,7 @@ export const addTagInWord = async (context, projectId, itemIdx, parentIdx, targe
         targetData.data_target_tags = result.data.data_tags
     } catch (error) {
         console.error('put tag delete in word error', error);
+        alert(`${error.response.data.detail} error: ${error.response.data.type}`)
     } finally {
         context.showLoadingDialog = false
     }
@@ -402,6 +406,7 @@ export const deleteTagInWord = async (context, projectId, itemIdx, parentIdx, ta
         targetData.data_target_tags = result.data.data_tags
     } catch (error) {
         console.error('put tag delete in word error', error);
+        alert(`${error.response.data.detail} error: ${error.response.data.type}`)
     } finally {
         context.showLoadingDialog = false
     }
@@ -447,6 +452,7 @@ export const deleteWord = async (context, projectId, dataId) => {
     } catch (error) {
         console.error('word data delete error', error);
         context.showLoadingDialog = false
+        alert(`${error.response.data.detail} error: ${error.response.data.type}`)
     }
 }
 
@@ -492,6 +498,7 @@ export const addTagInParagraph = async (context, projectId, parentIdx, targetTag
         targetData.data_target_tags = result.data.data_tags
     } catch (error) {
         console.error('put tag in paragraph error', error);
+        alert(`${error.response.data.detail} error: ${error.response.data.type}`)
     } finally {
         context.showLoadingDialog = false
     }
@@ -524,6 +531,7 @@ export const deleteTagInParagraph = async (context, projectId, itemId, targetTag
         targetData.data_target_tags = result.data.data_tags
     } catch (error) {
         console.error('put tag delete in paragraph error', error);
+        alert(`${error.response.data.detail} error: ${error.response.data.type}`)
     } finally {
         context.showLoadingDialog = false
     }
@@ -590,6 +598,7 @@ export const deleteParagraph = async (context, projectId, dataId) => {
     } catch (error) {
         console.error('paragraph data delete error', error);
         context.showLoadingDialog = false
+        alert(`${error.response.data.detail} error: ${error.response.data.type}`)
     }
 }
 
@@ -647,6 +656,7 @@ export const resultDownload = async (context, projectId) => {
         URL.revokeObjectURL(link.href)
     } catch (error) {
         console.error('download result error', error);
+        alert(`${error.response.data.detail} error: ${error.response.data.type}`)
     } finally {
         context.showLoadingProgressDialog = false
     }

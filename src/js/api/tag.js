@@ -28,6 +28,11 @@ export const getTagList = async (context, projectId, tagGroupId) => {
     context.loadingDialogTitle = '태그 목록'
     context.loadingDialogSubTitle = '태그 목록 가져오는 중...'
     context.showLoadingDialog = true
+
+    context.tags = []
+    context.tagGroupSelectionModel = 0
+    context.selectedTag = 0
+
     try {
         const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/tagGroup/${tagGroupId}/tag?size=100`)
         context.tags = result.data._embedded.tagResponseControllerDtoList;
@@ -52,6 +57,7 @@ export const addTagGroup = async (context, projectId, groupText, data_type_id) =
         loadProject(context, projectId, context.dataPage - 1, true)
     } catch (error) {
         console.error('add tag group error', error);
+        alert(`${error.response.data.detail} error: ${error.response.data.type}`)
     } finally {
         context.showLoadingDialog = false
     }
@@ -67,6 +73,7 @@ export const deleteTagGroup = async (context, projectId, tagGroupId,) => {
         loadProject(context, projectId, context.dataPage - 1, true)
     } catch (error) {
         console.error('delete tag group error', error);
+        alert(`${error.response.data.detail} error: ${error.response.data.type}`)
     } finally {
         context.showLoadingDialog = false
     }
@@ -85,6 +92,7 @@ export const addTag = async (context, projectId, tagGroupId, tag_name, tag_color
         loadProject(context, projectId, context.dataPage - 1, true)
     } catch (error) {
         console.error('add tag group error', error);
+        alert(`${error.response.data.detail} error: ${error.response.data.type}`)
     } finally {
         context.showLoadingDialog = false
     }
@@ -100,6 +108,7 @@ export const deleteTag = async (context, projectId, tagGroupId, tagId) => {
         loadProject(context, projectId, context.dataPage - 1, true)
     } catch (error) {
         console.error('delete tag group error', error);
+        alert(`${error.response.data.detail} error: ${error.response.data.type}`)
     } finally {
         context.showLoadingDialog = false
     }
@@ -118,6 +127,7 @@ export const changeTagInform = async (context, projectId, tagGroupId, tagId, tag
         loadProject(context, projectId, context.dataPage - 1, true)
     } catch (error) {
         console.error('delete tag group error', error);
+        alert(`${error.response.data.detail} error: ${error.response.data.type}`)
     } finally {
         context.showLoadingDialog = false
     }

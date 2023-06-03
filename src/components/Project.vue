@@ -1554,8 +1554,14 @@ export default {
           this.lineData = []
           this.wordTagData = {}
           this.nowModId = this.DATA_TYPE_WORD
+          this.tags = []
+          this.tagGroupSelectionModel = 0
+          this.selectedTag = 0
 
           await getTagGroupList(this, this.selectedProjectId, this.nowModId)
+          if (this.tagGroups.length > 0) {
+            await getTagList(this, this.selectedProjectId, this.tagGroups[this.selectedTagGroupId].tag_group_id)
+          }
 
           if (this.reloadCount === 0) {
             await getDataList(
@@ -1595,8 +1601,14 @@ export default {
         case 'sentence': {
           this.lineData = []
           this.nowModId = this.DATA_TYPE_SENTENCE
+          this.tags = []
+          this.tagGroupSelectionModel = 0
+          this.selectedTag = 0
 
           await getTagGroupList(this, this.selectedProjectId, this.nowModId)
+          if (this.tagGroups.length > 0) {
+            await getTagList(this, this.selectedProjectId, this.tagGroups[this.selectedTagGroupId].tag_group_id)
+          }
 
           if (this.reloadCount === 0) {
             await getDataList(
@@ -1624,8 +1636,14 @@ export default {
           this.childData = []
           this.paragraphData = {}
           this.nowModId = this.DATA_TYPE_PARAGRAPH
+          this.tags = []
+          this.tagGroupSelectionModel = 0
+          this.selectedTag = 0
 
           await getTagGroupList(this, this.selectedProjectId, this.nowModId)
+          if (this.tagGroups.length > 0) {
+            await getTagList(this, this.selectedProjectId, this.tagGroups[this.selectedTagGroupId].tag_group_id)
+          }
 
           if (this.reloadCount === 0) {
             await getDataList(
