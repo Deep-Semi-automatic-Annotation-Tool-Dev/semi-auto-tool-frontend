@@ -207,3 +207,18 @@
   //width: 50vw;
  width: 300px;
 }
+
+#layout-dashboard-history::-webkit-scrollbar {
+  width: 0;
+}
+
+#layout-dashboard-history::-webkit-scrollbar-thumb {
+  height: 30%;
+  background: $scrollbar-background-color;
+
+  border-radius: 10px;
+}
+
+#layout-dashboard-history::-webkit-scrollbar-track {
+  background: $scrollbar-color;
+}

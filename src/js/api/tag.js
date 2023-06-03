@@ -24,6 +24,25 @@ export const getTagGroupList = async (context, projectId, dataTypeId) => {
     }
 }
 
+export const getTagGroupListDashboard = async (context, projectId, dataTypeId) => {
+    context.loadingDialogTitle = "태그 그룹"
+    context.loadingDialogSubTitle = "태그 그룹을 가져오는 중 입니다."
+    context.showLoadingDialog = true
+
+    try {
+        const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/tagGroup?dataTypeId=${dataTypeId}&size=100`)
+        let tagGroupData = result.data._embedded.tagGroupResponseControllerDtoList;
+        for (let i = 0;i < tagGroupData.length;i++) tagGroupData[i].value = i;
+        console.log('get tag groups', tagGroupData)
+        context.showLoadingDialog = false
+        return tagGroupData
+    } catch(error) {
+        console.error('get tag group error', error);
+        context.showLoadingDialog = false
+        return []
+    }
+}
+
 export const getTagList = async (context, projectId, tagGroupId) => {
     context.loadingDialogTitle = '태그 목록'
     context.loadingDialogSubTitle = '태그 목록 가져오는 중...'
