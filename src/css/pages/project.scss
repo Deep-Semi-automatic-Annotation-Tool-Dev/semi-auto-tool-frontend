@@ -386,11 +386,16 @@
   flex-direction: row;
 }
 
-.text-line-paragraph div {
+.text-line-paragraph-line-num {
   height: 100%;
   width: 30px;
   margin-right: 5px;
   padding-top: 3px;
+}
+
+.paragraph-highlight {
+  overflow-wrap: break-word;
+  width: calc(100% - 30px);
 }
 
 .text-word {

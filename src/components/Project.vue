@@ -169,6 +169,7 @@
               </div>
               <div v-else-if="tagMod === 'paragraph'" id="editor-paragraphs">
                 <div
+                    style="width: 100%"
                     v-for="(l, idx) in lineData"
                     :key="l"
                 >
@@ -176,7 +177,7 @@
                       class="text-line-paragraph"
                       :data-tooltip="idx"
                   >
-                    <div>{{ idx }}</div>
+                    <div class="text-line-paragraph-line-num">{{ idx }}</div>
                     <p
                         class="text-line"
                         v-html="setParagraphHighlight(l, paragraphData)"
@@ -798,9 +799,10 @@ import {
 import {
   getTagList,
   addTagGroup,
+  // eslint-disable-next-line no-unused-vars
   deleteTagGroup, deleteTag, changeTagInform, addTag, getTagGroupList
 } from "@/js/api/tag";
-import {initVariables, loadProject} from "@/js/api/common";
+import {getDataByTagMod, initVariables, loadProject} from "@/js/api/common";
 import {startTrain} from "@/js/api/train";
 
 import {disconnectLoggingSSE, disconnectStatusSSE, initLogSSE} from "@/js/sse/train";
@@ -1548,126 +1550,7 @@ export default {
     },
 
     async changeTagMod(d) {
-      this.selectedTag = 0
-      switch (d) {
-        case 'word': {
-          this.lineData = []
-          this.wordTagData = {}
-          this.nowModId = this.DATA_TYPE_WORD
-          this.tags = []
-          this.tagGroupSelectionModel = 0
-          this.selectedTag = 0
-
-          await getTagGroupList(this, this.selectedProjectId, this.nowModId)
-          if (this.tagGroups.length > 0) {
-            await getTagList(this, this.selectedProjectId, this.tagGroups[this.selectedTagGroupId].tag_group_id)
-          }
-
-          if (this.reloadCount === 0) {
-            await getDataList(
-                this,
-                this.selectedProjectId,
-                this.dataPage - 1,
-                0,
-                this.selectionRank
-            )
-
-            if (this.lineData.length > 0) {
-              let startIdx = this.lineData[this.lineData.length - 1].id
-              let endIdx = this.lineData[0].id
-              await getWordDataList(
-                  this,
-                  this.selectedProjectId,
-                  startIdx,
-                  endIdx,
-                  0,
-                  this.dataPage - 1,
-                  this.selectionRank
-              )
-            }
-          } else {
-            await getWordDataList(
-                this,
-                this.selectedProjectId,
-                0, 0,
-                this.tagGroups[this.selectedTagGroupId].tag_group_id,
-                this.dataPage - 1,
-                this.selectionRank
-            )
-          }
-
-          break
-        }
-        case 'sentence': {
-          this.lineData = []
-          this.nowModId = this.DATA_TYPE_SENTENCE
-          this.tags = []
-          this.tagGroupSelectionModel = 0
-          this.selectedTag = 0
-
-          await getTagGroupList(this, this.selectedProjectId, this.nowModId)
-          if (this.tagGroups.length > 0) {
-            await getTagList(this, this.selectedProjectId, this.tagGroups[this.selectedTagGroupId].tag_group_id)
-          }
-
-          if (this.reloadCount === 0) {
-            await getDataList(
-                this,
-                this.selectedProjectId,
-                this.dataPage - 1,
-                0,
-                this.selectionRank
-            )
-          } else {
-            await getDataList(
-                this,
-                this.selectedProjectId,
-                this.dataPage - 1,
-                this.tagGroups[this.selectedTagGroupId].tag_group_id,
-                this.selectionRank
-            )
-          }
-          break
-        }
-        case 'paragraph': {
-          this.makeParagraphStatus = '문단을 지정할 문장을 선택해 주세요'
-          this.lineData = []
-          this.firstParagraph = -1
-          this.childData = []
-          this.paragraphData = {}
-          this.nowModId = this.DATA_TYPE_PARAGRAPH
-          this.tags = []
-          this.tagGroupSelectionModel = 0
-          this.selectedTag = 0
-
-          await getTagGroupList(this, this.selectedProjectId, this.nowModId)
-          if (this.tagGroups.length > 0) {
-            await getTagList(this, this.selectedProjectId, this.tagGroups[this.selectedTagGroupId].tag_group_id)
-          }
-
-          if (this.reloadCount === 0) {
-            await getDataList(
-                this,
-                this.selectedProjectId,
-                this.dataPage - 1
-            )
-
-            let startIdx = this.lineData[this.lineData.length - 1].id
-            let endIdx = this.lineData[0].id
-            await getParagraphDataList(this, this.selectedProjectId, startIdx, endIdx)
-          } else {
-            await getParagraphDataList(
-                this,
-                this.selectedProjectId,
-                0, 0,
-                this.tagGroups[this.selectedTagGroupId].tag_group_id,
-                this.dataPage - 1,
-                this.selectionRank
-            )
-          }
-          break
-        }
-      }
+      await getDataByTagMod(this, d)
     },
     changeTagSelection(d) {
       this.selectedTag = d
@@ -1797,7 +1680,7 @@ export default {
     setParagraphHighlight(nowData, paragraphData) {
       let paragraphIdx = null;
       if (paragraphData === undefined ||
-          paragraphData.length === 0) return `<span>` + nowData.text + `</span>`
+          paragraphData.length === 0) return `<span class="paragraph-highlight">` + nowData.text + `</span>`
 
       let isExist = false;
       for (let dKey in paragraphData) {
@@ -1814,15 +1697,15 @@ export default {
           paragraphIdx = d.id
           if (nowTagInfo !== null) {
             return `<span not-alloc="0" parent-idx="${paragraphIdx}" style="background-color: #${nowTagInfo.tagColor};
-            color: ${setTextColorToBackground(nowTagInfo.tagColor)}; cursor: pointer;">` + nowData.text + `</span>`
+            color: ${setTextColorToBackground(nowTagInfo.tagColor)}; cursor: pointer;"  class="paragraph-highlight">` + nowData.text + `</span>`
           }
         }
       }
 
       if (isExist) {
-        return `<span not-alloc="1" parent-idx="${paragraphIdx}" style="cursor: pointer;">` + nowData.text + `</span>`
+        return `<span not-alloc="1" parent-idx="${paragraphIdx}" style="cursor: pointer;" class="paragraph-highlight">` + nowData.text + `</span>`
       } else {
-        return `<span not-alloc="0" parent-idx="${paragraphIdx}">` + nowData.text + `</span>`
+        return `<span not-alloc="0" parent-idx="${paragraphIdx}" class="paragraph-highlight">` + nowData.text + `</span>`
       }
     },
     setParagraphBackground(nowData) {
