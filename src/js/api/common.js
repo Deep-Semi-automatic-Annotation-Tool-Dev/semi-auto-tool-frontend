@@ -55,7 +55,7 @@ export const loadProject = async (context, id, page) => {
     }
     // console.log("reloaded", context.reloadCount)
 
-    await getTagGroupList(context, id)
+    await getTagGroupList(context, id, context.DATA_TYPE_SENTENCE)
     if (context.tagGroups.length > 0) {
         console.log(context.tagGroups)
         await getTagList(context,

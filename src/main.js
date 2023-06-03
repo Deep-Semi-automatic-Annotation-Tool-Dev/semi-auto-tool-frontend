@@ -33,6 +33,10 @@ app.config.globalProperties.CONTEXTMENU_TAG_RENAME = 300;
 app.config.globalProperties.CONTEXTMENU_TAG_DELETE = 310;
 app.config.globalProperties.CONTEXTMENU_TAG_COLOR = 320;
 
+app.config.globalProperties.DATA_TYPE_WORD = 3;
+app.config.globalProperties.DATA_TYPE_PARAGRAPH = 2;
+app.config.globalProperties.DATA_TYPE_SENTENCE = 1;
+
 app.use(router)
     .use(vuetify)
     .use(VueSSE)

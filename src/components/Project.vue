@@ -798,7 +798,7 @@ import {
 import {
   getTagList,
   addTagGroup,
-  deleteTagGroup, deleteTag, changeTagInform, addTag
+  deleteTagGroup, deleteTag, changeTagInform, addTag, getTagGroupList
 } from "@/js/api/tag";
 import {initVariables, loadProject} from "@/js/api/common";
 import {startTrain} from "@/js/api/train";
@@ -1551,6 +1551,9 @@ export default {
         case 'word': {
           this.lineData = []
           this.wordTagData = {}
+
+          await getTagGroupList(this, this.selectedProjectId, this.DATA_TYPE_WORD)
+
           if (this.reloadCount === 0) {
             await getDataList(
                 this,
@@ -1588,6 +1591,9 @@ export default {
         }
         case 'sentence': {
           this.lineData = []
+
+          await getTagGroupList(this, this.selectedProjectId, this.DATA_TYPE_SENTENCE)
+
           if (this.reloadCount === 0) {
             await getDataList(
                 this,
@@ -1613,6 +1619,8 @@ export default {
           this.firstParagraph = -1
           this.childData = []
           this.paragraphData = {}
+
+          await getTagGroupList(this, this.selectedProjectId, this.DATA_TYPE_PARAGRAPH)
 
           if (this.reloadCount === 0) {
             await getDataList(

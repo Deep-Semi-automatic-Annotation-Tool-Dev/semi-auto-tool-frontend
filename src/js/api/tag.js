@@ -1,15 +1,20 @@
 import axios from "axios";
 import {loadProject} from "@/js/api/common";
 
-export const getTagGroupList = async (context, projectId) => {
+export const getTagGroupList = async (context, projectId, dataTypeId) => {
     context.loadingDialogTitle = "태그 그룹"
     context.loadingDialogSubTitle = "태그 그룹을 가져오는 중 입니다."
     context.showLoadingDialog = true
+
+    context.selectedTagGroupId = 0
+    context.tagGroups = []
+
     try {
-        const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/tagGroup?size=100`)
+        const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/tagGroup?dataTypeId=${dataTypeId}&size=100`)
         let tagGroupData = result.data._embedded.tagGroupResponseControllerDtoList;
         for (let i = 0;i < tagGroupData.length;i++) tagGroupData[i].value = i;
         context.tagGroups = tagGroupData
+        console.log('get tag groups', context.tagGroups)
     } catch(error) {
         context.tagGroups = []
         console.error('get tag group error', error);
