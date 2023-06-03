@@ -475,14 +475,14 @@
                     <tbody>
                     <tr>
                       <td>train</td>
-                      <td>{{ trainResultData[tagGroups[selectedTagGroupId].tag_group_name].current_train_tag_group_gpt_train_acc }}</td>
-                      <td>{{ trainResultData[tagGroups[selectedTagGroupId].tag_group_name].current_train_tag_group_bert_train_acc }}</td>
+                      <td>{{ trainResultData[tagGroups[selectedTagGroupId].tag_group_name].current_train_tag_group_gpt_val_acc }}</td>
+                      <td>{{ trainResultData[tagGroups[selectedTagGroupId].tag_group_name].current_train_tag_group_bert_val_acc}}</td>
                     </tr>
-                    <tr>
-                      <td>test</td>
-                      <td>{{ trainResultData[tagGroups[selectedTagGroupId].tag_group_name].current_train_tag_group_gpt_test_acc }}</td>
-                      <td>{{ trainResultData[tagGroups[selectedTagGroupId].tag_group_name].current_train_tag_group_bert_test_acc }}</td>
-                    </tr>
+<!--                    <tr>-->
+<!--                      <td>test</td>-->
+<!--                      <td>{{ trainResultData[tagGroups[selectedTagGroupId].tag_group_name].current_train_tag_group_gpt_test_acc }}</td>-->
+<!--                      <td>{{ trainResultData[tagGroups[selectedTagGroupId].tag_group_name].current_train_tag_group_bert_test_acc }}</td>-->
+<!--                    </tr>-->
                     </tbody>
                   </v-table>
                   <v-select

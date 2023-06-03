@@ -26,9 +26,23 @@
           <v-divider color="white" thickness="1" style="width: 100%"></v-divider>
           <div class="card-content card-content-row">
             <div class="card-content-row-center">
-              <div>데이터 개수</div>
+              <div>전체 데이터 개수</div>
               <div>{{ trainResultData.total_data_count }}개</div>
             </div>
+            <div class="card-content-row-center">
+              <div>문단 데이터 개수</div>
+              <div>{{ trainResultData.data_cnt_each_data_type[this.DATA_TYPE_PARAGRAPH] }}개</div>
+            </div>
+            <div class="card-content-row-center">
+              <div>문장 데이터 개수</div>
+              <div>{{ trainResultData.data_cnt_each_data_type[this.DATA_TYPE_SENTENCE] }}개</div>
+            </div>
+            <div class="card-content-row-center">
+              <div>단어 데이터 개수</div>
+              <div>{{ trainResultData.data_cnt_each_data_type[this.DATA_TYPE_WORD] }}개</div>
+            </div>
+          </div>
+          <div class="card-content card-content-row">
             <div class="card-content-row-center">
               <div>문단 태그 그룹 개수</div>
               <div>{{ paragraphTagGroups.length }}개</div>
@@ -64,7 +78,7 @@
             <div class="card-content-row">
               <div class="card-content-row-center">
                 <div>태그그룹 태깅 비율</div>
-                <div v-if="trainResultData.total_data_count > 0">{{ Math.ceil(trainResultData.tag_group_stats[paragraphTagGroups[selectedParagraphTagGroupId].tag_group_id].tag_group_tagged_count / trainResultData.total_data_count * 10000) / 100 }}%</div>
+                <div v-if="trainResultData.data_cnt_each_data_type[this.DATA_TYPE_PARAGRAPH] > 0">{{ Math.ceil(trainResultData.tag_group_stats[paragraphTagGroups[selectedParagraphTagGroupId].tag_group_id].tag_group_tagged_count / trainResultData.data_cnt_each_data_type[this.DATA_TYPE_PARAGRAPH] * 10000) / 100 }}%</div>
                 <div v-else>0%</div>
               </div>
               <div class="card-content-row-center">
@@ -82,7 +96,7 @@
                     :style="[chipBackground(`#${tag.tag_color}`),
                       setChipBackgroundColor(`#${tag.tag_color}`)]"
                 >
-                  {{ tag.tag_name }} - {{ Math.ceil(tag.data_count / this.trainResultData.total_data_count * 10000) / 100 }}%
+                  {{ tag.tag_name }} - {{ Math.ceil(tag.data_count / trainResultData.data_cnt_each_data_type[this.DATA_TYPE_PARAGRAPH] * 10000) / 100 }}%
                 </v-chip>
               </div>
               <canvas id="chart-tag-ratio-paragraph"></canvas>
@@ -133,7 +147,7 @@
             <div class="card-content-row">
               <div class="card-content-row-center">
                 <div>태그그룹 태깅 비율</div>
-                <div v-if="trainResultData.total_data_count > 0">{{ Math.ceil(trainResultData.tag_group_stats[sentenceTagGroups[selectedSentenceTagGroupId].tag_group_id].tag_group_tagged_count / trainResultData.total_data_count * 10000) / 100 }}%</div>
+                <div v-if="trainResultData.data_cnt_each_data_type[this.DATA_TYPE_SENTENCE] > 0">{{ Math.ceil(trainResultData.tag_group_stats[sentenceTagGroups[selectedSentenceTagGroupId].tag_group_id].tag_group_tagged_count / trainResultData.data_cnt_each_data_type[this.DATA_TYPE_SENTENCE] * 10000) / 100 }}%</div>
                 <div v-else>0%</div>
               </div>
               <div class="card-content-row-center">
@@ -151,7 +165,7 @@
                     :style="[chipBackground(`#${tag.tag_color}`),
                       setChipBackgroundColor(`#${tag.tag_color}`)]"
                 >
-                  {{ tag.tag_name }} - {{ Math.ceil(tag.data_count / this.trainResultData.total_data_count * 10000) / 100 }}%
+                  {{ tag.tag_name }} - {{ Math.ceil(tag.data_count / trainResultData.data_cnt_each_data_type[this.DATA_TYPE_SENTENCE] * 10000) / 100 }}%
                 </v-chip>
               </div>
               <canvas id="chart-tag-ratio-sentence"></canvas>
@@ -202,7 +216,7 @@
             <div class="card-content-row">
               <div class="card-content-row-center">
                 <div>태그그룹 태깅 비율</div>
-                <div v-if="trainResultData.total_data_count > 0">{{ Math.ceil(trainResultData.tag_group_stats[wordTagGroups[selectedWordTagGroupId].tag_group_id].tag_group_tagged_count / trainResultData.total_data_count * 10000) / 100 }}%</div>
+                <div v-if="trainResultData.data_cnt_each_data_type[this.DATA_TYPE_WORD] > 0">{{ Math.ceil(trainResultData.tag_group_stats[wordTagGroups[selectedWordTagGroupId].tag_group_id].tag_group_tagged_count / trainResultData.data_cnt_each_data_type[this.DATA_TYPE_WORD] * 10000) / 100 }}%</div>
                 <div v-else>0%</div>
               </div>
               <div class="card-content-row-center">
@@ -220,7 +234,7 @@
                     :style="[chipBackground(`#${tag.tag_color}`),
                       setChipBackgroundColor(`#${tag.tag_color}`)]"
                 >
-                  {{ tag.tag_name }} - {{ Math.ceil(tag.data_count / this.trainResultData.total_data_count * 10000) / 100 }}%
+                  {{ tag.tag_name }} - {{ Math.ceil(tag.data_count / trainResultData.data_cnt_each_data_type[this.DATA_TYPE_WORD] * 10000) / 100 }}%
                 </v-chip>
               </div>
               <canvas id="chart-tag-ratio-word"></canvas>
@@ -367,7 +381,7 @@ export default {
       for (let tag of this.trainResultData.tag_group_stats[this.paragraphTagGroups[this.selectedParagraphTagGroupId].tag_group_id].per_tag_count) {
         const rgb = hexToRgb(tag.tag_color)
         labels.push(tag.tag_name)
-        const tagged = Math.ceil(tag.data_count / this.trainResultData.total_data_count * 10000) / 100
+        const tagged = Math.ceil(tag.data_count / this.trainResultData.data_cnt_each_data_type[this.DATA_TYPE_PARAGRAPH] * 10000) / 100
         notTagged -= tagged
         datasets[0].data.push(tagged)
         datasets[0].backgroundColor.push(`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`)
@@ -430,7 +444,7 @@ export default {
       for (let tag of this.trainResultData.tag_group_stats[this.sentenceTagGroups[this.selectedSentenceTagGroupId].tag_group_id].per_tag_count) {
         const rgb = hexToRgb(tag.tag_color)
         labels.push(tag.tag_name)
-        const tagged = Math.ceil(tag.data_count / this.trainResultData.total_data_count * 10000) / 100
+        const tagged = Math.ceil(tag.data_count / this.trainResultData.data_cnt_each_data_type[this.DATA_TYPE_SENTENCE] * 10000) / 100
         notTagged -= tagged
         datasets[0].data.push(tagged)
         datasets[0].backgroundColor.push(`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`)
@@ -493,7 +507,7 @@ export default {
       for (let tag of this.trainResultData.tag_group_stats[this.wordTagGroups[this.selectedWordTagGroupId].tag_group_id].per_tag_count) {
         const rgb = hexToRgb(tag.tag_color)
         labels.push(tag.tag_name)
-        const tagged = Math.ceil(tag.data_count / this.trainResultData.total_data_count * 10000) / 100
+        const tagged = Math.ceil(tag.data_count / this.trainResultData.data_cnt_each_data_type[this.DATA_TYPE_WORD] * 10000) / 100
         notTagged -= tagged
         datasets[0].data.push(tagged)
         datasets[0].backgroundColor.push(`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`)

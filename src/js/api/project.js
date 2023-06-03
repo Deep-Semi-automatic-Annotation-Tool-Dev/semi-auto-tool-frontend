@@ -98,6 +98,11 @@ export const getRecentTrainResultALL = async (context, projectId) => {
             })
             tags[tag.tag_group_id] = tag
         }
+        const dataCount = {}
+        for (let count of context.trainResultData.data_cnt_each_data_type) {
+            dataCount[count.data_type_id] = count.total_data_cnt
+        }
+        context.trainResultData.data_cnt_each_data_type = dataCount
         context.trainResultData.tag_group_stats = tags
         console.log(context.trainResultData)
     } catch (error) {
