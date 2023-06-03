@@ -404,7 +404,7 @@ export default {
             options: {
               animation: {
                 onComplete: () => {
-                  console.log("Animation completed");
+                  console.log("Paragraph Animation completed");
                   this.nowDrawingParagraph = false
                 }
               },
@@ -467,7 +467,7 @@ export default {
             options: {
               animation: {
                 onComplete: () => {
-                  console.log("Animation completed");
+                  console.log("Sentence Animation completed");
                   this.nowDrawingSentence = false
                 }
               },
@@ -530,7 +530,7 @@ export default {
             options: {
               animation: {
                 onComplete: () => {
-                  console.log("Animation completed");
+                  console.log("Word Animation completed");
                   this.nowDrawingWord = false
                 }
               },
@@ -558,7 +558,12 @@ export default {
         this.selectedProjectId = id
         this.selectedProjectName = name
         await loadHistory(this, this.selectedProjectId)
+
+        this.showLoadingDialog = true
+        this.loadingDialogTitle = '정보 업데이트중'
+        this.loadingDialogSubTitle = '정보 업데이트중...'
         this.drawChart()
+        this.showLoadingDialog = false
       }
     },
     async changeGroupSentence(v) {
