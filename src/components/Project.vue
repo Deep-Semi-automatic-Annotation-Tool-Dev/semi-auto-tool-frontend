@@ -260,7 +260,6 @@
                   <v-container id="tag-selection-top">
                     <v-btn-toggle
                         density="compact"
-                        id="tag-mod-group"
                         v-model="tagMod"
                         color="deep-purple-accent-3"
                         variant="outlined"
@@ -460,6 +459,24 @@
               <div class="stepper-item-content-area" :class="stepperIdx !== 3 ? 'unselected' : ''">
                 <div v-if=" tagGroups.length > 0" style="width: 100%">
                   <v-container class="pa-0 mb-1 ma-0">
+                    <v-btn-toggle
+                        density="compact"
+                        v-model="tagMod"
+                        color="deep-purple-accent-3"
+                        variant="outlined"
+                        @update:modelValue="changeTagMod"
+                        mandatory
+                    >
+                      <v-btn value="paragraph" width="85">
+                        문단
+                      </v-btn>
+                      <v-btn value="sentence" width="85">
+                        문장
+                      </v-btn>
+                      <v-btn value="word" width="85">
+                        단어
+                      </v-btn>
+                    </v-btn-toggle>
                     <v-select
                         label="태그 그룹 선택"
                         density="compact"
