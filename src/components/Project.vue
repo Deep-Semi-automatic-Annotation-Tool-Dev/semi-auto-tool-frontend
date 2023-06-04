@@ -1183,20 +1183,7 @@ export default {
       this.reloadCount += 1;
       this.editable = false
 
-      this.tagMod = 'sentence'
-      this.wordTagData = {}
-      this.paragraphData = {}
-      this.lineData = []
-      this.dataPage = 1
-      this.dataTotalPage = 1
-
-      await getDataList(
-          this,
-          this.selectedProjectId,
-          this.dataPage - 1,
-          this.tagGroups[this.selectedTagGroupId].tag_group_id,
-          this.selectionRank
-      )
+      getDataByTagMod(this, this.tagMod)
     },
     async dataLoadAll() {
       await loadProject(this, this.selectedProjectId, 1, false)
