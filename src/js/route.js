@@ -1,7 +1,7 @@
 import router from "@/plugins/routers";
 
 const gotoPage = (targetUrl, query) => {
-    var pushParam = {name: targetUrl};
+    let pushParam = {name: targetUrl};
     if (typeof query != 'undefined') {
         pushParam['query'] = query;
     }
@@ -9,4 +9,12 @@ const gotoPage = (targetUrl, query) => {
     router.push(pushParam);
 }
 
-export {gotoPage}
+const gotoExternalPage = (targetUrl) => {
+    window.open(
+        targetUrl,
+        '_blank'
+    )
+    // window.location.href = targetUrl
+}
+
+export {gotoPage, gotoExternalPage}
