@@ -1965,8 +1965,28 @@ export default {
     async checkTrainStart() {
       if (checkTrainName(this, this.trainName)) {
         const total = await getRecentTrainResult(this, this.selectedProjectId)
-        const tagGroupRatio = this.trainResultData[this.tagGroups[this.selectedTagGroupId].tag_group_name].tag_group_tagged_count / total.total_data_count
+        let dataType = 0
+        switch (this.tagMod) {
+          case "sentence": {
+            dataType = this.DATA_TYPE_SENTENCE
+            break
+          }
+          case "word": {
+            dataType = this.DATA_TYPE_WORD
+            break
+          }
+          case "paragraph": {
+            dataType = this.DATA_TYPE_PARAGRAPH
+            break
+          }
+        }
+        console.log(dataType, this.trainResultData[this.tagGroups[this.selectedTagGroupId].tag_group_name].tag_group_tagged_count, total.data_cnt_each_data_type)
+        const tagGroupRatio = this.trainResultData[this.tagGroups[this.selectedTagGroupId].tag_group_name].tag_group_tagged_count / total.data_cnt_each_data_type[dataType]
         console.log(tagGroupRatio)
+        if (Number.isNaN(tagGroupRatio)) {
+          alert('태깅 작업을 진행해주세요')
+          return
+        }
         if (tagGroupRatio < 0.2) {
           if (confirm(`최소 20% 이상의 데이터를 태깅 후 학습을 권고합니다. 현재 태깅 비율은 ${Math.ceil(tagGroupRatio * 10000) / 100}% 입니다.`)) {
             this.showTrainStart = true

@@ -71,12 +71,22 @@ export const getRecentTrainResult = async (context, projectId) => {
     context.loadingDialogSubTitle = '최근 학습 결과 가져오는 중...'
     try {
         const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/statistics`)
+
+        const dataCount = {}
+        for (let count of result.data.data_cnt_each_data_type) {
+            dataCount[count.data_type_id] = count.total_data_cnt
+        }
+        result.data.data_cnt_each_data_type = dataCount
+
         console.log(result.data)
         context.trainResultData = {}
         for (let t of result.data.tag_group_stats) {
             context.trainResultData[t.tag_group_name] = t
         }
+
         context.showLoadingDialog = false
+
+        console.log('get recent train result\n', context.trainResultData)
         return result.data
     } catch (error) {
         console.error('get train result error', error);
