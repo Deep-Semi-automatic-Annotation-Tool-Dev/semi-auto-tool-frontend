@@ -9,4 +9,12 @@ const gotoPage = (targetUrl, query) => {
     router.push(pushParam);
 }
 
-export {gotoPage}
+const gotoExternalPage = (targetUrl) => {
+    window.open(
+        targetUrl,
+        '_blank'
+    )
+    // window.location.href = targetUrl
+}
+
+export {gotoPage, gotoExternalPage}
