@@ -421,7 +421,7 @@ export const deleteWord = async (context, projectId, dataId) => {
         await axios.delete(`${context.$baseURL}api/v1/project/${projectId}/data/${dataId}`)
 
         context.wordTagData = {}
-        if (this.reloadCount === 0) {
+        if (context.reloadCount === 0) {
             if (context.lineData.length > 0) {
                 let startIdx = context.lineData[context.lineData.length - 1].id
                 let endIdx = context.lineData[0].id
