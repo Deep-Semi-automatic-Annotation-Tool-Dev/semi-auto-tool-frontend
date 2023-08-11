@@ -9,7 +9,7 @@ export const getDataList = async (context, projectId, page, tagGroupId, pageable
     // context.sentenceMap.clear()
     if (context.reloadCount === 0) {
         try {
-            const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/data?size=100&page=${page}`)
+            const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/data?size=100&page=${page}&sort=id,asc`)
             context.lineData = result.data._embedded.dataResponseControllerDtoList;
             context.dataPage = result.data.page.number + 1
             context.dataTotalPage = result.data.page.totalPages
