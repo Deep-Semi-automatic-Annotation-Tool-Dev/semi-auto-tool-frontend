@@ -311,7 +311,16 @@
                     </v-btn>
                   </div>
                 </div>
-
+                <div  id="layout-project-tag-tagging">
+                  <v-btn
+                      color="light_brown"
+                      id="tag-top-add-btn"
+                      @click="autoTag"
+                      :disabled="editable"
+                  >
+                    자동태깅
+                  </v-btn>
+                </div>
                 <div class="stepper-item-buttons">
                   <v-btn color="color_accept" size="small" @click="startTrain">
                     파라미터 설정
@@ -828,7 +837,7 @@ import {
   getTagList,
   addTagGroup,
   // eslint-disable-next-line no-unused-vars
-  deleteTagGroup, deleteTag, changeTagInform, addTag, getTagGroupList
+  deleteTagGroup, deleteTag, changeTagInform, addTag, getTagGroupList, autoTagRequest
 } from "@/js/api/tag";
 import {getDataByTagMod, initVariables, loadProject} from "@/js/api/common";
 import {startTrain} from "@/js/api/train";
@@ -1053,6 +1062,35 @@ export default {
     // }
   },
   methods: {
+    autoTag() {
+      var percentage = prompt("자동 태깅할 데이터의 개수를 퍼센트로 입력해 주세요. 기본값은 30입니다.\n 1~99, % 기호는 빼고 입력", '30')
+      try {
+        percentage = Number(percentage)
+        if (Number.isNaN(percentage)) {
+          alert("숫자만 입력해 주세요.")
+          return
+        }
+        if (percentage < 0 || percentage > 99) {
+          alert("1~99 숫자만 입력 가능합니다.")
+          return
+        }
+      } catch (e) {
+        alert("숫자만 입력해 주세요.")
+        return
+      }
+      var model = prompt("자동 태깅에 이용할 모델을 입력해 주세요. (gpt / bert 중 선택)")
+      if (model !== 'gpt' && model !== 'bert') {
+        alert("지정한 모델 외는 입력할 수 없습니다.")
+        return
+      }
+      autoTagRequest(
+          this,
+          this.selectedProjectId,
+          this.tagGroups[this.selectedTagGroupId].tag_group_id,
+          percentage,
+          model
+      )
+    },
     checkLrText() {
       try {
         if (this.trainLearningRateText === '') throw false

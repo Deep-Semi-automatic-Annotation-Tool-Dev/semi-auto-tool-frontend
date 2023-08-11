@@ -151,3 +151,28 @@ export const changeTagInform = async (context, projectId, tagGroupId, tagId, tag
         context.showLoadingDialog = false
     }
 }
+
+export const autoTagRequest = async (context, projectId, tagGroupId, percent, model_type) => {
+    context.showLoadingDialog = true
+    context.loadingDialogTitle = '자동 태깅'
+    context.loadingDialogSubTitle = '자동 태깅 중...'
+
+    try {
+        let result = await axios.post(`${context.$baseURL}api/v1/project/${projectId}/data/${tagGroupId}/uncertainty`, {
+            "percent": percent,
+            "model_type": model_type
+        })
+        console.log('auto tag result', result)
+        if (result.status === 200) {
+            alert(`새로 태깅된 데이터 수: ${result.data}개`)
+            loadProject(context, projectId, context.dataPage - 1, true)
+        } else {
+            alert("오토 태깅 과정에서 오류가 발생했습니다. 다시 시도해 주세요.")
+        }
+    } catch (error) {
+        console.error('post auto tag error', error);
+        alert(`${error.response.data.detail} error: ${error.response.data.type}`)
+    } finally {
+        context.showLoadingDialog = false
+    }
+}
