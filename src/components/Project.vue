@@ -1750,7 +1750,7 @@ export default {
       for (let dKey in this.paragraphData) {
         const d = this.paragraphData[dKey]
         if (d.start_index <= nowData.id && nowData.id <= d.end_index) {
-          if (d.end_index === nowData.id) returnStyle['margin-top'] = '5px'
+          if (d.start_index === nowData.id) returnStyle['margin-top'] = '5px'
           isExist = true;
           let nowTagInfo = null
           for (let t of d.data_target_tags) {
