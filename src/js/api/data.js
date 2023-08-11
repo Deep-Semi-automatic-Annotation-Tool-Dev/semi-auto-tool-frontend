@@ -74,7 +74,7 @@ export const getDataList = async (context, projectId, page, tagGroupId, pageable
     }
 }
 
-export const getWordDataList = async (context, projectId, startIndex, endIndex, tagGroupId, page, pageable) => {
+export const getWordDataList = async (context, projectId, endIndex, startIndex, tagGroupId, page, pageable) => {
     context.loadingDialogTitle = '단어 데이터 로딩'
     context.loadingDialogSubTitle = "단어 태깅 데이터를 가져오는 중 입니다."
     context.showLoadingDialog = true
@@ -83,12 +83,12 @@ export const getWordDataList = async (context, projectId, startIndex, endIndex, 
         try {
             const result = await axios.get(`${context.$baseURL}api/v1/project/${projectId}/data/word?startIndex=${startIndex}&endIndex=${endIndex}`)
 
+            console.log(result.data);
             for (let word of result.data) {
                 let parentId = word.parent_id
                 if (context.wordTagData[parentId] === undefined) context.wordTagData[parentId] = []
                 context.wordTagData[parentId].push(word)
             }
-            // console.log(result.data);
         } catch (error) {
             console.error('get word data error', error);
         } finally {
