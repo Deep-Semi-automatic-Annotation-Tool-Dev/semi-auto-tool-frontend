@@ -301,11 +301,16 @@
   gap: 10px;
 
   width: 100%;
-  height: calc(100% - 114px - 48px);
+  height: calc(100% - 114px - 48px - 48px);
 
   flex: none;
-  order: 1;
+  order: 2;
   flex-grow: 1;
+}
+
+#layout-project-tag-tagging {
+  width: 100%;
+  order: 1;
 }
 
 #tag-selection-top {

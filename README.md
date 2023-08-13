@@ -1,24 +1,16 @@
 # semi_auto_tagging
 
-## Project setup
+## 패키지 설치
 ```
 npm install
 ```
 
-### Compiles and hot-reloads for development
+## 프로젝트 테스트 실행
 ```
 npm run serve
 ```
 
-### Compiles and minifies for production
+## 프로젝트 빌드
 ```
 npm run build
 ```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
